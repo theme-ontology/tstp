@@ -1,11 +1,13 @@
 import cgitb; cgitb.enable()
 import log; log.set_level('SILENT')
-log.set_logfile("web.log")
+import tempfile
+import os
+
+log.set_logfile(os.path.join(tempfile.gettempdir(), "web.log"))
 
 import webobject
 import traceback
 import cgi
-import os
 import json
 import pprint
 import sys
