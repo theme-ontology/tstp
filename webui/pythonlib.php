@@ -1,4 +1,4 @@
-<?
+<?php
 $DIR_LOCATIONS = array( 
     "F:\Workspace\PyTrekTools",
     "/home/odinlake/tstpdm/scripts/lib/python2.6/site-packages/",

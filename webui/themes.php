@@ -1,11 +1,11 @@
-<? require_once "preamble.php"; ?><!DOCTYPE html>
+<?php require_once "preamble.php"; ?><!DOCTYPE html>
 <html>
 
 <head>
 	<meta charset="UTF-8">
 	<title>TSTP themes</title>
 
-<? include "header.php"; ?>
+<?php include "header.php"; ?>
 
     <script>
         $(document).ready(function () {
@@ -52,7 +52,7 @@
 </head>
 
 <body>
-<? include "navbar.php"; ?>
+<?php include "navbar.php"; ?>
 
 <div class="container main-body">
     <div class="row">
@@ -75,7 +75,7 @@
 </div>
 
 
-<? include "footer.php"; ?>
+<?php include "footer.php"; ?>
 
 </body>
 </html>

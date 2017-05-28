@@ -2,7 +2,7 @@
 	<div class="container">
 		<p class="text-muted">
 
-			<span class="label label-default"><?
+			<span class="label label-default"><?php
 			echo basename($_SERVER['PHP_SELF']);
 			//echo "\n-----\n";
 			//var_dump($_SERVER);
