@@ -1,0 +1,608 @@
+import json
+from itertools import izip
+import datetime
+
+from db import do, esc, uuid
+import log
+
+
+class TSTPObject(object):
+    category = ""
+    fields = (
+        "name",
+        "category",
+        "description",
+    )
+    indexes = (
+        "name",
+        "category",
+    )
+
+    def __init__(self, *args, **kwargs):
+        for field, value in zip(self.fields, args):
+            setattr(self, field, value)
+        for field, value in kwargs.iteritems():
+            setattr(self, field, value)
+            
+    @classmethod
+    def create(cls, **kwargs):
+        """
+        Key error on missing field value in kwargs; unlike __init__, 
+        all fields must be set.
+        """
+        obj = cls()
+        
+        for kwarg in kwargs:
+            if kwarg not in cls.fields:
+                raise ValueError, "Invalid field %s" % kwarg
+                
+        for field in cls.fields:
+            value = kwargs.get(field, None) 
+            value = value if value is not None else getattr(cls, field, None)
+            
+            if value is not None:
+                setattr(obj, field, value)
+            else:
+                raise ValueError, "Missing value for %s" % field
+            
+        return obj
+
+    @classmethod
+    def edit_object(cls, cat, name, attrs, vals):
+        table = "web_attributes"
+        dt = datetime.datetime.now()
+        cat, name = esc(cat, name)
+        attrstr = cls.sql_filter_list(attrs)
+        #vals = [ esc(x) for x in vals_in ]
+        oldvalue = None
+        alu = dict(izip(attrs, vals))
+        evidbase = "ev.%d-" % uuid("event")
+        idx = 0
+
+        events = []
+        updates = []
+        objs = []
+
+        for attr, oldvalue in do("""
+            SELECT attr, value FROM `%s` WHERE 
+            category = "%s" AND name = "%s" AND attr IN %s
+            LIMIT 1
+        """ % (table, cat, name, attrstr)):
+            evid = evidbase + str(idx)
+            idx += 1
+            newvalue = alu[attr]
+            event = (evid, "odinlake", dt, "edit", "event", "", 
+                cat, name, "", "", attr, oldvalue, newvalue, "pending")
+            update = (cat, name, attr, newvalue)
+            obj = (cat, name)
+
+            events.append(event)
+            updates.append(update)
+            objs.append(obj)
+
+        evfields = [
+            "eventid",
+            "userid",
+            "entrytime",
+            "action",
+            "category",
+            "refcategory",
+            "category1",
+            "name1",
+            "category2", 
+            "name2",
+            "field", 
+            "oldvalue", 
+            "newvalue",
+            "eventstate",
+        ]
+        attrfields = [
+            "category",
+            "name",
+            "attr",
+            "value",
+        ]
+
+        fstr = ", ".join('`%s`' % s for s in evfields)
+        vstr = ", ".join("%s" for s in evfields)
+        do("REPLACE INTO `web_events` (%s) values (%s)" % (fstr, vstr), events)
+
+        fstr = ", ".join('`%s`' % s for s in attrfields)
+        vstr = ", ".join("%s" for s in attrfields)
+        do("REPLACE INTO `web_attributes` (%s) values (%s)" % (fstr, vstr), updates)
+
+        do("REPLACE INTO `web_objects` (`category`, `name`) values (%s, %s)", objs)
+
+    @classmethod
+    def sql_filter_list(cls, itemstr):
+        if isinstance(itemstr, (str, unicode)):
+            items = itemstr.split(',')
+        else:
+            items = itemstr
+
+        parts = [ esc(item) for item in items ]
+        ss = ', '.join("'%s'" % s for s in parts)
+        return '(%s)' % ss
+
+    @classmethod
+    def query_for(cls, attrs, filters, table, limit):
+        qfilters = [ "category = '%s'" % cls.category ]
+
+        for k, v in filters:
+            if v:
+                qfilters.append('%s IN ' % k + cls.sql_filter_list(v))
+
+        oattrs = ', '.join(esc(f[0]) for f in filters)
+        fattrs = ', '.join(esc(a) for a in attrs)
+        qfilters = ' AND '.join(qfilters)
+        alimit = limit * len(cls.fields)
+
+        for row in do("""
+            SELECT %s FROM `%s` WHERE %s ORDER BY %s LIMIT %d 
+        """ % (fattrs, table, qfilters, oattrs, alimit)):
+            yield row
+
+    @classmethod
+    def load_from_table(cls, attrs, filters, table, limit, nkey=-2):
+        result = {}
+        fields = set(cls.fields)
+
+        for row in cls.query_for(attrs, filters, table, limit):
+            attr, value = row[nkey:]
+            key = tuple(row[:nkey])
+
+            if attr in fields:
+                obj = result.get(key, None)
+
+                if obj is None:
+                    obj = cls()
+
+                    for f in obj.fields:
+                        setattr(obj, f, "")
+
+                    for f, v in izip(attrs, key):
+                        setattr(obj, f, v)
+
+                    result[key] = obj
+
+                setattr(obj, attr, value)
+
+        return result.itervalues()
+
+    @classmethod
+    def load(cls, names = None, limit = 10000):
+        attrs = [ "name", "attr", "value" ]
+        filters = [ ("name", names) ]
+        table = "web_attributes"
+        itr = cls.load_from_table(attrs, filters, table, limit)
+        return sorted(itr, key = lambda x: x.name)
+
+    @classmethod
+    def load_all(cls):
+        return cls.load()
+
+    @classmethod
+    def make_table(cls, objs, limit = 10000):
+        cats = set()
+        clss = set(type(o) for o in objs)
+        fields = set.intersection(*[ set(c.fields) for c in clss ])
+        ofields = []
+
+        if len(clss) == 1:
+            fields.remove('category')
+
+        for c in clss:
+            for f in c.fields:
+                if f in fields and f not in ofields:
+                    ofields.append(f)
+
+        header = ''.join('<th>%s</th>' % f for f in ofields)
+        rows = [ '<table class="table">\n<tr>%s</tr>' % str(header) ]
+
+        for obj in objs:
+            row = []
+
+            for f in ofields:
+                v = unicode(getattr(obj, f, ""))[:limit]
+                if len(v) == limit: v = v[:limit-3] + '...'
+                row.append('<td>%s</td>' % v.encode('utf-8'))
+
+            rows.append('<tr>%s</tr>' % ''.join(row))
+
+        rows.append('</table>')
+        return '\n'.join(rows)
+
+    @classmethod
+    def iter_attrs(cls):
+        for field in cls.fields:
+            if field not in cls.indexes:
+                yield field
+
+    @classmethod
+    def iter_rows(cls, objs, fields = (), limit = 10000):
+        for obj in objs:
+            row = []
+
+            for f in fields:
+                v = ""
+
+                if f in cls.fields:
+                    v = unicode(getattr(obj, f, ""))[:limit]
+
+                if len(v) == limit: 
+                    v = v[:limit-3] + '...'
+
+                row.append(v.encode('utf-8'))
+
+            yield row
+
+    @classmethod
+    def make_json(cls, objs, fields = (), limit = 10000):
+        rows = list(cls.iter_rows(objs, fields = fields, limit = limit))
+        return json.dumps({"data" : rows})
+
+    def terse_row(self, limit = 20):
+        for attr in [ "name", "eventid" ]:
+            if hasattr(self, attr):
+                row = [ getattr(self, attr) ]
+
+        for f in self.fields[2:]:
+            v = unicode(getattr(self, f))[:limit]
+            if len(v) == limit:
+                v = v[:limit - 3].strip() + '...'
+            row.append(v)
+
+        return tuple(row)
+
+    def __str__(self):
+        return type(self).__name__ + unicode(self.terse_row()).encode('ascii', 'replace')
+
+    def html_format_name(self, limit = 30):
+        v = unicode(self.name).encode('utf-8')[:limit]
+        if len(v) == limit: v = v[:limit-3] + '...'
+    
+    def make_insert_events(self):
+        evid = "unsaved"
+        dt = datetime.datetime.now()
+
+        events = [ 
+            TSTPEvent.create(
+                eventid     = evid, 
+                userid      = "odinlake", 
+                entrytime   = dt, 
+                action      = "insert", 
+                category    = "event", 
+                refcategory = self.category, 
+                category1   = self.category, 
+                name1       = self.name, 
+                category2   = "", 
+                name2       = "", 
+                field       = attr, 
+                oldvalue    = "", # no old value
+                newvalue    = getattr(self, attr),
+                eventstate  = "pending",
+            ) for attr in self.iter_attrs()
+        ]
+        
+        return events
+
+    def make_edit_events(self, reference):
+        if reference is None:
+            return self.make_insert_events()
+        
+        evid = "unsaved"
+        dt = datetime.datetime.now()
+        events = []
+        
+        for attr in self.iter_attrs():
+            newval = getattr(self, attr)
+            oldval = getattr(reference, attr)
+            
+            if newval != oldval:
+                events.append( 
+                    TSTPEvent.create(
+                        eventid     = evid, 
+                        userid      = "odinlake", 
+                        entrytime   = dt, 
+                        action      = "edit", 
+                        category    = "event", 
+                        refcategory = self.category, 
+                        category1   = self.category, 
+                        name1       = self.name, 
+                        category2   = "", 
+                        name2       = "", 
+                        field       = attr, 
+                        oldvalue    = oldval,
+                        newvalue    = newval,
+                        eventstate  = "pending",
+                    )
+                )
+        
+        return events
+
+
+class Story(TSTPObject):
+    category = "story"
+    fields = (
+        "name",
+        "category",
+        "title",
+        "date",
+        "description",
+    )
+    preforder = {
+        "tos" : 1,
+        "tas" : 2,
+        "tng" : 3,
+    }
+
+    @classmethod
+    def prefix_sort(cls, obj):
+        pref = obj.name[:3]
+        s = cls.preforder.get(pref, 99)
+        return (s, obj.name)
+
+    @classmethod
+    def make_json(cls, objs, fields = (), limit = 10000):
+        objs.sort(key = lambda x: cls.prefix_sort(x))
+        rows = list(cls.iter_rows(objs, fields = fields, limit = limit))
+
+        return json.dumps({"data" : rows})
+
+
+class Theme(TSTPObject):
+    category = "theme"
+    fields = (
+        "name",
+        "category",
+        "description",
+        "parents",
+    )
+
+
+class TSTPConnection(TSTPObject):
+    category = "featureof"
+    fields = (
+        "category",
+        "category1",
+        "name1",
+        "category2",
+        "name2",
+        "weight",
+        "motivation",
+    )
+    
+    @classmethod
+    def propose_edit_object(cls, cat1, name1, cat2, name2, attrs, vals):
+        table = "web_connections"
+        dt = datetime.datetime.now()
+        cat, name = esc(cat, name)
+        attrstr = cls.sql_filter_list(attrs)
+        oldvalue = None
+        alu = dict(izip(attrs, vals))
+        evidbase = "ev.%d-" % uuid("event")
+        idx = 0
+
+        events = []
+        updates = []
+
+        for attr, oldvalue in do("""
+            SELECT attr, value FROM `%s` WHERE 
+            category1 = "%s" AND name1 = "%s" AND
+            category2 = "%s" AND name2 = "%s" AND
+            attr IN %s LIMIT 1
+        """ % (table, cat1, name1, cat2, name2, attrstr)):
+            evid = evidbase + str(idx)
+            idx += 1
+            newvalue = alu[attr]
+            event = (evid, "odinlake", dt, "edit", "event", "", 
+                cat1, name1, cat2, name2, attr, oldvalue, newvalue, "pending")
+            update = ("featureof", cat1, name1, cat2, name2, attr, newvalue)
+
+            events.append(event)
+            updates.append(update)
+            
+        return events, updates
+        
+    @classmethod
+    def commit_edit_object(cls, events, updates):
+        evfields = [
+            "eventid",
+            "userid",
+            "entrytime",
+            "action",
+            "category",
+            "refcategory",
+            "category1",
+            "name1",
+            "category2", 
+            "name2",
+            "field", 
+            "oldvalue", 
+            "newvalue",
+            "eventstate",
+        ]
+        attrfields = [
+            "category",
+            "category1",
+            "name1",
+            "category2",
+            "name2",
+            "attr",
+            "value",
+        ]
+
+        fstr = ", ".join('`%s`' % s for s in evfields)
+        vstr = ", ".join("%s" for s in evfields)
+        do("REPLACE INTO `web_events` (%s) values (%s)" % (fstr, vstr), events)
+
+        fstr = ", ".join('`%s`' % s for s in attrfields)
+        vstr = ", ".join("%s" for s in attrfields)
+        do("REPLACE INTO `web_connections` (%s) values (%s)" % (fstr, vstr), updates)
+        
+    @classmethod
+    def edit_object(cls, cat1, name1, cat2, name2, attrs, vals):
+        events, updates = cls.propose_edit_object(cat1, name1, cat2, name2, attrs, vals)
+        cls.commit_edit_object(events, updates)
+
+    @classmethod
+    def load(
+        cls, 
+        cat1s = None,
+        name1s = None,
+        cat2s = None,
+        name2s = None,
+        limit = 10000,
+    ):
+        attrs = [ "category1", "name1", "category2", "name2", "attr", "value" ]
+        filters = [
+            ("category1", cat1s),
+            ("name1", name1s),
+            ("category2", cat2s),
+            ("name2", name2s),
+        ]
+        table = "web_connections"
+        itr = cls.load_from_table(attrs, filters, table, limit)
+
+        return sorted(itr, key = lambda x: (x.name1, x.name2))
+
+    def make_insert_events(self):
+        evid = "unsaved"
+        dt = datetime.datetime.now()
+        attrs = [ 'weight', 'motivation' ]
+
+        events = [ 
+            TSTPEvent.create(
+                eventid     = evid, 
+                userid      = "odinlake", 
+                entrytime   = dt, 
+                action      = "insert", 
+                category    = "event", 
+                refcategory = self.category, 
+                category1   = self.category1, 
+                name1       = self.name1, 
+                category2   = self.category2, 
+                name2       = self.name2, 
+                field       = attr, 
+                oldvalue    = "", # no old value
+                newvalue    = getattr(self, attr),
+                eventstate  = "pending",
+            ) for attr in attrs
+        ]
+        
+        return events
+
+    def make_edit_event(self, attr, newvalue):
+        evid = "unsaved"
+        dt = datetime.datetime.now()
+        
+        event = TSTPEvent.create(
+            eventid     = evid, 
+            userid      = "odinlake", 
+            entrytime   = dt, 
+            action      = "edit", 
+            category    = "event", 
+            refcategory = self.category, 
+            category1   = self.category1, 
+            name1       = self.name1, 
+            category2   = self.category2, 
+            name2       = self.name2, 
+            field       = attr, 
+            oldvalue    = getattr(self, attr),
+            newvalue    = newvalue,
+            eventstate  = "pending",
+        )
+        
+        return event
+
+
+class StoryTheme(TSTPConnection):
+    @classmethod
+    def create(cls, story, theme, weight, motivation):
+        return super(StoryTheme, cls).create(
+            category = "featureof",
+            category1 = "story",
+            name1 = story,
+            category2 = "theme",
+            name2 = theme,
+            weight = weight,
+            motivation = motivation,
+        )
+    
+    @classmethod
+    def load(
+        cls, 
+        name1s = None,
+        name2s = None,
+        limit = 10000,
+    ):
+        return super(StoryTheme, cls).load(
+            "story", name1s, "theme", name2s, limit
+        )
+
+
+class TSTPEvent(TSTPObject):
+    category = "event"
+    fields = (
+        "eventid",      # a unique identifier
+        "userid",       # identify user
+        "entrytime",    # time of entry
+        "eventstate",   # pending/committed/reverted/...
+        "action",       # insert/edit/delete/...
+        "category",     # event
+        "refcategory",  # identifies the TSTPObject type acted on
+        "category1",    # subject category or category1
+        "name1",        # subject name or name1
+        "category2",    # subject category2 for TSTPConnection
+        "name2",        # subject name2 for TSTPConnection
+        "field",        # field changed
+        "oldvalue",     # old value if any
+        "newvalue",     # new value if any
+    )
+
+    @classmethod
+    def load(
+        cls, 
+        cat1s = None,
+        name1s = None,
+        cat2s = None,
+        name2s = None,
+        limit = 10000,
+    ):
+        attrs = list(cls.fields)
+        filters = [
+            ("category1", cat1s),
+            ("name1", name1s),
+            ("category2", cat2s),
+            ("name2", name2s),
+        ]
+        table = "web_events"
+        itr = cls.load_from_table(attrs, filters, table, limit, nkey=1)
+
+        return sorted(itr, key = lambda x: x.entrytime)
+
+    @classmethod
+    def load_from_table(cls, attrs, filters, table, limit, nkey=-2):
+        result = {}
+        fields = list(cls.fields)
+
+        for row in cls.query_for(attrs, filters, table, limit):
+            key = tuple(row[:nkey])
+            obj = result.get(key, None) or cls()
+            result[key] = obj
+
+            for attr, val in izip(attrs, row):
+                setattr(obj, attr, val)
+
+        return result.itervalues()
+
+
+def test():
+    stories = Story.load_all()
+
+    for story in stories:
+        print unicode(story).encode("ascii", "ignore")
+
+
+if __name__ == '__main__':
+    test()

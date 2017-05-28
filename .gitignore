@@ -1,0 +1,2 @@
+*.pyc
+/pylib/credentials.py
