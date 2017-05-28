@@ -1,13 +1,13 @@
-<? require_once "preamble.php"; ?><!DOCTYPE html>
+<?php require_once "preamble.php"; ?><!DOCTYPE html>
 <html>
-<? 
+<?php 
 	$SID = $_GET['name'];
 ?>
 <head>
 	<meta charset="UTF-8">
-	<title>TSTP <? echo $SID; ?></title>
+	<title>TSTP <?php echo $SID; ?></title>
 
-<? include "header.php"; ?>
+<?php include "header.php"; ?>
 
     <script>
         var g_objType = "story";
@@ -92,7 +92,7 @@
 </head>
 
 <body>
-<? include "navbar.php"; ?>
+<?php include "navbar.php"; ?>
 
 <div class="container main-body">
     <div id="loading_message" class="row">
@@ -209,7 +209,7 @@
 
 </div>
 
-<? include "footer.php"; ?>
+<?php include "footer.php"; ?>
 
 </body>
 </html>

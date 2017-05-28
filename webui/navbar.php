@@ -1,4 +1,4 @@
-<?
+<?php
 	$ME = basename($_SERVER['PHP_SELF']);
 
 	function make_link($name)
@@ -128,14 +128,14 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-<?
+<?php
 	make_link("TSTP");
 ?>
     </div>
 
     <div id="navbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-<?
+<?php
 	make_link("Stories");
 	make_link("Themes");
 ?>

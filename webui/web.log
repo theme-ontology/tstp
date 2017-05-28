@@ -2043,3 +2043,7 @@ Executing:
             SELECT eventid, userid, entrytime, eventstate, action, category, refcategory, category1, name1, category2, name2, field, oldvalue, newvalue FROM `web_events` WHERE category = 'event' ORDER BY category1, name1, category2, name2 LIMIT 1400 
         ...
 ...Done in 0.26 seconds with result 8
+Executing: 
+            SELECT name, attr, value FROM `web_attributes` WHERE category = 'story' ORDER BY name LIMIT 50000 
+        ...
+...Done in 0.53 seconds with result 843

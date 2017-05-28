@@ -1,9 +1,9 @@
-<? require_once "preamble.php"; ?><!DOCTYPE html>
+<?php require_once "preamble.php"; ?><!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>TSTP</title>
-<? include "header.php"; ?>
+<?php include "header.php"; ?>
 
     <script>
     	var eventsTable;
@@ -98,7 +98,7 @@
 </head>
 
 <body>
-<? include "navbar.php"; ?>
+<?php include "navbar.php"; ?>
 
 <div class="container">
     <div class="row">
@@ -132,7 +132,7 @@
 </div>
 
 
-<? include "footer.php"; ?>
+<?php include "footer.php"; ?>
 
 </body>
 </html>
