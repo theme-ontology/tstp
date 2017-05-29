@@ -22,9 +22,11 @@ def set_level(level):
     LEVEL = LEVELS.index(level)
 
 
-def printmsg( msg, level = 'INFO' ):
+def printmsg(msg, level = 'INFO', args = None):
     dt = datetime.now()
     tstr = dt.strftime( '%m/%d %H:%M:%S' )
+    if args:
+        msg = msg % args
     msg = unicode(msg).encode('ascii','ignore')
 
     if LOGFILE is not None:
@@ -39,17 +41,17 @@ def printmsg( msg, level = 'INFO' ):
             print "<failed to print>"
 
 
-def debug( msg ):
-    printmsg( msg, 'DEBUG' )
+def debug(msg, *args):
+    printmsg(msg, 'DEBUG', args)
 
-def status( msg ):
-    printmsg( msg, 'STATUS' )
+def status(msg, *args):
+    printmsg(msg, 'STATUS', args)
 
-def info( msg ):
-    printmsg( msg, 'INFO' )
+def info(msg, *args):
+    printmsg(msg, 'INFO', args)
 
-def error( msg ):
-    printmsg( msg, 'ERROR' )
+def error(msg, *args):
+    printmsg(msg, 'ERROR', args)
 
 
 class Timer( object ):
