@@ -1,2 +1,3 @@
 *.pyc
 /pylib/credentials.py
+/webui/web.log
