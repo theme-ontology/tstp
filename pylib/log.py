@@ -25,20 +25,22 @@ def set_level(level):
 def printmsg(msg, level = 'INFO', args = None):
     dt = datetime.now()
     tstr = dt.strftime( '%m/%d %H:%M:%S' )
+    
     if args:
         msg = msg % args
     msg = unicode(msg).encode('ascii','ignore')
-
+    logline = u'%-6s %s  %s' % (level, tstr, msg)
+    
     if LOGFILE is not None:
         with open(LOGFILE, "a") as fh:
-            fh.write(msg)
+            fh.write(logline)
             fh.write("\n")
 
     if LEVELS.index(level) >= LEVEL:
         try:
-            print( u'%-6s %s  %s' % ( level, tstr, msg ) )
+            print(logline)
         except:
-            print "<failed to print>"
+            print("<failed to print logline>")
 
 
 def debug(msg, *args):
