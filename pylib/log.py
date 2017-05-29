@@ -12,6 +12,12 @@ LEVEL = 0
 LOGFILE = None
 
 
+def set_templog(filename):
+    import os
+    import tempfile
+    set_logfile(os.path.join(tempfile.gettempdir(), "web.log"))
+
+
 def set_logfile(filename):
     global LOGFILE
     LOGFILE = filename

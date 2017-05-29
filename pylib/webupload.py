@@ -1,6 +1,7 @@
 import cgitb; cgitb.enable()
-import log; log.set_level('SILENT')
-log.set_logfile("web.log")
+import log
+log.set_level('SILENT')
+log.set_templog("web.log")
 
 import webobject
 import traceback
@@ -206,6 +207,8 @@ def handle_upload():
         filename = meta["tmp_name"]
         name = meta["name"]
         events = None
+
+        log.info("Handling file upload: %s", filename)
         
         if ftype == "storythemes":
             events, sheetcount, rowcount = read_storythemes(filename)

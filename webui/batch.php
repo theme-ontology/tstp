@@ -144,7 +144,6 @@
 		// python handles all of this
 		require_once("pythonlib.php");
 		$response = tstp_run_python('python ../pylib/webupload.py');
-		echo $response;
 
 		if (substr($response, 0, 7) === "Nothing") {
 			$result = "nothing";
