@@ -123,6 +123,10 @@ def handle_query():
         """))
         return json.dumps(themes)
 
+    if act_type == "metathemedata":
+        from webdb import get_metatheme_data
+        return json.dumps(get_metatheme_data())
+
     ## queries for each object type available
     if obj_type:
         if act_type == "submit":
