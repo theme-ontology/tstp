@@ -61,6 +61,33 @@
             </div>
         </div>
 
+
+        <div class="col-sm-12 col-md-8 col-lg-6">
+			<div class="panel panel-default">
+				<div class="panel-body">
+	              	<H3 class="px-3">API</H3>
+	            	<TABLE class="table table-striped">
+		            	<tbody>
+			            	<tr>
+				            	<td><A href = "json.php?action=metathemedata">Full Theme/Metatheme usage and hierarchy data</A></td>
+			            		<td>
+			            			Five items will be returned:
+			            			<ol>
+			            			<li>A mapping from leaf_theme to list of [sid, weight] tuples, indicating when a theme was directly used.</li>
+			            			<li>A mapping from meta_theme to list of [sid, weight] tuples, indicating when a theme was indirectly used.</li>
+			            			<li>A mapping from child_theme to parent_theme, indicating the hierarchy.</li>
+			            			<li>A mapping from parent_theme to child_theme, indicating the hierarchy.</li>
+			            			<li>A list of "top" level themes, i.e., those that have no parents.</li>
+			            			</ol>
+			            		</td>
+				            </tr>
+			            	</tbody>
+	            	</TABLE>
+            	</div>
+            </div>
+        </div>
+
+
     </div>
 </div>
 

@@ -7,10 +7,11 @@ from collections import defaultdict
 from scipy.stats import hypergeom
 import numpy as np
 
-import func
+from lib.func import memoize
+from lib.svgtools import SVG
 import svg
 import log
-
+from copy import deepcopy
 
 BASE_URL = "http://127.0.0.1/tstp/webui/json.php?"
 
@@ -52,18 +53,21 @@ def sym_rot_project(x, y, z):
     b = 35.2644
     v = np.array([x, y, z], dtype=float)
     r = rotate(v, a, b)
-    return r[0], r[1]
+    return r[:2]
 
 
 def norm(v):
     return v.dot(v) ** 0.5
 
 
-def phyper(k, K, n, N):
+def cphyper(k, K, n, N):
     return 1.0 - hypergeom.cdf(k - 1, N, n, K)
 
+def phyper(k, K, n, N):
+    return hypergeom.pmf(k, N, n, K)
 
-@func.memoize
+
+@memoize
 def get_data():
     url = BASE_URL + "action=metathemedata"
     response = urllib.urlopen(url)
@@ -71,21 +75,36 @@ def get_data():
     return ret_data
 
 
+def merged_theme_data(d1, d2):
+    """
+    Merge two { theme1 => [(sid1, weight1), ...], ... } type
+    distionaries into one.
+    """
+    dd_ret = {}
+    keys = set(d1.keys() + d2.keys())
+
+    for theme in keys:
+        items1 = d1.get(theme, [])
+        items2 = d2.get(theme, [])
+        dd_ret[theme] = sorted(set(tuple(x) for x in (items1 + items2)))
+
+    return dd_ret
+
+
 def themes_to_level(roots, level):
     """
     @returns
         { theme1 => (level1, root1), ... }
     """
-    data, parent_lu, toplevel = get_data()
+    leaf_data, meta_data, parent_lu, ret_child_lu, toplevel = get_data()
     child_lu = defaultdict(list)
+    thlevel = { th: 0 for th in roots }
+    throot = { th: th for th in roots }
+    remain = deque(roots)
 
     for theme, parents in parent_lu.iteritems():
         for parent in parents:
             child_lu[parent].append(theme)
-
-    thlevel = { th: 0 for th in roots }
-    throot = { th: th for th in roots }
-    remain = deque(roots)
 
     while remain:
         parent = remain.popleft()
@@ -112,12 +131,13 @@ def calculate_series_affinity_v1(themes):
     Score each used theme for tos/tas/tng repsectively using 
     a simple counting heuristic.
     """
-    data, parent_lu, toplevel = get_data()
+    leaf_data, meta_data, parent_lu, ret_child_lu, toplevel = get_data()
     tos, tas, tng = 'tos tas tng'.split()
     tosc, tasc, tngc = 80, 22, 178
     nc = tosc + tasc + tngc
     scope = ("minor", "major")
     counts = defaultdict(lambda: defaultdict(float))
+    data = merged_theme_data(leaf_data, meta_data)
 
     for theme, items in data.iteritems():
         if theme in themes:
@@ -131,10 +151,11 @@ def calculate_series_affinity_v1(themes):
     scores = defaultdict(lambda: defaultdict(float))
 
     for theme in counts.keys():
-        tot = sum(x for x in counts[theme].itervalues())
+        count = sum(x for x in counts[theme].itervalues())
+        totals[theme] = count
         for series, seriesc in zip((tos, tas, tng), (tosc, tasc, tngc)):
-            count = counts[theme][series]
-            pvalue = phyper(count, seriesc, tot, nc)
+            tscount = counts[theme][series]
+            pvalue = cphyper(tscount, seriesc, count, nc)
             scores[theme][series] = pvalue
 
     # sort and calculate ordinal score
@@ -148,13 +169,13 @@ def calculate_series_affinity_v1(themes):
         for idx, (_, theme) in enumerate(thorder):
             scores2[theme][series] = idx / float(len(thorder))
             
-    return scores2
+    return scores2, totals
 
 
 
 
 def do_make_metatheme_cube( 
-    level = 3, 
+    level = 2, 
     roots = ('the human condition', 'society', 'the pursuit of knowledge', 'alternate reality'),
     colors = ("rgb(166,85,84)", "rgb(107,140,84)", "rgb(11,112,156)", "rgb(156,122,26)"),
 ):
@@ -164,91 +185,87 @@ def do_make_metatheme_cube(
     '''
     themes_lu = themes_to_level(roots, level)
     themes = set(themes_lu)
-    scores = calculate_series_affinity_v1(themes)
+    scores, totals = calculate_series_affinity_v1(themes)
     color_lu = { t : c for t, c in zip(roots, colors) }
-    totals = { theme: sum(scores[theme].values()) for theme in scores }
-
     maxtot = float(max(totals.itervalues()))
-    mintot = float(min(totals.itervalues()))
-    dtot = (maxtot - mintot)
 
-    style = '''
-        text {
-            font-family:  Helvetica;
-            font-size:    8px;
-            fill:         #333333;
-            text-anchor:  middle;
-        }
-        polyline {
-            stroke:       #333333;
-            stroke-width: 4px;
-            fill-opacity: 0.1;
-        }
-    '''
+    svg = SVG(style = {
+        "text": {
+            "font-family": "Helvetica",
+            "font-size": "8px",
+            "fill": "#333333",
+            "text-anchor": "middle",
+        },
+        "polyline": {
+            "stroke": "#333333",
+            "stroke-width": "4px",
+            "fill-opacity": "0.1",
+        },
+        "polygon": {
+            "stroke": "#333333",
+            "stroke-width": "2px",
+            "fill": "none",
+        },
+    })
     tos, tas, tng = 'tos tas tng'.split()
     
     # make drawing
     lines = []
-    scale = 800.0
+    scale = 500.0
+    origo = np.array([500, 500])
     
-    font_min = 14.0
-    circle_min = 10
-    
-    lines.append('''<g transform="translate(800, 800) rotate(00)"> ''')
-    
-    dotlines = []
+    font_min = 7.0
+    circle_min = 8
+
     textlines = []
+    dotlines = []
 
     for kw, data in scores.iteritems():
-        color = color_lu[themes_lu[kw][1]]
-            
         x1 = data[tng] * scale
         x2 = data[tas] * scale
         x3 = data[tos] * scale
-        xx, yy = sym_rot_project(x1, x2, x3)
+        xx, yy = sym_rot_project(x1, x2, x3) + origo
             
         sz = font_min + (totals[kw] / maxtot) ** 0.5 * 10.0 * 4 / len(roots)
         radius = circle_min + (totals[kw] / maxtot) ** 0.5 / len(roots) * 100
-        print kw, totals[kw], radius
-        
-        textlines.append('''  <g transform="translate(%s, %s) rotate(-00) "> ''' % (xx, yy + sz / 2.5) )
-        textlines.append('''    <text style="fill: %s; font-size:%spx;" x="%s" y="%s">%s</text>''' % (color, sz, 0, 0, kw) )
-        textlines.append('''  </g> ''')
-        dotlines.append('''  <g transform="translate(%s, %s) rotate(-00) "> ''' % (xx, yy) )
-        dotlines.append('''    <circle style="fill: %s; stroke: %s; fill-opacity:0.5; stroke-opacity:0.7;" x="%s" y="%s" r="%s"/>''' % (color, color, 0, 0, radius) )
-        dotlines.append('''  </g> ''')
+        color = color_lu[themes_lu[kw][1]]
 
-    for v in [
-        [0, 0, 0],
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1],
-    ]:
-        x1, x2, x3 = v
-        xx, yy = sym_rot_project(x1 * scale, x2 * scale, x3 * scale)
-        kw = ''.join(str(x) for x in v)
-        color = '#000000' 
-        sz = 10
-        radius = 10
-        textlines.append('''  <g transform="translate(%s, %s) rotate(-00) "> ''' % (xx, yy + sz / 2.5) )
-        textlines.append('''    <text style="fill: %s; font-size:%spx;" x="%s" y="%s">%s</text>''' % (color, sz, 0, 0, kw) )
-        textlines.append('''  </g> ''')
-        color = '#ff0000' 
-        dotlines.append('''  <g transform="translate(%s, %s) rotate(-00) "> ''' % (xx, yy) )
-        dotlines.append('''    <circle style="fill: %s; stroke: %s; fill-opacity:0.5; stroke-opacity:0.7;" x="%s" y="%s" r="%s"/>''' % (color, color, 0, 0, radius) )
-        dotlines.append('''  </g> ''')
-        
-    lines.extend(dotlines)
-    lines.extend(textlines)
+        tstyle = { 
+            "fill": color, 
+            "font-size": "%spx" % sz,
+        }
+        cstyle = { 
+            "fill": color, 
+            "stroke": color, 
+            "fill-opacity": 0.5, 
+            "stroke-opacity": 0.8,
+        }
 
-    lines.append('''</g>''')
+        svg.text(xx, yy + sz / 2.5, kw, style = tstyle)
+        svg.circle(xx, yy, radius, style = cstyle)
+
+    np2o = sym_rot_project(1 * scale, 0 * scale, 0 * scale)
+    np2a = sym_rot_project(0 * scale, 1 * scale, 0 * scale)
+    np2n = sym_rot_project(0 * scale, 0 * scale, 1 * scale)
+    np2o_ = -np2op
+    np2a_ = -np2ap
+    np2n_ = -np2np
+
+    p2tos = np2o + origo
+    p2tas = np2a + origo
+    p2tng = np2n + origo
+    p2tos_ = np2o_ + origo
+    p2tas_ = np2a_ + origo
+    p2tng_ = np2n_ + origo
+    p2oo = origo
+
+    svg.polygon((p2tos, p2tng_, p2tas, p2tos_, p2tng, p2tas_))
+    
     
     # write to file
-    svgdata = svg.make_svg(1600, 1600, style, '\n'.join(lines))
     filename = "D:\\Temp\\test.svg"
     log.info( 'Writing: %s' % filename ) 
-    with open(filename, "w+") as fh:
-        fh.write(svgdata.encode("utf-8"))
+    svg.write(filename, 1600, 1600)
 
 
 if __name__ == '__main__':
