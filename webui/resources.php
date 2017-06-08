@@ -81,6 +81,26 @@
 			            			</ol>
 			            		</td>
 				            </tr>
+			            	<tr>
+				            	<td><A href = "json.php?action=storydefinitions">Full list of stories</A></td>
+			            		<td>
+			            			Same as the csv download but in JSON format. 
+			            			First row will contain headers. 
+			            			The data will contain story id, title, date, and description. 
+			            			Other columns may be added.
+			            			We will try not to remove or rename columns.
+			            		</td>
+				            </tr>
+			            	<tr>
+				            	<td><A href = "json.php?action=themedefinitions">Full list of themes</A></td>
+			            		<td>
+			            			Same as the csv download but in JSON format. 
+			            			First row will contain headers. 
+			            			The data will contain theme name, description and parents. 
+			            			Other columns may be added.
+			            			We will try not to remove or rename columns.
+			            		</td>
+				            </tr>
 			            	</tbody>
 	            	</TABLE>
             	</div>

@@ -8,45 +8,36 @@ import tempfile
 import time
 import csv
 
-import webobject
-from webphp import php_get
+import webphp
+import webdb
+    
 
-    
 def handle_download():
-    target = php_get("what")
-    klass = {
-        "storydefinitions": webobject.Story,
-        "themedefinitions": webobject.Theme,
-        "storythemes": webobject.StoryTheme,
-    }[target]
-    
-    #: note, above dict lookup guarantees target is safe
+    """
+    Read GET parameter "what" and produca the appropriate
+    cvs file. May be cached.
+
+    Returns
+    -------
+    Path of csv file.
+    """
+    target = webphp.php_get("what")
+
+    #: note, important for security
+    assert target in webdb.SUPPORTED_OBJECTS
+
     td = tempfile.gettempdir()
     path = os.path.join(td, "%s.csv" % target)
     
     if os.path.isfile(path):
         mtime = os.path.getmtime(path)
-        timeout = 0
+        timeout = 60
         if mtime + timeout < time.time():
             os.unlink(path)
         else:
             return path
         
-    remap = {
-        "name": target[:5],
-        "name1": "story",
-        "name2": "theme",
-    }
-    
-    objs = klass.load()
-    headers = [ f for f in klass.fields if "category" not in f ]
-    rows = [ [remap.get(f, f) for f in headers] ]
-    
-    for obj in objs:
-        row = []
-        for field in headers:
-            row.append(unicode(getattr(obj, field)).encode("utf-8"))
-        rows.append(row)
+    rows = webdb.get_defenitions(target)
         
     with open(path, "wb+") as fh:
         writer = csv.writer(fh, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)

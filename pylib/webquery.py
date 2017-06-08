@@ -13,7 +13,7 @@ import sys
 from db import do
 
 from webphp import php_get as get
-
+import webdb
 
 
 OBJECT_TYPES = {
@@ -126,6 +126,9 @@ def handle_query():
     if act_type == "metathemedata":
         from webdb import get_metatheme_data
         return json.dumps(get_metatheme_data())
+
+    if act_type in webdb.SUPPORTED_OBJECTS:
+        return json.dumps(webdb.get_defenitions(act_type))
 
     ## queries for each object type available
     if obj_type:
