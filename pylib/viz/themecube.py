@@ -8,8 +8,7 @@ from scipy.stats import hypergeom
 import numpy as np
 
 from lib.func import memoize
-from lib.svg import SVG
-import svg
+import lib.svg
 import log
 from copy import deepcopy
 
@@ -192,7 +191,7 @@ def do_make_metatheme_cube(
     color_lu = { t : c for t, c in zip(roots, colors) }
     maxtot = float(max(totals.itervalues()))
 
-    svg = SVG(style = {
+    svg = lib.svg.SVG(style = {
         "text": {
             "font-family": "Helvetica",
             "font-size": "8px",
