@@ -8,7 +8,7 @@ from scipy.stats import hypergeom
 import numpy as np
 
 from lib.func import memoize
-from lib.svgtools import SVG
+from lib.svg import SVG
 import svg
 import log
 from copy import deepcopy
@@ -177,14 +177,17 @@ def calculate_series_affinity_v1(themes):
 def do_make_metatheme_cube( 
     level = 2, 
     roots = ('the human condition', 'society', 'the pursuit of knowledge', 'alternate reality'),
-    colors = ("rgb(166,85,84)", "rgb(107,140,84)", "rgb(11,112,156)", "rgb(156,122,26)"),
+    #colors = ("rgb(166,85,84)", "rgb(107,140,84)", "rgb(11,112,156)", "rgb(156,122,26)"),
+    colors = ("#6F0F0F", "#176F0F", "#0F0F6F", "#6F5F0F"),
+    
 ):
     '''
     Write an SVG image triangle of metathemes selected and color by arguments,
     positioned by relative affinities towards tos/tas/tng.
     '''
-    themes_lu = themes_to_level(roots, level)
-    themes = set(themes_lu)
+    themes_lu = themes_to_level(roots, 99)
+    themes = set(t for t, (l, _) in themes_lu.iteritems() if l <= level)
+    tinythemes = set(t for t in themes_lu if t not in themes)
     scores, totals = calculate_series_affinity_v1(themes)
     color_lu = { t : c for t, c in zip(roots, colors) }
     maxtot = float(max(totals.itervalues()))
@@ -206,17 +209,30 @@ def do_make_metatheme_cube(
             "stroke-width": "2px",
             "fill": "none",
         },
+        ".axis": {
+            "stroke": "#333333",
+            "stroke-width": "2px",
+        },
+        ".border": {
+            "stroke": "#cccccc",
+            "stroke-width": "1px",
+        },
+        ".grid": {
+            "stroke": "#444444",
+            "stroke-width": "1px",
+            "stroke-dasharray": "1, 2",
+        },
     })
+    svg.marker("arrow", svg.stock.arrowhead(6), scale = 2)
+    sgrid = svg['grid']
+    sdata = svg['data']
+
     tos, tas, tng = 'tos tas tng'.split()
-    
-    # make drawing
     lines = []
     scale = 500.0
     origo = np.array([500, 500])
-    
     font_min = 7.0
     circle_min = 8
-
     textlines = []
     dotlines = []
 
@@ -228,7 +244,8 @@ def do_make_metatheme_cube(
             
         sz = font_min + (totals[kw] / maxtot) ** 0.5 * 10.0 * 4 / len(roots)
         radius = circle_min + (totals[kw] / maxtot) ** 0.5 / len(roots) * 100
-        color = color_lu[themes_lu[kw][1]]
+        level, root = themes_lu[kw]
+        color = color_lu[root]
 
         tstyle = { 
             "fill": color, 
@@ -238,38 +255,58 @@ def do_make_metatheme_cube(
             "fill": color, 
             "stroke": color, 
             "fill-opacity": 0.5, 
-            "stroke-opacity": 0.8,
+            "stroke-opacity": 0.7,
         }
 
-        svg.text(xx, yy + sz / 2.5, kw, style = tstyle)
-        svg.circle(xx, yy, radius, style = cstyle)
+        if level < 3:
+            sdata.text(xx, yy + sz / 2.5, kw, style = tstyle)
+            sdata.circle(xx, yy, radius, style = cstyle)
+        else:
+            sdata.circle(xx, yy, 2, style = cstyle)
 
     np2o = sym_rot_project(1 * scale, 0 * scale, 0 * scale)
     np2a = sym_rot_project(0 * scale, 1 * scale, 0 * scale)
     np2n = sym_rot_project(0 * scale, 0 * scale, 1 * scale)
-    np2o_ = -np2op
-    np2a_ = -np2ap
-    np2n_ = -np2np
+    backorigo = origo + sym_rot_project(1, 1, 1)
 
-    p2tos = np2o + origo
-    p2tas = np2a + origo
-    p2tng = np2n + origo
-    p2tos_ = np2o_ + origo
-    p2tas_ = np2a_ + origo
-    p2tng_ = np2n_ + origo
-    p2oo = origo
+    p2tos = origo + np2o
+    p2tas = origo + np2a
+    p2tng = origo + np2n
+    p2tos_ = origo - np2o
+    p2tas_ = origo - np2a
+    p2tng_ = origo - np2n
+    ox, oy = origo
+    box, boy = backorigo
 
-    svg.polygon((p2tos, p2tng_, p2tas, p2tos_, p2tng, p2tas_))
+    sgrid.polygon((p2tos, p2tng_, p2tas, p2tos_, p2tng, p2tas_), cls = "border")
+
+    with sgrid.clip() as mask:
+        mask.polygon((p2tos, p2tng_, p2tas, p2tos_, p2tng, p2tas_))
+
+        for ss in xrange(1, 15):
+            sscale = ss / 14.0 * 2
+            pps = [ origo + pt * sscale for pt in [np2o, np2a, np2n] ]
+            sgrid.polygon(pps, cls = "grid")
+
+    for pt in [np2o, np2a, np2n]:
+        xx, yy = origo - pt * 1.05
+        sgrid.line(ox, oy, xx, yy, cls = "border")
+
+    for pt in [np2o, np2a, np2n]:
+        xx, yy = origo + pt * 1.02
+        sgrid.line(ox, oy, xx, yy, markers = (None, "arrow"), cls = "axis")
     
-    
-    # write to file
-    filename = "D:\\Temp\\test.svg"
-    log.info( 'Writing: %s' % filename ) 
-    svg.write(filename, 1600, 1600)
+    return svg
 
 
 if __name__ == '__main__':
-    do_make_metatheme_cube()
+    svg = do_make_metatheme_cube()
+    print svg.make(1600, 1600)
+
+    # write to file
+    #filename = "D:\\Temp\\test.svg"
+    #log.info( 'Writing: %s' % filename ) 
+    #svg.write(filename, 1600, 1600)
 
 
 

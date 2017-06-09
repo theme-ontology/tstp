@@ -9,12 +9,15 @@ from contextlib import contextmanager
 
 
 class SVG(object):
-    
     def __init__(self, prescript = None, unit = "px", style = None):
+        self.stock = SVGStockObjects
+
         self.unit = unit
         self.layers = OrderedDict()
+        self.defs = []
         self.elements = []
         self.style = defaultdict(dict)
+        self.masks = {}
         
         if style:
             self.style.update(style)
@@ -36,11 +39,36 @@ class SVG(object):
             svg[layer].rect(10, 10, 10, 10)
         """
         transform_str = 'transform="%s" ' % transform if transform else ''
-        payload = ''.join(transform_str, self._make_payload(cls, style, attrs))
+        payload = ''.join([ transform_str, self._make_payload(cls, style, attrs) ])
 
         self.elements.append("""<g %s>""" % payload)
         yield
         self.elements.append("""</g>""")
+
+    @contextmanager
+    def clip(self, name = None, attrs = None):
+        """
+        Draw within a clipping mask. The maks may be defined within the first context
+        then reused later on.
+
+        Example
+        -------
+        with svg[layer].clip("clipid") as mask:
+            mask.circle(100, 100, 50)
+            svg[layer].circle(50, 50, 100)
+        with svg[layer].clip("clipid"):
+            svg[layer].circle(150, 150, 100)
+        """
+        idx = 1
+
+        while name is None or name in self.masks:
+            name = "clip%d" % idx
+            idx += 1
+
+        self.masks[name] = SVG()
+
+        with self.group(style = { "clip-path": "url(#%s)" % name }, attrs = attrs):
+            yield self.masks[name]
 
     def declare_layers(self, names):
         """
@@ -67,34 +95,29 @@ class SVG(object):
         self,
         m_id,
         svg, 
-        viewbox = "0 0 10 10", 
-        refx = "0", 
-        refy = "3",
-        width = "4",
-        height = "3",
+        scale = 1,
+        viewbox = (-10, -10, 20, 20), 
+        refx = 1, 
+        refy = 0,
+        width = 10,
+        height = 10,
         **kwargs
     ):
         """
         """
-        markerUnits = "strokeWidth",
-        orient = "auto",
         kwargs.update(dict(
-            viewBox = viewbox, 
+            viewBox = " ".join(map(str, viewbox)), 
             refX = refx, 
             refY = refy,
-            markerWidth = width,
-            markerHeight = height,
+            markerWidth = width * scale,
+            markerHeight = height * scale,
         ))
         kwargs.setdefault("markerUnits", "strokeWidth")
         kwargs.setdefault("orient", "auto")
         payload = " ".join('%s="%s"' % (k, v) for k, v in kwargs.iteritems())
-
-        code = """
-            <marker id="%s" %s>
-                %s
-            </marker>
-        """ % (m_id, payload, svg._body_lines())
-        self.elements.append(code)
+        body = '\n'.join(svg._body_lines())
+        code = """<marker id="%s" %s>\n%s\n</marker>""" % (m_id, payload, body)
+        self.defs.append(code)
         return self
 
     def custom(self, svg_code):
@@ -116,7 +139,7 @@ class SVG(object):
         self.elements.append(custom)
         return self
 
-    def line(self, x1, y1, x2, y2, cls = None, style = None):
+    def line(self, x1, y1, x2, y2, markers = (None, None), cls = None, style = None, attrs = None):
         """
         Draws a line.
 
@@ -124,15 +147,20 @@ class SVG(object):
         -------
         self
         """
+        if any(markers):
+            attrs = dict(attrs or {})
+        if markers[0]:
+            attrs['marker-start'] = 'url(#%s)' % markers[0]
+        if markers[1]:
+            attrs['marker-end'] = 'url(#%s)' % markers[1]
+
         x1, y1, x2, y2 = self._units(x1, y1, x2, y2)
-        
-        cls_str = 'class="%s" ' % cls if cls else ''
-        style_str = 'style="%s" ' % self._make_style(style) if style else ''
+        payload = self._make_payload(cls, style, attrs)
         
         self.elements.append("""
-            <line x1="%s" y1="%s" x2="%s" y2="%s" %s%s/>
+            <line x1="%s" y1="%s" x2="%s" y2="%s" %s/>
         """.strip() % (
-            x1, y1, x2, y2, cls_str, style_str
+            x1, y1, x2, y2, payload,
         ))
         return self
         
@@ -268,7 +296,7 @@ class SVG(object):
         attr_str = self._make_attrs(attrs) if attrs else ''
         payload = ''.join([attr_str, cls_str, style_str])
         return payload
-        
+
     def _style_lines(self):
         if isinstance(self.style, str):
             yield self.style
@@ -281,48 +309,70 @@ class SVG(object):
                     yield "    %s: %s;" % (key, value)
     
                 yield "}"
+        
+    def _defs_lines(self):
+        for name in self.layers:
+            for line in self.layers[name]._defs_lines():
+                yield line
+
+        for line in self.defs:
+            yield line
+
+        for name, svg in self.masks.iteritems():
+            yield """<clipPath id="%s">""" % name
+            for line in svg._body_lines():
+                yield line
+            yield """</clipPath>"""
 
     def _body_lines(self):
         for name in self.layers:
             yield '<g id="%s">' % name
-            
             for elem in self.layers[name]._body_lines():
                 yield '    %s' % elem
-                
             yield "</g>"
             
         for elem in self.elements:
             yield "%s" % elem
             
     def make(self, width = 1500.0, height = 1000.0):
-        style = list(self._style_lines())
-        body = list(self._body_lines())
-        
-        return make_svg(width, height, style, body)
+        return self._template1(width, height)
     
     def write(self, file_name, width = 1500.0, height = 1000.0):
         with open(file_name, 'w+') as fh:
             fh.write(self.make(width, height))
-            
 
-def make_svg(width, height, style, body):
-    '''
-    A standard template for svg images.
-    '''
-    style = '\n'.join(style) if isinstance(style, list) else style
-    body = '\n'.join(body) if isinstance(body, list) else body
-    
-    style = style.encode('utf-8')
-    body = body.encode('utf-8')
-    
-    style_block = '' if not style else '''<defs>
-    
+    def _template1(self, width, height):
+        '''
+        A standard template for svg images.
+        '''
+        style = '\n'.join(self._style_lines()).encode('utf-8')
+        defs = '\n'.join(self._defs_lines()).encode('utf-8')
+        body = '\n'.join(self._body_lines()).encode('utf-8')
+        
+        defs_block = '' if not (style or defs) else '''<defs>
     <style type="text/css"><![CDATA[
-%s\n    ]]></style>\n</defs>''' % style
-    return '''<?xml version="1.0" standalone="no"?>
+%s\n    ]]></style>\n%s\n</defs>''' % (style, defs)
+
+        return '''<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">
-%s\n%s\n</svg>\n''' % (width, height, style_block, body )
+%s\n%s\n</svg>\n''' % (width, height, defs_block, body )
+
+
+
+class SVGStockObjects(object):
+    @classmethod
+    def arrowhead(cls, base = 20 / 3 ** 0.5, height = 10):
+        """
+        Creates an arrow head pointing rightwards of given base and height 
+        with centre base-line at origo. The default parameter yields an
+        equilateral triangle.
+        """
+        svg = SVG()
+        b2, h = base / 2, height
+        svg.path(["M 0", -b2, "L", h, "0 L 0", b2, "z", ])
+        return svg
+
 
 
