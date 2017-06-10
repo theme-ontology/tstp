@@ -16,7 +16,7 @@ import excel
 import tempfile
 import cPickle as pickle
 
-from webobject import StoryTheme, Story, Theme
+from webobject import StoryTheme, Story, Theme, TSTPEvent
 from webphp import php_get, FILES, PHP_SESSION_ID
 
 
@@ -49,6 +49,12 @@ def save_pending_events(events):
     fn = get_pending_path()
     with open(fn, "wb+") as fh:
         pickle.dump({ "events": events }, fh, 1)
+
+
+def commit_pending_events():
+    events = get_pending_events()
+    TSTPEvent.commit_many(events)
+    cancel_pending_events()
     
 
 def read_xls(filename, headers):
@@ -199,7 +205,7 @@ def handle_upload():
         cancel_pending_events()
       
     elif submit == "commit":
-        cancel_pending_events()
+        commit_pending_events()
     
     elif submit == "submitfile":
         ftype = php_get("fieldType")

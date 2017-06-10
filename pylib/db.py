@@ -62,7 +62,7 @@ def esc(*args):
     """
     if len(args) > 1:
         return tuple(esc(a) for a in args)
-    return handle().escape_string(args[0])
+    return handle().escape_string(args[0].encode("utf-8")).decode("utf-8")
 
 
 def do(query, values = None, dofetch = True, quietish = False):

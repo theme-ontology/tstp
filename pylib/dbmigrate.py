@@ -21,7 +21,6 @@ def migrate(fromdb, todb):
             db.connect(todb)
             vpatt = ', '.join("%s" for _ in rows[0])
             db.do("INSERT INTO `%s` VALUES (%s)" % (table, vpatt), rows)
-    
             log.info("Wrote %d rows to %s@%s", len(rows), table, todb)
 
 

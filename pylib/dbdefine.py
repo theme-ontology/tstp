@@ -1,6 +1,7 @@
 from db import do
 import log
 import webobject
+import sys
 
 
 TABLES = {
@@ -12,7 +13,9 @@ TABLES = {
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_index` (`category`, `name`),
             KEY object_by_category (`category`)
-        ) ENGINE = MYISAM;
+        ) 
+        DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
+        ENGINE = MYISAM;
     """,
 
     'web_attributes' : """
@@ -25,7 +28,9 @@ TABLES = {
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_index` (`category`, `name`, `attr`),
             KEY attribute_by_category_name (`category`, `name`(15))
-        ) ENGINE = MYISAM;
+        ) 
+        DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
+        ENGINE = MYISAM;
     """,
 
     'web_connections' : """
@@ -43,7 +48,9 @@ TABLES = {
             INDEX `category_index` (`category`),
             KEY connection_by_category1_name1 (category1, name1(15)),
             KEY connection_by_category2_name2 (category2, name2(15))
-        ) ENGINE = MYISAM;
+        ) 
+        DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
+        ENGINE = MYISAM;
     """,
 
     'web_events' : """
@@ -68,7 +75,9 @@ TABLES = {
             INDEX `user_index` (`userid`),
             KEY event_by_category1_name1 (category1, name1(15)),
             KEY event_by_category2_name2 (category2, name2(15))
-        ) ENGINE = MYISAM;
+        ) 
+        DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
+        ENGINE = MYISAM;
     """,
 
     'web_counters' : """
@@ -76,19 +85,25 @@ TABLES = {
             `id` VARCHAR(15) NOT NULL,
             `value` INT,
             PRIMARY KEY (`id`)
-        ) ENGINE = MYISAM;
+        ) 
+        DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
+        ENGINE = MYISAM;
     """,
 }
 
 
-def create_tables():
+def create_tables(recreate = False):
+    if recreate:
+        for key, _query in TABLES.iteritems():
+            do("""DROP TABLE `%s`""" % key)
+
     for key, query in TABLES.iteritems():
         do(query)
 
 
 if __name__ == '__main__':
-    if False:
-        create_tables()
+    recreate = (sys.argv[1] if len(sys.argv) > 1 else "") == "recreate"
+    create_tables(recreate)
 
 
 

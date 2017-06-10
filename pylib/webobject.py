@@ -6,8 +6,13 @@ from db import do, esc, uuid
 import log
 
 
+##################################################################
+##
+## A generic object type.
+##
+##################################################################
 class TSTPObject(object):
-    category = ""
+    category = "object"
     fields = (
         "name",
         "category",
@@ -61,7 +66,6 @@ class TSTPObject(object):
 
         events = []
         updates = []
-        objs = []
 
         for attr, oldvalue in do("""
             SELECT attr, value FROM `%s` WHERE 
@@ -78,7 +82,6 @@ class TSTPObject(object):
 
             events.append(event)
             updates.append(update)
-            objs.append(obj)
 
         evfields = [
             "eventid",
@@ -96,21 +99,28 @@ class TSTPObject(object):
             "newvalue",
             "eventstate",
         ]
+        fstr = ", ".join('`%s`' % s for s in evfields)
+        vstr = ", ".join("%s" for s in evfields)
+        do("REPLACE INTO `web_events` (%s) values (%s)" % (fstr, vstr), events)
+
+        cls.commit_updates(updates)
+
+    @classmethod
+    def commit_updates(cls, updates):
+        """
+        Write multiple attribute updates for this class into the database
+        without further ado. Dangerous.
+        """
         attrfields = [
             "category",
             "name",
             "attr",
             "value",
         ]
-
-        fstr = ", ".join('`%s`' % s for s in evfields)
-        vstr = ", ".join("%s" for s in evfields)
-        do("REPLACE INTO `web_events` (%s) values (%s)" % (fstr, vstr), events)
-
+        objs = [ x[:2] for x in updates ]
         fstr = ", ".join('`%s`' % s for s in attrfields)
         vstr = ", ".join("%s" for s in attrfields)
         do("REPLACE INTO `web_attributes` (%s) values (%s)" % (fstr, vstr), updates)
-
         do("REPLACE INTO `web_objects` (`category`, `name`) values (%s, %s)", objs)
 
     @classmethod
@@ -321,45 +331,11 @@ class TSTPObject(object):
         return events
 
 
-class Story(TSTPObject):
-    category = "story"
-    fields = (
-        "name",
-        "category",
-        "title",
-        "date",
-        "description",
-    )
-    preforder = {
-        "tos" : 1,
-        "tas" : 2,
-        "tng" : 3,
-    }
-
-    @classmethod
-    def prefix_sort(cls, obj):
-        pref = obj.name[:3]
-        s = cls.preforder.get(pref, 99)
-        return (s, obj.name)
-
-    @classmethod
-    def make_json(cls, objs, fields = (), limit = 10000):
-        objs.sort(key = lambda x: cls.prefix_sort(x))
-        rows = list(cls.iter_rows(objs, fields = fields, limit = limit))
-
-        return json.dumps({"data" : rows})
-
-
-class Theme(TSTPObject):
-    category = "theme"
-    fields = (
-        "name",
-        "category",
-        "description",
-        "parents",
-    )
-
-
+##################################################################
+##
+## Represents a Connection between two objects.
+##
+##################################################################
 class TSTPConnection(TSTPObject):
     category = "featureof"
     fields = (
@@ -403,6 +379,25 @@ class TSTPConnection(TSTPObject):
             updates.append(update)
             
         return events, updates
+
+    @classmethod
+    def commit_updates(cls, updates):
+        """
+        Write multiple attribute updates for this class into the database
+        without further ado. Dangerous.
+        """
+        attrfields = [
+            "category",
+            "category1",
+            "name1",
+            "category2",
+            "name2",
+            "attr",
+            "value",
+        ]
+        fstr = ", ".join('`%s`' % s for s in attrfields)
+        vstr = ", ".join("%s" for s in attrfields)
+        do("REPLACE INTO `web_connections` (%s) values (%s)" % (fstr, vstr), updates)
         
     @classmethod
     def commit_edit_object(cls, events, updates):
@@ -422,23 +417,11 @@ class TSTPConnection(TSTPObject):
             "newvalue",
             "eventstate",
         ]
-        attrfields = [
-            "category",
-            "category1",
-            "name1",
-            "category2",
-            "name2",
-            "attr",
-            "value",
-        ]
-
         fstr = ", ".join('`%s`' % s for s in evfields)
         vstr = ", ".join("%s" for s in evfields)
         do("REPLACE INTO `web_events` (%s) values (%s)" % (fstr, vstr), events)
 
-        fstr = ", ".join('`%s`' % s for s in attrfields)
-        vstr = ", ".join("%s" for s in attrfields)
-        do("REPLACE INTO `web_connections` (%s) values (%s)" % (fstr, vstr), updates)
+        cls.commit_updates(updates)
         
     @classmethod
     def edit_object(cls, cat1, name1, cat2, name2, attrs, vals):
@@ -516,6 +499,60 @@ class TSTPConnection(TSTPObject):
         return event
 
 
+##################################################################
+##
+## Represents a Story.
+##
+##################################################################
+class Story(TSTPObject):
+    category = "story"
+    fields = (
+        "name",
+        "category",
+        "title",
+        "date",
+        "description",
+    )
+    preforder = {
+        "tos" : 1,
+        "tas" : 2,
+        "tng" : 3,
+    }
+
+    @classmethod
+    def prefix_sort(cls, obj):
+        pref = obj.name[:3]
+        s = cls.preforder.get(pref, 99)
+        return (s, obj.name)
+
+    @classmethod
+    def make_json(cls, objs, fields = (), limit = 10000):
+        objs.sort(key = lambda x: cls.prefix_sort(x))
+        rows = list(cls.iter_rows(objs, fields = fields, limit = limit))
+
+        return json.dumps({"data" : rows})
+
+
+##################################################################
+##
+## Represents a Theme.
+##
+##################################################################
+class Theme(TSTPObject):
+    category = "theme"
+    fields = (
+        "name",
+        "category",
+        "description",
+        "parents",
+    )
+
+
+##################################################################
+##
+## Represents a Theme in a Story.
+##
+##################################################################
 class StoryTheme(TSTPConnection):
     @classmethod
     def create(cls, story, theme, weight, motivation):
@@ -541,6 +578,11 @@ class StoryTheme(TSTPConnection):
         )
 
 
+##################################################################
+##
+## Represents a change in the database or other event of note.
+##
+##################################################################
 class TSTPEvent(TSTPObject):
     category = "event"
     fields = (
@@ -596,6 +638,120 @@ class TSTPEvent(TSTPObject):
 
         return result.itervalues()
 
+    @classmethod
+    def commit_many(cls, events):
+        """
+        Commit a batch of unsaved events. This will update
+        objects and insert events for the updates.
+        """
+        evidbase = "ev.%d-" % uuid("event")
+        idx = 0
+        catmap = {
+            ('story', ''): Story,
+            ('theme', ''): Theme,
+            ('story', 'theme'): StoryTheme,
+        }
+        klassmap = { klass: set() for klass in catmap.values() }
+        klassevmap = { klass: [] for klass in catmap.values() }
+        objmap = {}
+
+        #: find previous object names for all classes
+        for event in events:
+            klass = catmap[(event.category1, event.category2)]
+            klassmap[klass].add((event.name1, event.name2))
+
+        #: batch load objects for every class
+        for klass, items in klassmap.iteritems():
+            if "name2" in klass.fields:
+                name1s = set( x[0] for x in items )
+                name2s = set( x[1] for x in items )
+                for obj in klass.load(name1s, name2s):
+                    objmap[(klass, obj.name1, obj.name2)] = obj
+            elif "name" in klass.fields:
+                name1s = set( x[0] for x in items )
+                for obj in klass.load(name1s):
+                    objmap[(klass, obj.name, None)] = obj
+            else:
+                raise ValueError, "Unknown object type"
+
+        #: fill in missing info on event: id and old-value
+        for event in events:
+            event.eventid = evidbase + str(idx)
+            idx += 1
+            klass = catmap[(event.category1, event.category2)]
+            oldobject = objmap.get((klass, event.name1, event.name2), None)
+
+            if oldobject:
+                event.action = "edit"
+                event.oldvalue = getattr(oldobject, event.field)
+            else:
+                event.action = "insert"
+                event.oldvalue = ""
+
+            klassevmap[klass].append(event)
+
+        for klass, events in klassevmap.iteritems():
+            updates = []
+
+            for event in events:
+                if 'name2' in klass.fields:
+                    updates.append([
+                        event.refcategory,
+                        event.category1,
+                        event.name1,
+                        event.category2,
+                        event.name2,
+                        event.field,
+                        event.newvalue,
+                    ])
+                else:
+                    updates.append([
+                        event.category1,
+                        event.name1,
+                        event.field,
+                        event.newvalue,
+                    ])
+    
+            if events:
+                cls.write_many(events)
+                klass.commit_updates(updates)
+
+    @classmethod
+    def write_many(cls, events):
+        """
+        Write many events to db. 
+        This will not affect any other objects.
+        """
+        evfields = [
+            "eventid",
+            "userid",
+            "entrytime",
+            "action",
+            "category",
+            "refcategory",
+            "category1",
+            "name1",
+            "category2", 
+            "name2",
+            "field", 
+            "oldvalue", 
+            "newvalue",
+            "eventstate",
+        ]
+        evvalues = []
+
+        for event in events:
+            row = []
+            for field in evfields:
+                row.append(getattr(event, field))
+            evvalues.append(row)
+
+        fstr = ", ".join('`%s`' % s for s in evfields)
+        vstr = ", ".join("%s" for s in evfields)
+        do("REPLACE INTO `web_events` (%s) values (%s)" % (fstr, vstr), evvalues)
+
+
+############## HELPERS ###############
 
 def test():
     stories = Story.load_all()
