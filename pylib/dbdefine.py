@@ -102,8 +102,8 @@ def create_tables(recreate = False):
 
 
 if __name__ == '__main__':
-    recreate = (sys.argv[1] if len(sys.argv) > 1 else "") == "recreate"
-    create_tables(recreate)
+    command = (sys.argv[1] if len(sys.argv) > 1 else "")
+    create_tables(command == recreate)
 
 
 
