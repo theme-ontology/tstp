@@ -8,8 +8,8 @@
 			//var_dump($_SERVER);
 			?></span>
 
-			 <A href="batch.php">batch</A>
-			 | <A href="resources.php">resources</A>
+			 <A href="upload.php">upload</A>
+			 | <A href="resources.php">download</A>
 			 | <A href="log.php">log</A>
 
 		</p>

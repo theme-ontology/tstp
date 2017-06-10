@@ -9,12 +9,14 @@
 			"TSTP" => "index.php",
             "Stories" => "stories.php",
             "Themes" => "themes.php",
+            "Pictures" => "pictures.php",
 
             "index.php" => "TSTP",
             "stories.php" => "Stories",
             "story.php" => "Stories",
             "themes.php" => "Themes",
             "theme.php" => "Themes",
+            "pictures.php" => "Pictures",
 		);
 
 		$cls = ($known[$ME] == $name) ? "active" : "";
@@ -31,7 +33,8 @@
 		} 
 		else 
 		{
-			echo "<li class=\"$cls\"><a href=\"$link\">$name</a></li>\n";
+            $acls = ($cls == "") ? "" : "active-navbar-item";
+			echo "<li class=\"$cls\"><a class=\"$acls\" href=\"$link\">$name</a></li>\n";
 		}
 	}
 ?>
@@ -137,7 +140,8 @@
       <ul class="nav navbar-nav">
 <?php
 	make_link("Stories");
-	make_link("Themes");
+    make_link("Themes");
+    make_link("Pictures");
 ?>
       </ul>
 
