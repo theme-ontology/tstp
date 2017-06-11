@@ -9,27 +9,23 @@
     // replace href=":xxxx/relative/path" type specs
     function fixRelativePort(target)
     {
-	  if (target.tagName.toLowerCase() == 'a')
-	  {
-	      var port = target.getAttribute('href').match(/^:(\d+)(.*)/);
-	      if (port)
-	      {
-	          if (target.port == "8080")
-              {
-                  target.href = port[2];
-                  target.port = String(parseInt(port[1]) + 1);
-              } 
-              else if (target.port == "80")
-              {
-	              target.href = port[2];
-	              target.port = port[1];		      
-              }
-              else
-              {
-                  alert("unknown initial port: " + target.port);
-              }
-	      }
-	  }        
+        if (target.tagName.toLowerCase() == 'a')
+        {
+            var port = target.getAttribute('href').match(/^:(\d+)(.*)/);
+            if (port)
+            {
+                if (target.port == "8080")
+                {
+                    target.href = port[2];
+                    target.port = String(parseInt(port[1]) + 1);
+                } 
+                else
+                {
+                    target.href = port[2];
+                    target.port = port[1];		      
+                }
+            }
+        }        
     }
 
 	// delegate event for performance, and save attaching a million events to each anchor
