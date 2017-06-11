@@ -6,19 +6,37 @@
 <?php include "header.php"; ?>
 
 <script>
-	// delegate event for performance, and save attaching a million events to each anchor
-	document.addEventListener('click', function(event) {
-	  var target = event.target;
+    // replace href=":xxxx/relative/path" type specs
+    function fixRelativePort(target)
+    {
 	  if (target.tagName.toLowerCase() == 'a')
 	  {
 	      var port = target.getAttribute('href').match(/^:(\d+)(.*)/);
 	      if (port)
 	      {
-	         target.href = port[2];
-	         target.port = port[1];
+	          if (target.port == "8080")
+              {
+                  target.href = port[2];
+                  target.port = String(parseInt(port[1]) + 1);
+              } 
+              else if (target.port == "80")
+              {
+	              target.href = port[2];
+	              target.port = port[1];		      
+              }
+              else
+              {
+                  alert("unknown initial port: " + target.port);
+              }
 	      }
-	  }
+	  }        
+    }
+
+	// delegate event for performance, and save attaching a million events to each anchor
+	document.addEventListener('click', function(event) {
+        fixRelativePort(event.target);
 	}, false);
+
 </script>
 
 </head>
