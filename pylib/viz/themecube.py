@@ -95,21 +95,16 @@ def themes_to_level(roots, level):
     @returns
         { theme1 => (level1, root1), ... }
     """
-    leaf_data, meta_data, parent_lu, ret_child_lu, toplevel = get_data()
-    child_lu = defaultdict(list)
+    leaf_data, meta_data, parent_lu, child_lu, toplevel = get_data()
     thlevel = { th: 0 for th in roots }
     throot = { th: th for th in roots }
     remain = deque(roots)
-
-    for theme, parents in parent_lu.iteritems():
-        for parent in parents:
-            child_lu[parent].append(theme)
 
     while remain:
         parent = remain.popleft()
         plevel = thlevel[parent]
 
-        for child in child_lu[parent]:
+        for child in child_lu.get(parent, []):
             clevel = thlevel.get(child, 9999)
             if clevel > plevel + 1:
                 remain.append(child)
@@ -117,7 +112,9 @@ def themes_to_level(roots, level):
                 throot[child] = throot[parent]
 
     for theme, ll in thlevel.iteritems():
-        if ll > level:
+        if level == -1 and theme in child_lu:
+            throot[theme] = (ll, throot[theme])
+        elif ll > level:
             del throot[theme]
         else:
             throot[theme] = (ll, throot[theme])
@@ -171,22 +168,25 @@ def calculate_series_affinity_v1(themes):
     return scores2, totals
 
 
-
+def get_viz_data(
+    roots = ('the human condition', 'society', 'the pursuit of knowledge', 'alternate reality'),
+    colors = ("#6F0F0F", "#176F0F", "#0F0F6F", "#6F5F0F"),
+):
+    """
+    Compose the dataset needed for this visualization. It may be published for D3 later.
+    """
 
 def do_make_metatheme_cube( 
-    level = 2, 
     roots = ('the human condition', 'society', 'the pursuit of knowledge', 'alternate reality'),
-    #colors = ("rgb(166,85,84)", "rgb(107,140,84)", "rgb(11,112,156)", "rgb(156,122,26)"),
     colors = ("#6F0F0F", "#176F0F", "#0F0F6F", "#6F5F0F"),
-    
 ):
     '''
     Write an SVG image triangle of metathemes selected and color by arguments,
     positioned by relative affinities towards tos/tas/tng.
     '''
-    themes_lu = themes_to_level(roots, 99)
-    themes = set(t for t, (l, _) in themes_lu.iteritems() if l <= level)
-    tinythemes = set(t for t in themes_lu if t not in themes)
+    themes_lu = themes_to_level(roots, -1)
+    themes = set(t for t, (l, _) in themes_lu.iteritems())
+    #tinythemes = set(t for t in themes_lu if t not in themes)
     scores, totals = calculate_series_affinity_v1(themes)
     color_lu = { t : c for t, c in zip(roots, colors) }
     maxtot = float(max(totals.itervalues()))
@@ -257,7 +257,7 @@ def do_make_metatheme_cube(
             "stroke-opacity": 0.7,
         }
 
-        if level < 3:
+        if level < 99:
             sdata.text(xx, yy + sz / 2.5, kw, style = tstyle)
             sdata.circle(xx, yy, radius, style = cstyle)
         else:
