@@ -54,7 +54,7 @@
                                 <td>Pick a story and see other stories that are thematically similar.</td>
                             </tr>
                             <tr>
-                                <td><A href = "svg.php?subject=themecube">Star Trek tos/tas/tng Theme Domain Distribution</A></td>
+                                <td><A href = "viz/themecube.html">Star Trek tos/tas/tng Theme Domain Distribution</A></td>
                                 <td>
                                     A case study of how themes are distributed between the three early Star Trek TV Series. 
                                     This delineates, to an extent, how the show changed over the years.
