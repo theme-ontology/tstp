@@ -140,7 +140,6 @@ def handle_query():
     else:
         return json.dumps({
             "error" : "unknown request: %s." % str((req_type, act_type, obj_type)),
-            "post" : POST,
         })
 
 

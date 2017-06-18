@@ -3,6 +3,7 @@ import json
 import operator as op
 from collections import deque
 from collections import defaultdict
+import re
 
 from scipy.stats import hypergeom
 import numpy as np
@@ -11,6 +12,7 @@ from lib.func import memoize
 import lib.svg
 import log
 from copy import deepcopy
+
 
 BASE_URL = "http://127.0.0.1/tstp/webui/json.php?"
 
@@ -25,11 +27,7 @@ def rotate(v, a, b):
     sa = np.sin(a)
     cb = np.cos(b)
     sb = np.sin(b)
-    M1 = np.array([
-        [+ca, -sa, 0],
-        [+sa, +ca, 0],
-        [  0,   0, 1],
-    ])
+
     M2 = np.array([
         [+cb, 0, +sb],
         [  0, 1,   0],
@@ -122,48 +120,71 @@ def themes_to_level(roots, level):
     return throot
 
 
-def calculate_series_affinity_v1(themes):
+def sid_to_set(sid, tests):
+    """
+    Map a list of sids to named sets.
+    """
+    for name, pattern in tests.iteritems():
+        if pattern.match(sid):
+            return name
+
+
+def calculate_series_affinity_v1(themes, themesets, scope):
     """
     Score each used theme for tos/tas/tng repsectively using 
     a simple counting heuristic.
     """
+    setnames = [ x[0] for x in themesets ]
+    tests = { name : re.compile(pattern) for name, pattern in themesets }
+    sidsets = { name: set() for name in tests }
+
     leaf_data, meta_data, parent_lu, ret_child_lu, toplevel = get_data()
-    tos, tas, tng = 'tos tas tng'.split()
-    tosc, tasc, tngc = 80, 22, 178
-    nc = tosc + tasc + tngc
-    scope = ("minor", "major")
+
     counts = defaultdict(lambda: defaultdict(float))
     data = merged_theme_data(leaf_data, meta_data)
+    done = defaultdict(int)
 
     for theme, items in data.iteritems():
         if theme in themes:
             for sid, ww in items:
-                series = sid[:3].lower()
-                if ww in scope and series in (tos, tas, tng):
-                    counts[theme][series] += 1.0
+                setname = sid_to_set(sid, tests)
+
+                if ww in scope and setname:
+                    done[(theme, sid)] += 1
+                    if done[(theme, sid)] == 1: # avoid double-counting choice/major
+                        sidsets[setname].add(sid)
+                        counts[theme][setname] += 1.0
         
+
     # calculate all p-values by hypergeometric test
     totals = {}
     scores = defaultdict(lambda: defaultdict(float))
+    nc = sum(len(s) for s in sidsets.itervalues())
 
     for theme in counts.keys():
         count = sum(x for x in counts[theme].itervalues())
         totals[theme] = count
-        for series, seriesc in zip((tos, tas, tng), (tosc, tasc, tngc)):
-            tscount = counts[theme][series]
+
+        for setname in setnames:
+            seriesc = len(sidsets[setname])
+            tscount = counts[theme][setname]
             pvalue = cphyper(tscount, seriesc, count, nc)
-            scores[theme][series] = pvalue
+            scores[theme][setname] = pvalue
 
     # sort and calculate ordinal score
     scores2 = defaultdict(lambda: defaultdict(float))
 
-    for series, seriesc in zip((tos, tas, tng), (tosc, tasc, tngc)):
+    for setname in setnames:
+        seriesc = len(sidsets[setname])
         thorder = []
+
         for theme in counts.keys():
-            thorder.append((scores[theme][series], theme))
+            thorder.append((scores[theme][setname], theme))
+
         thorder.sort(reverse = True)
+
         for idx, (_, theme) in enumerate(thorder):
-            scores2[theme][series] = idx / float(len(thorder))
+            scores2[theme][setname] = idx / float(len(thorder))
             
     return scores2, totals
 
@@ -171,30 +192,74 @@ def calculate_series_affinity_v1(themes):
 def get_viz_data(
     roots = ('the human condition', 'society', 'the pursuit of knowledge', 'alternate reality'),
     colors = ("#6F0F0F", "#176F0F", "#0F0F6F", "#6F5F0F"),
+    themesets = (
+        ("tos", "tos[0-3]x\\d\\d"), 
+        ("tas", "tas[1-2]x\\d\\d"),
+        ("tng", "tng[1-7]x\\d\\d"),
+    ),
+    scope = ("choice", "major", "minor"),
 ):
     """
     Compose the dataset needed for this visualization. It may be published for D3 later.
     """
+    themes_lu = themes_to_level(roots, -1)
+    themes = set(t for t, (l, _) in themes_lu.iteritems())
+    scores, totals = calculate_series_affinity_v1(themes, themesets, scope)
+    color_lu = { t : c for t, c in zip(roots, colors) }
+    maxtot = float(max(totals.itervalues()))
+    s1, s2, s3 = [ x[0] for x in themesets ]
+
+    font_min, font_max = 7.0, 14.0
+    circle_min, circle_max = 6, 24
+    sz_hi = 0
+    radius_hi = 0
+
+    for theme, data in scores.iteritems():
+        sz = (totals[theme] / maxtot) ** 0.5
+        radius = (totals[theme] / maxtot) ** 0.5
+        sz_hi = max(sz_hi, sz)
+        radius_hi = max(radius_hi, radius)
+
+    ret = []
+
+    for theme, data in scores.iteritems():
+        x1 = data[s1]
+        x2 = data[s2]
+        x3 = data[s3]
+        xx, yy = sym_rot_project(x3, x2, x1)
+            
+        sz = font_min + (totals[theme] / maxtot) ** 0.5 / sz_hi * (font_max - font_min)
+        radius = circle_min + (totals[theme] / maxtot) ** 0.5 / radius_hi * (circle_max - circle_min)
+        level, root = themes_lu[theme]
+        color = color_lu[root]
+
+        ret.append((
+            level, root, theme, color, sz, radius,
+            x1, x2, x3, xx, yy, 
+        ))
+
+    return ret
+
 
 def do_make_metatheme_cube( 
     roots = ('the human condition', 'society', 'the pursuit of knowledge', 'alternate reality'),
     colors = ("#6F0F0F", "#176F0F", "#0F0F6F", "#6F5F0F"),
+    themesets = (
+        ("tos", "tos[0-3]x\\d\\d"), 
+        ("tas", "tas[1-2]x\\d\\d"),
+        ("tng", "tng[1-7]x\\d\\d"),
+    ),
 ):
     '''
     Write an SVG image triangle of metathemes selected and color by arguments,
     positioned by relative affinities towards tos/tas/tng.
     '''
-    themes_lu = themes_to_level(roots, -1)
-    themes = set(t for t, (l, _) in themes_lu.iteritems())
-    #tinythemes = set(t for t in themes_lu if t not in themes)
-    scores, totals = calculate_series_affinity_v1(themes)
-    color_lu = { t : c for t, c in zip(roots, colors) }
-    maxtot = float(max(totals.itervalues()))
+    viz_data = get_viz_data(roots, colors, themesets)
 
     svg = lib.svg.SVG(style = {
         "text": {
             "font-family": "Helvetica",
-            "font-size": "8px",
+            "font-size": "12px",
             "fill": "#333333",
             "text-anchor": "middle",
         },
@@ -226,26 +291,16 @@ def do_make_metatheme_cube(
     sgrid = svg['grid']
     sdata = svg['data']
 
-    tos, tas, tng = 'tos tas tng'.split()
     lines = []
     scale = 500.0
     origo = np.array([500, 500])
-    font_min = 7.0
-    circle_min = 8
     textlines = []
     dotlines = []
 
-    for kw, data in scores.iteritems():
-        x1 = data[tng] * scale
-        x2 = data[tas] * scale
-        x3 = data[tos] * scale
-        xx, yy = sym_rot_project(x1, x2, x3) + origo
-            
-        sz = font_min + (totals[kw] / maxtot) ** 0.5 * 10.0 * 4 / len(roots)
-        radius = circle_min + (totals[kw] / maxtot) ** 0.5 / len(roots) * 100
-        level, root = themes_lu[kw]
-        color = color_lu[root]
-
+    for row in viz_data:
+        (level, root, theme, color, sz, radius, 
+            x1, x2, x3, xx, yy) = row
+        xx, yy = np.array([xx, yy]) * scale + origo
         tstyle = { 
             "fill": color, 
             "font-size": "%spx" % sz,
@@ -258,14 +313,14 @@ def do_make_metatheme_cube(
         }
 
         if level < 99:
-            sdata.text(xx, yy + sz / 2.5, kw, style = tstyle)
+            sdata.text(xx, yy + sz / 2.5, theme, style = tstyle)
             sdata.circle(xx, yy, radius, style = cstyle)
         else:
             sdata.circle(xx, yy, 2, style = cstyle)
 
-    np2o = sym_rot_project(1 * scale, 0 * scale, 0 * scale)
+    np2o = sym_rot_project(0 * scale, 0 * scale, 1 * scale)
     np2a = sym_rot_project(0 * scale, 1 * scale, 0 * scale)
-    np2n = sym_rot_project(0 * scale, 0 * scale, 1 * scale)
+    np2n = sym_rot_project(1 * scale, 0 * scale, 0 * scale)
     backorigo = origo + sym_rot_project(1, 1, 1)
 
     p2tos = origo + np2o
@@ -291,22 +346,29 @@ def do_make_metatheme_cube(
         xx, yy = origo - pt * 1.05
         sgrid.line(ox, oy, xx, yy, cls = "border")
 
-    for pt in [np2o, np2a, np2n]:
+    for idx in xrange(3):
+        pt = [np2o, np2a, np2n][idx]
+        name = themesets[idx][0].upper()
         xx, yy = origo + pt * 1.02
         sgrid.line(ox, oy, xx, yy, markers = (None, "arrow"), cls = "axis")
+
+        if xx < ox:
+            align = "end"
+            xx -= 10
+        else:
+            align = "start"
+            yy -= 10
+
+        sgrid.text(xx, yy, name, style = {"text-anchor": align})
     
     return svg
 
 
 if __name__ == '__main__':
+    #a = np.array([1,1,1], dtype=float)
+    #print a
+    #print rotate(a, -45, 0)
+
     svg = do_make_metatheme_cube()
     print svg.make(1600, 1600)
-
-    # write to file
-    #filename = "D:\\Temp\\test.svg"
-    #log.info( 'Writing: %s' % filename ) 
-    #svg.write(filename, 1600, 1600)
-
-
-
 

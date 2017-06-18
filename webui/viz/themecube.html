@@ -1,0 +1,398 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>TSTP</title>
+
+        <script src="https://d3js.org/d3.v4.min.js">
+        </script>
+
+        <script>
+            function rad(deg)
+            {
+                while (deg < 0) { deg += 360; }
+                return deg / 180.0 * Math.PI;
+            }
+
+            var URL = '/tstp/webui/vizdata.php?subject=viz.themecube';
+            var DATA;
+
+            // initiall yaw/pitch
+            var THX = rad(45.0);
+            var THY = rad(35.2644);
+
+            // drawing metrics
+            var CX = 500;
+            var CY = 400;
+            var SCALE = CY;
+            var NUDGE_DELTA = 0.2;
+
+            // last mouse pos
+            var MX;
+            var MY;
+
+            // three story-set definitions - TODO: make this editable
+            var SERIES = [
+                [ "TOS", "tos[0-3]x\\d\\d" ],
+                [ "TAS", "tas[1-2]x\\d\\d" ],
+                [ "TNG", "tng[1-7]x\\d\\d" ],
+            ];
+
+            function initRotateAndProject()
+            {
+                updateMetrics();
+
+                for (var i = 0, len = DATA.length; i < len; i++)
+                {
+                    while (DATA[i].length < 14)
+                        DATA[i].push(0.0);
+                    DATA[i][11] = DATA[i][6] * SCALE;
+                    DATA[i][12] = DATA[i][7] * SCALE;
+                    DATA[i][13] = DATA[i][8] * SCALE;
+                }
+                rotateAndProject(THX, THY);
+            }
+
+            function rotateAndProject(thx, thy)
+            {
+                var sx = Math.sin(thx);
+                var cx = Math.cos(thx);
+
+                var sy = Math.sin(thy);
+                var cy = Math.cos(thy);
+
+                for (var i = 0, len = DATA.length; i < len; i++)
+                {
+                    var x = DATA[i][11];
+                    var y = DATA[i][12];
+                    var z = DATA[i][13];
+
+                    var nx = x;
+                    var ny = +y * cx - z * sx;
+                    var nz = +y * sx + z * cx;
+
+                    x = +nx * cy - nz * sy;
+                    y = ny;
+                    z = +nx * sy + nz * cy;
+
+                    DATA[i][9] = x;
+                    DATA[i][10] = y;
+
+                    DATA[i][11] = x;
+                    DATA[i][12] = y;
+                    DATA[i][13] = z;
+                }
+            }
+
+            function setData(data)
+            {
+                data.push.apply(data, [
+                    [ -1, "", "oo", "#222222", 0, 10, 0.0, 0.0, 0.0, 0.0, 0.0 ],
+                    [ -1, "", "s1", "#222222", 0, 10, 1.0, 0.0, 0.0, 0.0, 0.0 ],
+                    [ -1, "", "s2", "#222222", 0, 10, 0.0, 1.0, 0.0, 0.0, 0.0 ],
+                    [ -1, "", "s3", "#222222", 0, 10, 0.0, 0.0, 1.0, 0.0, 0.0 ],
+                    [ -1, "", "bb", "#ff2222", 0, 10, 1.0, 1.0, 1.0, 0.0, 0.0 ],
+                    [ -1, "", "n1", "#eeee22", 0, 10, 0.0, 1.0, 1.0, 0.0, 0.0 ],
+                    [ -1, "", "n2", "#eeee22", 0, 10, 1.0, 0.0, 1.0, 0.0, 0.0 ],
+                    [ -1, "", "n3", "#eeee22", 0, 10, 1.0, 1.0, 0.0, 0.0, 0.0 ],
+                ]);
+                DATA = data;
+                initRotateAndProject();
+                updateDrawing();
+                updateDrawing();
+            }
+
+            // return a number of equally spacecd points between p1 and p
+            // where p is a point on the ray from p1 through p2
+            function interpolatePoints(p1, p2, extend, steps)
+            {
+                var x = p1[0];
+                var y = p1[1];
+                var dx = (p2[0] - x) / steps * extend;
+                var dy = (p2[1] - y) / steps * extend;
+                var rets = [];
+
+                for (var i = 0; i <= steps; i++)
+                {
+                    x += dx;
+                    y += dy;
+                    rets.push([ x, y ]);
+                }
+                return rets;
+            }
+
+            function extend(p1, p2, ratio)
+            {
+                var x = p1[0];
+                var y = p1[1];
+                var dx = (p2[0] - x) * ratio;
+                var dy = (p2[1] - y) * ratio;
+                return [ x + dx, y + dy ];
+            }
+
+            function zip(lols)
+            {
+                var ret = [];
+
+                for (var i = 0; i < lols[0].length; i++)
+                {
+                    var row = [];
+                    for (var j = 0; j < lols.length; j++)
+                    {
+                        row.push(lols[j][i]);
+                    }
+                    ret.push(row);
+                }
+                return ret;
+            }
+
+            function updateMetrics()
+            {
+                var svg = d3.select("#canvas");
+                var bb = svg.node().getBoundingClientRect();
+                var ww = bb.width;
+                var hh = bb.height;
+                CX = ww / 2;
+                CY = hh / 2;
+                SCALE = Math.min(CX, CY);
+            }
+
+            function updateDrawing()
+            {
+                var oidx = DATA.length - 8;
+                var data = DATA.slice(0, oidx);
+                var axes_data = [
+                    [ DATA[oidx], DATA[oidx + 1], "axis_arrow_main", SERIES[0] ],
+                    [ DATA[oidx + 4], DATA[oidx + 7], "axis_arrow_back", "" ],
+                    [ DATA[oidx], DATA[oidx + 2], "axis_arrow_main", SERIES[1] ],
+                    [ DATA[oidx + 4], DATA[oidx + 5], "axis_arrow_back", "" ],
+                    [ DATA[oidx], DATA[oidx + 3], "axis_arrow_main", SERIES[2] ],
+                    [ DATA[oidx + 4], DATA[oidx + 6], "axis_arrow_back", "" ],
+                ];
+                var grid_data = zip([
+                    interpolatePoints(DATA[oidx].slice(9, 11), DATA[oidx + 1].slice(9, 11), 2.0, 12),
+                    interpolatePoints(DATA[oidx].slice(9, 11), DATA[oidx + 2].slice(9, 11), 2.0, 12),
+                    interpolatePoints(DATA[oidx].slice(9, 11), DATA[oidx + 3].slice(9, 11), 2.0, 12),
+                ]);
+                var svg = d3.select("#canvas");
+
+
+                // define the outer boundary and associated clipPath
+                var clip = svg.selectAll("#outerClip").data([ axes_data ]);
+                var path = clip.enter().append("svg:clipPath")
+                    .attr("id", "outerClip").append("polygon");
+                clip.select("polygon")
+                    .attr("points", function(d) {
+                        var res = d.map(function(d) {
+                            return [ CX + d[1][9], CY - d[1][10] ].join(",");
+                        });
+                        return res;
+                    });
+                var bounds = svg.selectAll("#outerBounds").data([ axes_data ]);
+                bounds.enter().append("polygon")
+                    .attr("id", "outerBounds");
+                bounds.attr("points", function(d) {
+                    return d.map(function(d) {
+                        return [ CX + d[1][9], CY - d[1][10] ].join(",");
+                    });
+                });
+
+                // draw grid
+                var gridcont = svg.select("#grid_container");
+                var grid = gridcont.selectAll(".grid").data(grid_data);
+                grid.enter()
+                    .append("polygon")
+                    .attr("class", "grid");
+                grid.attr("points", function(d) {
+                        return d.map(function(d) {
+                            return [CX + d[0], CY - d[1]].join(",");
+                        });
+                    });
+                grid.exit().remove();
+                gridcont.style("clip-path", "url(#outerClip)");
+
+                // draw axes
+                function axis_farp(d) { return extend(d[0].slice(9, 11), d[1].slice(9, 11), 1.05) }
+                var axes = svg.selectAll(".axis_arrow").data(axes_data);
+                axes.enter()
+                    .append("line")
+                    .attr("class", function(d, i) { return "axis_arrow " + d[2]; });
+                axes.attr("x1", function(d, i) { return CX + d[0][9]; })
+                    .attr("y1", function(d, i) { return CY - d[0][10]; })
+                    .attr("x2", function(d, i) { return CX + axis_farp(d)[0]; })
+                    .attr("y2", function(d, i) { return CY - axis_farp(d)[1]; });
+                axes.exit().remove();
+                var axes_labels = svg.selectAll(".axis_label").data(axes_data);
+                axes_labels.enter()
+                    .append("text")
+                    .attr("class", "axis_label")
+                    .text(function(d, i) { return d[3][0]; });
+                axes_labels.attr("x", function(d, i) { return CX + axis_farp(d)[0] + (d[1][9] < 50 ? -15 : 15); })
+                    .attr("y", function(d, i) { return CY - axis_farp(d)[1] + (d[1][10] < 50 ? -15 : 15); })
+                axes_labels.exit().remove();
+
+                // draw circles
+                var elem = svg.selectAll("g.theme").data(data, function(d) { return d[2]; });
+                var eleme = elem.enter().append("g").attr("class", "theme").attr("id", function(d) { return d[2]; });
+
+                function defconfig_gelem(elem)
+                {
+                    elem.select("circle")
+                        .style("stroke-width", "1")
+                        .style("fill-opacity", "0.5")
+                        .style("stroke-opacity", "0.7")
+                        .attr("r", function(d, i) { return d[5]; })
+                        .style("stroke", function(d, i) { return d[3]; })
+                        .style("fill", function(d, i) { return d[3]; });
+                    elem.select("text")
+                        .attr("class", "theme")
+                        .style("fill-opacity", "0.5")
+                        .style("fill", function(d, i) { return d[3]; })
+                        .style("font-size", function(d, i) { return parseInt(d[4]); })
+                        .text(function(d, i) { return d[2]; });
+                }
+
+                eleme.on("mouseover", function(d) {
+                        d3.select(this).select("circle")
+                            .attr("r", function(d, i) { return d[5] * 1.5 + 2; })
+                            .style("stroke-width", "2");
+                        d3.select(this).select("text")
+                            .attr("class", "theme_focus")
+                            .style("fill", function(d, i) { return "black"; })
+                            .style("font-size", function(d, i) { return parseInt(d[4] * 1.5) + 2; })
+                            .style("fill-opacity", "1.0");
+                        this.parentElement.appendChild(this);
+                    })
+                    .on("mouseout", function(d) {
+                        defconfig_gelem(d3.select(this));
+                    });
+
+                eleme.append("circle");
+                eleme.append("text");
+                defconfig_gelem(eleme);
+                elem.attr("transform", function(d) { return "translate(" + (CX + d[9]) + "," + (CY - d[10]) + ")"; });
+                elem.exit().remove();
+
+                // set up mouse dynamics
+                svg.on("mousemove", function(d, i) {
+                    var x = d3.mouse(this)[0];
+                    var y = d3.mouse(this)[1];
+                    var bb = this.getBoundingClientRect();
+                    var ww = bb.width;
+                    var hh = bb.height;
+
+                    if (MX > 0)
+                    {
+                        var pitch = -(MX - x) / ww * NUDGE_DELTA;
+                        var roll = (MY - y) / hh * NUDGE_DELTA;
+                        rotateAndProject(roll, pitch);
+                    }
+                    else
+                    {
+                        var pitch = -(ww / 2 - x) / ww * NUDGE_DELTA;
+                        var roll = (hh / 2 - y) / hh * NUDGE_DELTA;
+                        rotateAndProject(roll, pitch);
+                    }
+                    MX = x;
+                    MY = y;
+                    updateDrawing();
+                });
+                svg.on("mouseout", function(d, i) {
+                    var x = d3.mouse(this)[0];
+                    var y = d3.mouse(this)[1];
+                    var bb = this.getBoundingClientRect();
+                    var ww = bb.width;
+                    var hh = bb.height;
+
+                    if (x <= 10 || x >= ww - 10 || y <= 10 || y >= hh - 10)
+                    {
+                        initRotateAndProject();
+                        updateDrawing();
+                        MX = -1;
+                    }
+                });
+
+            }
+
+            d3.request(URL, function(error, response) {
+                var data = JSON.parse(response.response);
+                setData(data);
+            });
+
+        </script>
+
+    </head>
+
+    <body>
+
+        <svg id="canvas" width="100%" height="100%"" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <style type="text/css"><![CDATA[
+                svg {
+                    background: none;
+                    cursor: default;
+                }
+
+                .axis_arrow_main {
+                    stroke: #444444;
+                    stroke-width: 2px;
+                    marker-end: url(#arrowhead);
+                }
+                .axis_arrow_back {
+                    stroke: #cccccc;
+                    stroke-width: 1px;
+                }
+                .grid {
+                    stroke: #444444;
+                    stroke-width: 1px;
+                    stroke-dasharray: 1, 2;
+                    fill: none;
+                }
+                #outerBounds {
+                    stroke: #cccccc;
+                    stroke-width: 1px;
+                    fill: none;
+                }
+                .border {
+                    stroke: #cccccc;
+                    stroke-width: 1px;
+                }
+                text {
+                    alignment-baseline: central;
+                    font-family: Helvetica;
+                    text-anchor: middle;
+                    stroke: none;
+                    user-select: none;
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                }
+                text.theme {
+                }
+                text.theme_focus {
+                    paint-order: stroke;
+                    stroke: #ffffff;
+                    stroke-width: 3px;
+                    stroke-opacity: 0.3;
+                    font-weight: bold;
+                }
+                text.axis_label {
+                    fill: #000000;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+
+            ]]></style>
+            <defs>
+                <marker id="arrowhead" refY="0" refX="1" markerUnits="strokeWidth" orient="auto" markerWidth="20" viewBox="-10 -10 20 20" markerHeight="20">
+                    <path d="M 0 -3 L 10 0 L 0 3 z" />
+                </marker>
+            </defs>
+
+            <g id="grid_container">
+            </g>
+        </svg>
+
+    </body>
+
+</html>
+
+
+
