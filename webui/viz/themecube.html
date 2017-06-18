@@ -177,7 +177,6 @@
                 ]);
                 var svg = d3.select("#canvas");
 
-
                 // define the outer boundary and associated clipPath
                 var clip = svg.selectAll("#outerClip").data([ axes_data ]);
                 var path = clip.enter().append("svg:clipPath")
@@ -321,18 +320,24 @@
             });
 
         </script>
-
+        <style>
+            body {
+                text-align: center;
+            }
+            svg {
+                background: none;
+                cursor: default;
+                max-width: 1000px;
+                max-height: 1000px;
+                width: 100%;
+                height: 100%;
+            }
+        </style>
     </head>
 
     <body>
-
-        <svg id="canvas" width="100%" height="100%"" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <svg id="canvas" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <style type="text/css"><![CDATA[
-                svg {
-                    background: none;
-                    cursor: default;
-                }
-
                 .axis_arrow_main {
                     stroke: #444444;
                     stroke-width: 2px;
