@@ -3,8 +3,7 @@
         <meta charset="UTF-8">
         <title>TSTP</title>
 
-        <script src="https://d3js.org/d3.v4.min.js">
-        </script>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
 
         <script>
             function rad(deg)
@@ -15,10 +14,14 @@
 
             var URL = '/tstp/webui/vizdata.php?subject=viz.themecube';
             var DATA;
+            var FORCE_NODES;
+            var FORCE;
 
             // initiall yaw/pitch
             var THX = rad(45.0);
             var THY = rad(35.2644);
+            var WIDTH = 1000;
+            var HEIGHT = 1000;
 
             // drawing metrics
             var CX = 500;
@@ -27,10 +30,6 @@
             var TSCALE = CY / 500.0;
             var NUDGE_DELTA = 0.2;
 
-            // last mouse pos
-            var MX;
-            var MY;
-
             // three story-set definitions - TODO: make this editable
             var SERIES = [
                 [ "TOS", "tos[0-3]x\\d\\d" ],
@@ -38,26 +37,27 @@
                 [ "TNG", "tng[1-7]x\\d\\d" ],
             ];
 
-            function initRotateAndProject()
+            function updateMetrics()
             {
-                updateMetrics();
-
-                for (var i = 0, len = DATA.length; i < len; i++)
-                {
-                    while (DATA[i].length < 14)
-                        DATA[i].push(0.0);
-                    DATA[i][11] = DATA[i][6] * SCALE;
-                    DATA[i][12] = DATA[i][7] * SCALE;
-                    DATA[i][13] = DATA[i][8] * SCALE;
-                }
-                rotateAndProject(THX, THY);
+                var svg = d3.select("#canvas");
+                var bb = svg.node().getBoundingClientRect();
+                var ww = bb.width;
+                var hh = bb.height;
+                CX = ww / 2;
+                CY = hh / 2;
+                SCALE = Math.min(CX, CY);
+                TSCALE = SCALE / 500.0;
             }
 
             function rotateAndProject(thx, thy)
             {
+                updateMetrics();
+
+                if (thx === undefined) thx = THX;
+                if (thy === undefined) thy = THY;
+
                 var sx = Math.sin(thx);
                 var cx = Math.cos(thx);
-
                 var sy = Math.sin(thy);
                 var cy = Math.cos(thy);
 
@@ -81,7 +81,55 @@
                     DATA[i][11] = x;
                     DATA[i][12] = y;
                     DATA[i][13] = z;
+
+                    DATA[i][14] = DATA[i][4] * TSCALE;
+                    DATA[i][15] = DATA[i][5] * TSCALE;
+                    DATA[i][16] = CX + x;
+                    DATA[i][17] = CY - y;
+                    //DATA[i][18] = reserved for physics;
+                    //DATA[i][19] = reserved for physics;
+                    DATA[i][18] = DATA[i][16];
+                    DATA[i][19] = DATA[i][17];
                 }
+
+                if (FORCE == undefined)
+                {
+                    FORCE_NODES = DATA.map(function(d) { 
+                        return { 
+                            radius: d[15], 
+                            x: d[18], 
+                            y: d[19],
+                            tx: d[18], 
+                            ty: d[19],
+                        }; 
+                    });
+                    initForce();
+                }
+                else
+                {
+                    FORCE_NODES.map(function(d, i) { 
+                        d.tx = DATA[i][18];
+                        d.ty = DATA[i][19];
+                    });
+                    //initForce();
+                    FORCE.nodes(FORCE_NODES);
+                    FORCE.alpha(1);
+                    FORCE.restart();
+                }
+            }
+
+            function initRotateAndProject()
+            {
+                updateMetrics();
+                for (var i = 0, len = DATA.length; i < len; i++)
+                {
+                    while (DATA[i].length < 20) 
+                        DATA[i].push(0.0);
+                    DATA[i][11] = DATA[i][6] * SCALE;
+                    DATA[i][12] = DATA[i][7] * SCALE;
+                    DATA[i][13] = DATA[i][8] * SCALE;
+                }
+                rotateAndProject(THX, THY);
             }
 
             function setData(data)
@@ -98,8 +146,6 @@
                 ]);
                 DATA = data;
                 initRotateAndProject();
-                updateDrawing();
-                updateDrawing();
             }
 
             // return a number of equally spacecd points between p1 and p
@@ -146,132 +192,10 @@
                 return ret;
             }
 
-            function updateMetrics()
+            function initDrawing()
             {
                 var svg = d3.select("#canvas");
-                var bb = svg.node().getBoundingClientRect();
-                var ww = bb.width;
-                var hh = bb.height;
-                CX = ww / 2;
-                CY = hh / 2;
-                SCALE = Math.min(CX, CY);
-                TSCALE = SCALE / 500.0;
-            }
-
-            function updateDrawing()
-            {
-                var oidx = DATA.length - 8;
-                var data = DATA.slice(0, oidx);
-                var axes_data = [
-                    [ DATA[oidx], DATA[oidx + 1], "axis_arrow_main", SERIES[0] ],
-                    [ DATA[oidx + 4], DATA[oidx + 7], "axis_arrow_back", "" ],
-                    [ DATA[oidx], DATA[oidx + 2], "axis_arrow_main", SERIES[1] ],
-                    [ DATA[oidx + 4], DATA[oidx + 5], "axis_arrow_back", "" ],
-                    [ DATA[oidx], DATA[oidx + 3], "axis_arrow_main", SERIES[2] ],
-                    [ DATA[oidx + 4], DATA[oidx + 6], "axis_arrow_back", "" ],
-                ];
-                var grid_data = zip([
-                    interpolatePoints(DATA[oidx].slice(9, 11), DATA[oidx + 1].slice(9, 11), 2.0, 12),
-                    interpolatePoints(DATA[oidx].slice(9, 11), DATA[oidx + 2].slice(9, 11), 2.0, 12),
-                    interpolatePoints(DATA[oidx].slice(9, 11), DATA[oidx + 3].slice(9, 11), 2.0, 12),
-                ]);
-                var svg = d3.select("#canvas");
-
-                // define the outer boundary and associated clipPath
-                var clip = svg.selectAll("#outerClip").data([ axes_data ]);
-                var path = clip.enter().append("svg:clipPath")
-                    .attr("id", "outerClip").append("polygon");
-                clip.select("polygon")
-                    .attr("points", function(d) {
-                        var res = d.map(function(d) {
-                            return [ CX + d[1][9], CY - d[1][10] ].join(",");
-                        });
-                        return res;
-                    });
-                var bounds = svg.selectAll("#outerBounds").data([ axes_data ]);
-                bounds.enter().append("polygon")
-                    .attr("id", "outerBounds");
-                bounds.attr("points", function(d) {
-                    return d.map(function(d) {
-                        return [ CX + d[1][9], CY - d[1][10] ].join(",");
-                    });
-                });
-
-                // draw grid
-                var gridcont = svg.select("#grid_container");
-                var grid = gridcont.selectAll(".grid").data(grid_data);
-                grid.enter()
-                    .append("polygon")
-                    .attr("class", "grid");
-                grid.attr("points", function(d) {
-                        return d.map(function(d) {
-                            return [CX + d[0], CY - d[1]].join(",");
-                        });
-                    });
-                grid.exit().remove();
-                gridcont.style("clip-path", "url(#outerClip)");
-
-                // draw axes
-                function axis_farp(d) { return extend(d[0].slice(9, 11), d[1].slice(9, 11), 1.05) }
-                var axes = svg.selectAll(".axis_arrow").data(axes_data);
-                axes.enter()
-                    .append("line")
-                    .attr("class", function(d, i) { return "axis_arrow " + d[2]; });
-                axes.attr("x1", function(d, i) { return CX + d[0][9]; })
-                    .attr("y1", function(d, i) { return CY - d[0][10]; })
-                    .attr("x2", function(d, i) { return CX + axis_farp(d)[0]; })
-                    .attr("y2", function(d, i) { return CY - axis_farp(d)[1]; });
-                axes.exit().remove();
-                var axes_labels = svg.selectAll(".axis_label").data(axes_data);
-                axes_labels.enter()
-                    .append("text")
-                    .attr("class", "axis_label")
-                    .text(function(d, i) { return d[3][0]; });
-                axes_labels.attr("x", function(d, i) { return CX + axis_farp(d)[0] + (d[1][9] < 50 ? -15 : 15); })
-                    .attr("y", function(d, i) { return CY - axis_farp(d)[1] + (d[1][10] < 50 ? -15 : 15); })
-                axes_labels.exit().remove();
-
-                // draw circles
-                var elem = svg.selectAll("g.theme").data(data, function(d) { return d[2]; });
-                var eleme = elem.enter().append("g").attr("class", "theme").attr("id", function(d) { return d[2]; });
-
-                function defconfig_gelem(elem)
-                {
-                    elem.select("circle")
-                        .style("stroke-width", "1")
-                        .style("fill-opacity", "0.5")
-                        .style("stroke-opacity", "0.7")
-                        .attr("r", function(d, i) { return d[5] * TSCALE; })
-                        .style("stroke", function(d, i) { return d[3]; })
-                        .style("fill", function(d, i) { return d[3]; });
-                    elem.select("text")
-                        .attr("class", "theme")
-                        .style("fill-opacity", "0.5")
-                        .style("fill", function(d, i) { return d[3]; })
-                        .style("font-size", function(d, i) { return d[4] * TSCALE; })
-                        .text(function(d, i) { return d[2]; });
-                }
-
-                eleme.on("mouseover", function(d) {
-                        d3.select(this).select("circle")
-                            .attr("r", function(d, i) { return d[5] * 1.5 * TSCALE + 2; })
-                            .style("stroke-width", "2");
-                        d3.select(this).select("text")
-                            .attr("class", "theme_focus")
-                            .style("fill", function(d, i) { return "black"; })
-                            .style("font-size", function(d, i) { return d[4] * 1.5 * TSCALE  + 2; })
-                            .style("fill-opacity", "1.0");
-                        this.parentElement.appendChild(this);
-                    })
-                    .on("mouseout", function(d) {
-                        defconfig_gelem(d3.select(this));
-                    });
-
-                eleme.append("circle");
-                eleme.append("text");
-                defconfig_gelem(eleme);
-                elem.attr("transform", function(d) { return "translate(" + (CX + d[9]) + "," + (CY - d[10]) + ")"; });
-                elem.exit().remove();
+                var prevxy = [-1, -1];
 
                 // set up mouse dynamics
                 svg.on("mousemove", function(d, i) {
@@ -280,11 +204,13 @@
                     var bb = this.getBoundingClientRect();
                     var ww = bb.width;
                     var hh = bb.height;
+                    var px = prevxy[0];
+                    var py = prevxy[1];
 
-                    if (MX > 0)
+                    if (px >= 0)
                     {
-                        var pitch = -(MX - x) / ww * NUDGE_DELTA;
-                        var roll = (MY - y) / hh * NUDGE_DELTA;
+                        var pitch = -(px - x) / ww * NUDGE_DELTA;
+                        var roll = (py - y) / hh * NUDGE_DELTA;
                         rotateAndProject(roll, pitch);
                     }
                     else
@@ -293,8 +219,8 @@
                         var roll = (hh / 2 - y) / hh * NUDGE_DELTA;
                         rotateAndProject(roll, pitch);
                     }
-                    MX = x;
-                    MY = y;
+                    prevxy[0] = x;
+                    prevxy[1] = y;
                     updateDrawing();
                 });
                 svg.on("mouseout", function(d, i) {
@@ -308,15 +234,214 @@
                     {
                         initRotateAndProject();
                         updateDrawing();
-                        MX = -1;
+                        prevxy[0] = -1;
                     }
                 });
 
+                updateDrawing();
             }
 
+            // update the theme bubbles only
+            function updateBubbles()
+            {
+                var oidx = DATA.length - 8;
+                var data = DATA.slice(0, oidx);
+
+                // draw circles
+                var svg = d3.select("#canvas");
+                var elem = svg.selectAll("g.theme").data(data, function(d) { return d[2]; });
+                var eleme = elem.enter().append("g").attr("class", "theme").attr("id", function(d) { return d[2]; });
+
+                function defconfig_gelem(elem)
+                {
+                    elem.select("circle")
+                        .style("stroke-width", "1")
+                        .style("fill-opacity", "0.5")
+                        .style("stroke-opacity", "0.7")
+                        .attr("r", function(d, i) { return d[15]; })
+                        .style("stroke", function(d, i) { return d[3]; })
+                        .style("fill", function(d, i) { return d[3]; });
+                    elem.select("text")
+                        .attr("class", "theme")
+                        .style("fill-opacity", "0.5")
+                        .style("fill", function(d, i) { return d[3]; })
+                        .style("font-size", function(d, i) { return d[14]; })
+                        .text(function(d, i) { return d[2]; });
+                }
+
+                eleme.on("mouseover", function(d) {
+                        d3.select(this).select("circle")
+                            .attr("r", function(d, i) { return d[15] * 1.5 + 2; })
+                            .style("stroke-width", "2");
+                        d3.select(this).select("text")
+                            .attr("class", "theme_focus")
+                            .style("fill", function(d, i) { return "black"; })
+                            .style("font-size", function(d, i) { return d[14] * 1.5 + 2; })
+                            .style("fill-opacity", "1.0");
+                        this.parentElement.appendChild(this);
+                    })
+                    .on("mouseout", function(d) {
+                        defconfig_gelem(d3.select(this));
+                    });
+
+                eleme.append("circle");
+                eleme.append("text");
+                defconfig_gelem(eleme);
+                eleme.merge(elem).select("circle")
+                    .attr("transform", function(d) { return "translate(" + d[16] + "," + d[17] + ")"; });
+                eleme.merge(elem).select("text")
+                    .attr("transform", function(d) { return "translate(" + d[18] + "," + d[19] + ")"; });
+                elem.exit().remove();
+            }
+
+            function updateDrawing()
+            {
+                var oidx = DATA.length - 8;
+                var axes_data = [
+                    [ DATA[oidx], DATA[oidx + 1], "axis_arrow_main", SERIES[0] ],
+                    [ DATA[oidx + 4], DATA[oidx + 7], "axis_arrow_back", "" ],
+                    [ DATA[oidx], DATA[oidx + 2], "axis_arrow_main", SERIES[1] ],
+                    [ DATA[oidx + 4], DATA[oidx + 5], "axis_arrow_back", "" ],
+                    [ DATA[oidx], DATA[oidx + 3], "axis_arrow_main", SERIES[2] ],
+                    [ DATA[oidx + 4], DATA[oidx + 6], "axis_arrow_back", "" ],
+                ];
+                var grid_data = zip([
+                    interpolatePoints(DATA[oidx].slice(16, 18), DATA[oidx + 1].slice(16, 18), 2.0, 12),
+                    interpolatePoints(DATA[oidx].slice(16, 18), DATA[oidx + 2].slice(16, 18), 2.0, 12),
+                    interpolatePoints(DATA[oidx].slice(16, 18), DATA[oidx + 3].slice(16, 18), 2.0, 12),
+                ]);
+                var svg = d3.select("#canvas");
+
+                // define the outer boundary and associated clipPath
+                var clip = svg.selectAll("#outerClip").data([ axes_data ]);
+                var path = clip.enter().append("svg:clipPath")
+                    .attr("id", "outerClip").append("polygon");
+                clip.select("polygon")
+                    .merge(path)
+                    .attr("points", function(d) {
+                        var res = d.map(function(d) {
+                            return [ d[1][16], d[1][17] ].join(",");
+                        });
+                        return res;
+                    });
+                var bounds = svg.selectAll("#outerBounds").data([ axes_data ]);
+                bounds.enter().append("polygon")
+                    .attr("id", "outerBounds")
+                    .merge(bounds)
+                    .attr("points", function(d) {
+                        return d.map(function(d) {
+                            return [ d[1][16], d[1][17] ].join(",");
+                        });
+                    });
+
+                // draw grid
+                var gridcont = svg.select("#grid_container");
+                var grid = gridcont.selectAll(".grid").data(grid_data);
+                grid.enter()
+                    .append("polygon")
+                    .attr("class", "grid")
+                    .merge(grid)
+                    .attr("points", function(d) {
+                        return d.map(function(d) {
+                            return [ d[0], d[1] ].join(",");
+                        });
+                    });
+                grid.exit().remove();
+                gridcont.style("clip-path", "url(#outerClip)");
+
+                // draw axes
+                function axis_farp(d) { return extend(d[0].slice(16, 18), d[1].slice(16, 18), 1.05) }
+                var axes = svg.selectAll(".axis_arrow").data(axes_data);
+                axes.enter()
+                    .append("line")
+                    .attr("class", function(d, i) { return "axis_arrow " + d[2]; })
+                    .merge(axes)
+                    .attr("x1", function(d, i) { return d[0][16]; })
+                    .attr("y1", function(d, i) { return d[0][17]; })
+                    .attr("x2", function(d, i) { return axis_farp(d)[0]; })
+                    .attr("y2", function(d, i) { return axis_farp(d)[1]; });
+                axes.exit().remove();
+
+                var axes_labels = svg.selectAll(".axis_label").data(axes_data);
+                axes_labels.enter()
+                    .append("text")
+                    .attr("class", "axis_label")
+                    .text(function(d, i) { return d[3][0]; })
+                    .merge(axes_labels)
+                    .attr("x", function(d, i) { return axis_farp(d)[0] + (d[1][9] < 50 ? -15 : 15); })
+                    .attr("y", function(d, i) { return axis_farp(d)[1] + (d[1][10] < 50 ? -15 : 15); });
+                axes_labels.exit().remove();
+
+                // update the theme bubbles for good measure - TODO: activate physics instead
+                updateBubbles();
+            }
+
+            function initForce()
+            {
+                var forceCollide = d3.forceCollide()
+                    .radius(function(d) { return d.radius - 1.5; })
+                    .iterations(1);
+
+                FORCE  = d3.forceSimulation()
+                    .nodes(FORCE_NODES)
+                    .velocityDecay(0.2)
+                    .alphaDecay(0.09)
+                    .force("xposition", d3.forceX(function(d, i) { return d.tx; }))
+                    .force("yposition", d3.forceY(function(d, i) { return d.ty; }))
+                    //.force("collide", forceCollide)
+                    .on("tick", tick);
+            }
+
+            // let bubbles gravitate towards their locations but avoid overlap on each tick
+            function tick(e) 
+            {
+                FORCE_NODES.map(function(d, i) { 
+                    DATA[i][18] = d.x;
+                    DATA[i][19] = d.y;
+                });
+                updateBubbles();
+            }
+
+            // Collision detection
+            function collide(alpha) 
+            {
+                var quadtree = d3.geom.quadtree(FORCE_NODES);
+
+                return function(d) {
+                    var r = d.radius + 50,
+                        nx1 = d.x - r,
+                        nx2 = d.x + r,
+                        ny1 = d.y - r,
+                        ny2 = d.y + r;
+
+                    quadtree.visit(function(quad, x1, y1, x2, y2) 
+                    {
+                        if (quad.point && (quad.point !== d)) 
+                        {
+                            var x = d.x - quad.point.x,
+                                y = d.y - quad.point.y,
+                                l = Math.sqrt(x * x + y * y),
+                                r = d.radius + quad.point.radius;
+
+                            if (l < r) 
+                            {
+                                l = (l - r) / l * alpha;
+                                d.x -= x *= l;
+                                d.y -= y *= l;
+                                quad.point.x += x;
+                                quad.point.y += y;
+                            }
+                        }
+                        return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+                    });
+                };
+            }
+
+            // fetch data and start the behemoth
             d3.request(URL, function(error, response) {
                 var data = JSON.parse(response.response);
                 setData(data);
+                initDrawing();
             });
 
         </script>
