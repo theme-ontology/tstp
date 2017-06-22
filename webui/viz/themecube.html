@@ -27,7 +27,7 @@
             var CX = 500;
             var CY = 400;
             var SCALE = CY;
-            var TSCALE = CY / 500.0;
+            var TSCALE = CY / 500.0 * 1.5;
             var NUDGE_DELTA = 0.2;
 
             // three story-set definitions - TODO: make this editable
@@ -86,8 +86,6 @@
                     DATA[i][15] = DATA[i][5] * TSCALE;
                     DATA[i][16] = CX + x;
                     DATA[i][17] = CY - y;
-                    //DATA[i][18] = reserved for physics;
-                    //DATA[i][19] = reserved for physics;
                     DATA[i][18] = DATA[i][16];
                     DATA[i][19] = DATA[i][17];
                 }
@@ -101,6 +99,7 @@
                             y: d[19],
                             tx: d[18], 
                             ty: d[19],
+                            bb: { width: 50, height: 15 },
                         }; 
                     });
                     initForce();
@@ -111,9 +110,8 @@
                         d.tx = DATA[i][18];
                         d.ty = DATA[i][19];
                     });
-                    //initForce();
                     FORCE.nodes(FORCE_NODES);
-                    FORCE.alpha(1);
+                    FORCE.alpha(0.75);
                     FORCE.restart();
                 }
             }
@@ -123,11 +121,12 @@
                 updateMetrics();
                 for (var i = 0, len = DATA.length; i < len; i++)
                 {
-                    while (DATA[i].length < 20) 
+                    while (DATA[i].length < 21) 
                         DATA[i].push(0.0);
                     DATA[i][11] = DATA[i][6] * SCALE;
                     DATA[i][12] = DATA[i][7] * SCALE;
                     DATA[i][13] = DATA[i][8] * SCALE;
+                    DATA[i][20] = null;
                 }
                 rotateAndProject(THX, THY);
             }
@@ -290,7 +289,10 @@
                 eleme.merge(elem).select("circle")
                     .attr("transform", function(d) { return "translate(" + d[16] + "," + d[17] + ")"; });
                 eleme.merge(elem).select("text")
-                    .attr("transform", function(d) { return "translate(" + d[18] + "," + d[19] + ")"; });
+                    .attr("transform", function(d) { return "translate(" + d[18] + "," + d[19] + ")"; })
+                    .each(function(d) {
+                        d[20] = this.getBBox();
+                    });
                 elem.exit().remove();
             }
 
@@ -386,10 +388,13 @@
                     .nodes(FORCE_NODES)
                     .velocityDecay(0.2)
                     .alphaDecay(0.09)
+                    .alphaMin(0.01)
                     .force("xposition", d3.forceX(function(d, i) { return d.tx; }))
                     .force("yposition", d3.forceY(function(d, i) { return d.ty; }))
-                    //.force("collide", forceCollide)
-                    .on("tick", tick);
+                    .on("tick", function() {
+                        FORCE_NODES.map(collide(FORCE.alphaDecay()));
+                        tick(this);
+                    });
             }
 
             // let bubbles gravitate towards their locations but avoid overlap on each tick
@@ -400,37 +405,57 @@
                     DATA[i][19] = d.y;
                 });
                 updateBubbles();
+                FORCE_NODES.map(function(d, i) { 
+                    if (DATA[i][20])
+                        d.bb = DATA[i][20];
+                });
             }
 
             // Collision detection
             function collide(alpha) 
             {
-                var quadtree = d3.geom.quadtree(FORCE_NODES);
+                var quadtree = d3.quadtree()
+                    .x(function(d) { return d.x; })
+                    .y(function(d) { return d.y; })
+                    .extent([[-1, -1], [WIDTH + 1, HEIGHT + 1]])
+                    .addAll(FORCE_NODES);
 
-                return function(d) {
+                return function(d, i) {
                     var r = d.radius + 50,
-                        nx1 = d.x - r,
-                        nx2 = d.x + r,
-                        ny1 = d.y - r,
-                        ny2 = d.y + r;
+                        nx1 = d.x - d.bb.width / 2 - 50,
+                        nx2 = d.x + d.bb.width / 2 + 50,
+                        ny1 = d.y - d.bb.height / 2 - 10,
+                        ny2 = d.y + d.bb.height / 2 + 10;
 
-                    quadtree.visit(function(quad, x1, y1, x2, y2) 
+                    quadtree.visit(function(node, x1, y1, x2, y2) 
                     {
-                        if (quad.point && (quad.point !== d)) 
-                        {
-                            var x = d.x - quad.point.x,
-                                y = d.y - quad.point.y,
-                                l = Math.sqrt(x * x + y * y),
-                                r = d.radius + quad.point.radius;
+                        var d2 = node.data;
 
-                            if (l < r) 
+                        if (!node.length && d2 && (d2 !== d)) 
+                        {
+                            var x = d.x - d2.x,
+                                y = d.y - d2.y,
+                                l = Math.sqrt(x * x + y * y),
+                                r = d.r + d2.r
+                                ww = (d.bb.width + d2.bb.width) / 2
+                                hh = (d.bb.height + d2.bb.height) / 2 * 0.7;
+
+                            if (y == 0)
+                                y = Math.random();
+
+                            if (Math.abs(x) < ww && y > 0 && y <= hh * 0.8) 
                             {
-                                l = (l - r) / l * alpha;
-                                d.x -= x *= l;
-                                d.y -= y *= l;
-                                quad.point.x += x;
-                                quad.point.y += y;
+                                var dy = (hh - y) * alpha * 2;
+                                d.y += dy;
+                                d2.y -= dy;
                             }
+                            if (Math.abs(y) < hh * 0.8 && x > 0 && x <= ww) 
+                            {
+                                var dx = (ww - x) * alpha * 0.5;
+                                d.x += dx;
+                                d2.x -= dx;
+                            }
+
                         }
                         return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
                     });
@@ -491,6 +516,7 @@
                     alignment-baseline: central;
                     dominant-baseline: central;
                     font-family: Helvetica;
+                    font-weight: bold;
                     text-anchor: middle;
                     stroke: none;
                     user-select: none;
