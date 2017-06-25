@@ -15,7 +15,7 @@ It should be:
 **Well defined and coherent**: 
 Ideally the name itself should make it clear. 
 This is sometimes possible with common themes.
-Every theme, however, should have a rigorous definition written for it.
+Either way, every theme should have a rigorous definition written for it.
 
 **Context independent**:
 Neither the name nor the definition of a theme should contain story-specific jargon.
@@ -27,10 +27,10 @@ They make the task of *themeing* harder as they make it difficult to search for 
 Sometimes overly specific themes are better expressed as the juxtaposition of two more generalized themes.
 
 **Interesting**:
-A great many trivial topics can be found in any story.
+A great many trivial observations can be found in any story.
 Tables are flat, stairs are exhausting to scale, and things fall down.
-These observations are not generally interesting.
-Should the flatness of tables ever be the topic of a story, the appropriate themes are probably something to do with philosophy and perception.
+These are not generally interesting.
+Should the flatness of tables ever be the central topic of a story, the appropriate themes are probably something to do with philosophy and perception.
 
 The *useful*/*interesting* conditions taken together imply that a named theme should be something that we can 
 find in several different stories but do not expect to find in every other story.
