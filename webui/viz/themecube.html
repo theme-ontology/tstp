@@ -16,6 +16,7 @@
             var DATA;
             var FORCE_NODES;
             var FORCE;
+            var FORCE_COUNTER = 0;
 
             // initiall yaw/pitch
             var THX = rad(45.0);
@@ -86,8 +87,12 @@
                     DATA[i][15] = DATA[i][5] * TSCALE;
                     DATA[i][16] = CX + x;
                     DATA[i][17] = CY - y;
-                    DATA[i][18] = DATA[i][16];
-                    DATA[i][19] = DATA[i][17];
+
+                    if (FORCE == undefined)
+                    {
+                        DATA[i][18] = DATA[i][16];
+                        DATA[i][19] = DATA[i][17];
+                    }
                 }
 
                 if (FORCE == undefined)
@@ -107,8 +112,8 @@
                 else
                 {
                     FORCE_NODES.map(function(d, i) { 
-                        d.tx = DATA[i][18];
-                        d.ty = DATA[i][19];
+                        d.tx = DATA[i][16];
+                        d.ty = DATA[i][17];
                     });
                     FORCE.nodes(FORCE_NODES);
                     FORCE.alpha(0.75);
@@ -380,10 +385,7 @@
 
             function initForce()
             {
-                var forceCollide = d3.forceCollide()
-                    .radius(function(d) { return d.radius - 1.5; })
-                    .iterations(1);
-
+                FORCE_COUNTER = 0;
                 FORCE  = d3.forceSimulation()
                     .nodes(FORCE_NODES)
                     .velocityDecay(0.2)
@@ -400,11 +402,15 @@
             // let bubbles gravitate towards their locations but avoid overlap on each tick
             function tick(e) 
             {
-                FORCE_NODES.map(function(d, i) { 
-                    DATA[i][18] = d.x;
-                    DATA[i][19] = d.y;
-                });
-                updateBubbles();
+                FORCE_COUNTER += 1;
+                if (FORCE_COUNTER % 2 == 1) 
+                {
+                    FORCE_NODES.map(function(d, i) { 
+                        DATA[i][18] = d.x;
+                        DATA[i][19] = d.y;
+                    });
+                    updateBubbles();
+                }
                 FORCE_NODES.map(function(d, i) { 
                     if (DATA[i][20])
                         d.bb = DATA[i][20];

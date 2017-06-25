@@ -4,6 +4,7 @@ log.set_level('SILENT')
 log.set_templog("web.log")
 
 import os
+import os.path
 import tempfile
 import time
 import csv
@@ -23,6 +24,13 @@ def handle_download():
     """
     target = webphp.php_get("what")
 
+    #: an already  prepared file for user?
+    if target.startswith("user") and target.isalnum():
+        path = webphp.get_userfile_path(target) + ".xls"
+        assert os.path.isfile(path)
+        return path, True
+
+    #: list objects of given types?
     #: note, important for security
     assert target in webdb.SUPPORTED_OBJECTS
 
@@ -35,7 +43,7 @@ def handle_download():
         if mtime + timeout < time.time():
             os.unlink(path)
         else:
-            return path
+            return path, False
         
     rows = webdb.get_defenitions(target)
         
@@ -43,14 +51,19 @@ def handle_download():
         writer = csv.writer(fh, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerows(rows)
         
-    return path
+    return path, False
     
 
 if __name__ == '__main__':
     try:
-        ret = handle_download()
-        if isinstance(ret, unicode):
-            with open(ret, "r+") as fh:
+        ret, binary = handle_download()
+        fmt = "rb" if binary else "r"
+
+        if binary:
+            print ret
+
+        elif isinstance(ret, unicode):
+            with open(ret, fmt) as fh:
                 print fh.read()
         else:
             print "<pre>", type(ret), ret, "</pre>"

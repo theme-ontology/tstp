@@ -3,29 +3,23 @@ import log
 log.set_level('SILENT')
 log.set_templog("web.log")
 
-import webobject
-import traceback
-import cgi
-import os
-import json
-from pprint import pprint as pp
-import sys
-from db import do
 from collections import defaultdict
-import excel
-import tempfile
+import cgi
 import cPickle as pickle
+import os
+import re
+import sys
+import traceback
 
+from db import do
+from lib.xls import read_xls, write_xls
 from webobject import StoryTheme, Story, Theme, TSTPEvent
-from webphp import php_get, FILES, PHP_SESSION_ID
+from webphp import php_get, FILES, get_pending_path, get_userfile_path
+import webobject
 
 
 class UploadException(Exception):
     pass
-
-
-def get_pending_path():
-    return os.path.join(tempfile.gettempdir(), "batch_events_%s" % PHP_SESSION_ID)
 
 
 def cancel_pending_events():
@@ -55,39 +49,6 @@ def commit_pending_events():
     events = get_pending_events()
     TSTPEvent.commit_many(events)
     cancel_pending_events()
-    
-
-def read_xls(filename, headers):
-    """
-    Return cells in rows with given headers for all sheets in file.
-    """
-    sheetcount = 0
-    rowcount = 0
-    
-    try:
-        sheets = excel.xls_sheet_to_memory(filename)
-    except (OSError, KeyError):
-        raise UploadException("Unable to read excel file")
-    
-    results = []
-    idxs = []
-    
-    for sheet in sheets:
-        sheetcount += 1
-        for idx, row in enumerate(sheets[sheet]):
-            if idx == 0:
-                idxs = []
-                for header in headers:
-                    try:
-                        idxs.append(row.index(header))
-                    except ValueError:
-                        raise UploadException("Missing header: '%s' in %s" % (header, str(row)))
-                continue
-            
-            rowcount += 1
-            results.append([ row[i] for i in idxs ])
-    
-    return results, sheetcount, rowcount
 
     
 def read_storythemes(filename):
@@ -197,6 +158,110 @@ def read_themes(filename):
 
     return events, sheetcount, rowcount
 
+
+def expload_field(field):
+    '''
+    Explode a field of raw data into quadruplets of (keyword,comment,implication,capacity).
+    '''
+    def dict2row(token):
+        kw = token.get('', '').strip()
+        com = token.get('[', '').strip()
+        imp = token.get('{', '').strip()
+        cap = token.get('<', '').strip()
+        return ( kw, com, imp, cap )
+    
+    token = {}
+    delcorr = { 
+        '[': ']', 
+        '{': '}',
+        '<': '>',
+    }
+    farr = re.split('([\[\]\{\}\<\>,])', field)
+    state = ''
+    
+    for part in farr:
+        if part in delcorr:
+            state = part
+
+        elif part in delcorr.values():
+            if delcorr.get(state, None) == part:
+                state = ''
+            else:
+                raise AssertionError('Malformed field (bracket mismatch):\n  %s' % field)
+
+        elif part == ',' and not state:
+            tokrow = dict2row( token )
+
+            if not tokrow[0].strip():
+                raise AssertionError('Malformed field (empty keyword %s):\n  %s' % (str(tokrow), field))
+            else:
+                yield tokrow
+
+            token = {}
+
+        else:
+            token[state] = token.get( state, '' ) + part
+            
+    tokrow = dict2row( token )
+
+    if tokrow[0].strip():
+        yield dict2row( token )
+
+
+def expload_compact_storythemes(filename):
+    """
+    Compact format has many comma-separated themes in each cell and comments in brackets.
+    """
+    headers = [
+        "StoryID",
+        "Choice Themes",
+        "Major Themes",
+        "Minor Themes",
+    ]
+    relations, sheetcount, rowcount = read_xls(filename, headers)
+    sids = sorted(set(x[0].lower() for x in relations))
+    errors = []
+    themerows = []
+
+    for row in relations:
+        sid = row[0]
+
+        for idx, hdr in enumerate(headers):
+            if idx < 1:
+                continue
+
+            fn = hdr.strip("s")
+            field = row[idx]
+
+            try:
+                themes = list(expload_field(field))
+            except AssertionError as e:
+                errors.append(e.message)
+                continue
+
+            for kw, com, imp, cap in themes:
+                themerows.append(
+                    (sid, fn, kw, com)
+                )
+
+    if errors:
+        return "<b>Parsing Errors:<b><br>" + "<br>".join(errors)
+
+    st_headers = [
+        "StoryID",
+        "FieldName",
+        "Keyword",
+        "Comment",
+    ]
+
+    path = get_userfile_path("userstorythemes.xls")
+    write_xls(path, st_headers, themerows)
+
+    return """
+    Download the result here:
+    <A href="download.php?what=userstorythemes&fmt=xls">userstorythemes.xls</A>
+    """
+
     
 def handle_upload():
     submit = php_get("submit")
@@ -213,19 +278,22 @@ def handle_upload():
         filename = meta["tmp_name"]
         name = meta["name"]
         events = None
+        message = None
 
-        log.info("Handling file upload: %s", filename)
+        log.info("Handling %s file upload: %s", ftype, filename)
         
         if ftype == "storythemes":
             events, sheetcount, rowcount = read_storythemes(filename)
+        elif ftype == "compactstorythemes":
+            message = expload_compact_storythemes(filename)
         elif ftype == "storydefinitions":
             events, sheetcount, rowcount = read_stories(filename)
         elif ftype == "themedefinitions":
             events, sheetcount, rowcount = read_themes(filename)
         else:
-            return "Type %s is not yet supported" % ftype 
+            message = "Type %s is not yet supported" % ftype 
         
-        if events is not None:
+        if message is None and events is not None:
             save_pending_events(events)
             message = "" if events else "Nothing to do."
             message += " Found %s changes in %s sheets and %s rows." % (
@@ -233,7 +301,8 @@ def handle_upload():
                 sheetcount,
                 rowcount,
             )
-            return message
+
+        return message
 
 
 if __name__ == '__main__':

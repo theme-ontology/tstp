@@ -219,9 +219,10 @@
         			<fieldset class="form-group">
         				<label for="fieldType">What?</label>
     					<select id="fieldType" name="fieldType" type="file">
-    						<option value="storythemes">Story Themes</option>
-    						<option value="themedefinitions">Theme Definitions</option>
-    						<option value="storydefinitions">Story Definitions</option>
+    						<option value="storythemes">Upload List of Themes in Stories</option>
+    						<option value="themedefinitions">Upload Theme Definitions</option>
+    						<option value="storydefinitions">Upload Story Definitions</option>
+                            <option value="compactstorythemes">Expload Compact Themed Stories Sheet</option>
     					</select>
         			</fieldset>
         			<fieldset class="form-group">

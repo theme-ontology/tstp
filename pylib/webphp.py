@@ -1,6 +1,10 @@
 import cgi
 import sys
 import json
+import hashlib
+import os
+import os.path
+import tempfile
 
 
 GET = {}
@@ -44,5 +48,21 @@ def php_keys():
     if FORM:
         return FORM.keys()
     return []
+
+
+def get_userfile_path(name):
+    m = hashlib.md5()
+    m.update(str(PHP_SESSION_ID))
+    path = os.path.join(tempfile.gettempdir(), m.hexdigest()[:10])
+
+    if not os.path.exists(path):
+        os.makedirs(path)    
+
+    return os.path.join(path, name)
+
+
+def get_pending_path():
+    return os.path.join(tempfile.gettempdir(), "batch_events_%s" % PHP_SESSION_ID)
+
 
 
