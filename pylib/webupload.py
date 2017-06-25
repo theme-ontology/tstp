@@ -18,10 +18,6 @@ from webphp import php_get, FILES, get_pending_path, get_userfile_path
 import webobject
 
 
-class UploadException(Exception):
-    pass
-
-
 def cancel_pending_events():
     fn = get_pending_path()
     try:
@@ -80,7 +76,7 @@ def read_storythemes(filename):
             weight = weights[fieldname]
         except KeyError:
             if weight not in weights.values():
-                raise UploadException("Unexpected FieldName: %s" % fieldname)
+                raise IOError("Unexpected FieldName: %s" % fieldname)
         
         sid = sid.lower()
         st = exist_lu.get((sid, kw), None)
@@ -311,7 +307,7 @@ if __name__ == '__main__':
         if isinstance(result, str):
             print result
     
-    except UploadException, e:
+    except IOError, e:
         print "<pre>", e, "</pre>"
         
     except:

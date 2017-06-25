@@ -37,7 +37,7 @@ def read_xls(filename, headers):
     try:
         sheets = xls_sheet_to_memory(filename)
     except (OSError, KeyError):
-        raise UploadException("Unable to read excel file")
+        raise IOError("Unable to read excel file")
     
     results = []
     idxs = []
@@ -51,7 +51,7 @@ def read_xls(filename, headers):
                     try:
                         idxs.append(row.index(header))
                     except ValueError:
-                        raise UploadException("Missing header: '%s' in %s" % (header, str(row)))
+                        raise IOError("Missing header: '%s' in %s" % (header, str(row)))
                 continue
             
             rowcount += 1

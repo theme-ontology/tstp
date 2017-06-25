@@ -26,10 +26,6 @@ if not POST and not GET:
     FORM = cgi.FieldStorage()
 
 
-class UploadException(Exception):
-    pass
-
-
 def php_get(vname, default=None):
     if POST:
         return POST.get(vname, default)
