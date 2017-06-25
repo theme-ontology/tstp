@@ -6,16 +6,16 @@
 
 ### Theme
 
-A theme is any topic of a story that is discussed however briefly.
-That sounds very simple, and it is.
-To do something useful, however, we also need to identify and name themes. 
+A theme is any topic that is discussed in a story, however briefly.
+That is all there is to it.
+To do something useful, however, we need to identify and name themes. 
 A named theme in this project is required to meet a modicum of conditions.
 It should be:
 
 **Well defined and coherent**: 
-Ideally the name should make it clear. 
+Ideally the name itself should make it clear. 
 This is sometimes possible with common themes.
-Every theme, however, should have a clear definition written for it.
+Every theme, however, should have a rigorous definition written for it.
 
 **Context independent**:
 Neither the name nor the definition of a theme should contain story-specific jargon.
@@ -23,8 +23,8 @@ Alternate reality type themes should be self-contained ideas that don't necessit
 
 **Useful**:
 There is no point in including themes that are so specific that it is hard to imagine another story containing the same theme.
-Indeed they make the task of *themeing* harder as they make it harder to search for suitable themes.
-Sometimes overly specific themes are better expressed as the juxtaposition of two more generalized named themes.
+They make the task of *themeing* harder as they make it difficult to search for suitable themes.
+Sometimes overly specific themes are better expressed as the juxtaposition of two more generalized themes.
 
 **Interesting**:
 A great many trivial topics can be found in any story.
@@ -36,15 +36,14 @@ The *useful*/*interesting* conditions taken together imply that a named theme sh
 find in several different stories but do not expect to find in every other story.
 
 
-### Choice Theme, Major Theme and Minor Theme
+### Choice Theme, Major Theme, and Minor Theme
 
 If there is a named theme that meets the requirements above, it may be used as a minor theme (or higher) whenever it is unambiguously featured.
 If it is difficult to reach reasonable consensus on whether it was featured or not, use a suitable generalization or omit it.
 The rest is highly subjective but the rules of thumb are:
 
-If a theme is featured throughout most or at least a major part of the story, or if it is purposely part of the conclusion, then it is a major theme.
-
-Choice themes are whatever we think is really the point of the story, e.g., *the moral of the story* for themes that express moral sentiments.
+- If a theme is featured throughout most or at least a major part of the story, or if it is purposely part of the conclusion, then it is a major theme.
+- Choice themes are whatever we think is really the point of the story, e.g., *the moral of the story* for themes that express moral sentiments.
 
 
 
