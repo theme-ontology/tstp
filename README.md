@@ -23,7 +23,7 @@ Alternate reality type themes should be self-contained ideas that don't necessit
 
 **Useful**:
 There is no point in including themes that are so specific that it is hard to imagine another story containing the same theme.
-Indeed they make the task of themeing harder as they make it harder to search for suitable themes.
+Indeed they make the task of *themeing* harder as they make it harder to search for suitable themes.
 Sometimes overly specific themes are better expressed as the juxtaposition of two more generalized named themes.
 
 **Interesting**:
@@ -32,14 +32,14 @@ Tables are flat, stairs are exhausting to scale, and things fall down.
 These observations are not generally interesting.
 Should the flatness of tables ever be the topic of a story, the appropriate themes are probably something to do with philosophy and perception.
 
-The useful/interesting conditions taken together imply that a named theme should be something that we can 
+The *useful*/*interesting* conditions taken together imply that a named theme should be something that we can 
 find in several different stories but do not expect to find in every other story.
 
 
 ### Choice Theme, Major Theme and Minor Theme
 
-If there is a named theme that meets the requiremetns above, it may be used as a minor theme (or higher) whenever it is unambiguously featured.
-If it is difficullt to reach reasonable consensus on whether it was featured or not, use a suitable generalization or omit it.
+If there is a named theme that meets the requirements above, it may be used as a minor theme (or higher) whenever it is unambiguously featured.
+If it is difficult to reach reasonable consensus on whether it was featured or not, use a suitable generalization or omit it.
 The rest is highly subjective but the rules of thumb are:
 
 If a theme is featured throughout most or at least a major part of the story, or if it is purposely part of the conclusion, then it is a major theme.
