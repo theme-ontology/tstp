@@ -121,7 +121,7 @@ def write_table(file, headers, rows):
     Produce a csv file woith some data.
     """
     with open(file, "wb") as fh:
-        ww = csv.writer(fh, quoting = csv.QUOTE_MINIMAL)
+        ww = csv.writer(fh, quoting = csv.QUOTE_MINIMAL, lineterminator = "\n")
         ww.writerow(headers)
         for row in rows:
             ww.writerow(row)
