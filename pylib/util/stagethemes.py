@@ -169,7 +169,7 @@ def main():
     for theme, refs in undef_themes.iteritems():
         undef_theme_rows.append((theme, "", "", "", "", ", ".join(refs)))
     for sid, refs in undef_stories.iteritems():
-        undef_story_rows.append((sid, "","", ", ".join(sorted(set(refs)))))
+        undef_story_rows.append((sid, "", "", "", ", ".join(sorted(set(refs)))))
 
     # write tables of results
     write_table(
