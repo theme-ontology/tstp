@@ -6,8 +6,11 @@ if [ "$(id -u)" != "500" ]; then
    exit 1
 fi
 
-cd ~/dev/themes
+cd ~/dev/theming
 git pull
-pyrun -m parsethemes .
+pyrun util.stagethemes ./notes
+git add auto
+git commit -m "(bot) staged theme changes"
+git push
 
 
