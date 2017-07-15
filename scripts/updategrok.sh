@@ -8,6 +8,7 @@ if [ "$(id -u)" != "500" ]; then
 fi
 
 cd ~/dev/tstp
-git pull
-~/opengrok-1.1-rc3/bin/OpenGrok index /home/ec2-user/dev
+if [[ $(git pull) != "Already up-to-date." ]]; then
+    sudo /home/ec2-user/opengrok-1.1-rc3/bin/OpenGrok index /home/ec2-user/dev
+fi
 
