@@ -7,7 +7,7 @@ from datetime import datetime
 import timeit
 
 
-LEVELS = [ 'DEBUG', 'STATUS', 'INFO', 'ERROR', 'SILENT' ]
+LEVELS = [ 'DEBUG', 'STATUS', 'INFO', 'WARN', 'ERROR', 'SILENT' ]
 LEVEL = 0
 LOGFILE = None
 
@@ -60,6 +60,9 @@ def info(msg, *args):
 
 def error(msg, *args):
     printmsg(msg, 'ERROR', args)
+
+def warn(msg, *args):
+    printmsg(msg, 'WARN', args)
 
 
 class Timer( object ):
