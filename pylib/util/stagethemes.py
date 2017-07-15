@@ -150,12 +150,12 @@ def main():
                     themes.append((title, subject.strip("s"),) + fields + (rfpath,))
 
     write_table(
-        os.path.join(target, "..\\notes_errors.csv"),
+        os.path.join(target, "..", "notes_errors.csv"),
         ("file", "message"),
         errors,
     )
     write_table(
-        os.path.join(target, "..\\notes_themes.csv"),
+        os.path.join(target, "..", "notes_themes.csv"),
         ("Story", "FieldName", "Keyword", "Comment", "SourceFile"),
         themes,
     )
