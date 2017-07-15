@@ -125,7 +125,6 @@ def write_table(file, headers, rows):
         ww.writerow(headers)
         for row in rows:
             ww.writerow(row)
-            print ":", row
     log.info('Wrote: %s.', file)
 
 
