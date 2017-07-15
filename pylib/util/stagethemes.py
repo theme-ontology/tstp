@@ -3,8 +3,10 @@ import log
 import os
 import re
 import csv
+from collections import defaultdict
 
 from lib.files import walk
+import webobject
 
 
 def expload_field( field ):
@@ -131,10 +133,14 @@ def write_table(file, headers, rows):
 def main():
     target = os.path.abspath(sys.argv[-1])
     log.info("reading staged themes in: " + target + "...")
+
+    all_themes = set(th.name for th in webobject.Theme.load())
+    undef_themes = defaultdict(list)
     themes = []
     errors = []
+    undefs = []
 
-    for fpath in walk(target):
+    for fpath in walk(target, ".*-stories.txt"):
         rfpath = os.path.relpath(fpath, target)
         log.info("parsing %s", fpath)
         stuff, notices = parse(fpath)
@@ -146,15 +152,27 @@ def main():
         for title, subject, contents in stuff:
             if subject.endswith("Themes"):
                 for fields in contents:
+                    theme = fields[0]
                     themes.append((title, subject.strip("s"),) + fields + (rfpath,))
 
+                    if theme not in all_themes:
+                        undef_themes[theme].append("%s: %s [%s]" % (rfpath, title, subject))
+
+    for theme, refs in undef_themes.iteritems():
+        undefs.append((theme, "", "", "", "", ", ".join(refs)))
+
     write_table(
-        os.path.join(target, "..", "notes_errors.csv"),
+        os.path.join(target, "..", "auto", "notes_errors.csv"),
         ("file", "message"),
         errors,
     )
     write_table(
-        os.path.join(target, "..", "notes_themes.csv"),
+        os.path.join(target, "..", "auto", "notes_themes.csv"),
         ("Story", "FieldName", "Keyword", "Comment", "SourceFile"),
         themes,
+    )
+    write_table(
+        os.path.join(target, "..", "auto", "notes_undefined_themes.csv"),
+        ("Keyword", "Implications", "RelatedThemes", "Definition", "Example", "References"),
+        undefs,
     )
