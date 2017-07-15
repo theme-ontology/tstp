@@ -3,6 +3,11 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PYTHONPATH=$PYTHONPATH:$DIR/../pylib
 
-python "$@"
+if [ -z "$1" ]
+then
+    python
+else
+    python -c "import $1; r=$1.main();" "$@"
+fi
 
 
