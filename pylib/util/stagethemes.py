@@ -74,7 +74,7 @@ def parse(file):
     notices = []
     stuff = []
 
-    # stories are delimeted by title underlined with ===
+    # stories are delimeted by story-id underlined with ===
     with open(file, "r") as fh:
         for line in fh.readlines():
             if line.startswith("==="):
@@ -85,7 +85,7 @@ def parse(file):
 
     # subjects begin with "::", content may be parsed in different ways
     for lines in stories:
-        title = lines[0]
+        storyid = lines[0]
         subject = None
         lineacc = []
 
@@ -101,12 +101,12 @@ def parse(file):
                     parser = SUBJECTS[subject]
 
                     try:
-                        stuff.append((title, subject, list(parser(lineacc))))
+                        stuff.append((storyid, subject, list(parser(lineacc))))
                     except Exception:
-                        notices.append('Failed to parse data for "%s" in "%s"' % (subject, title))
+                        notices.append('Failed to parse data for "%s" in "%s"' % (subject, storyid))
 
                 elif subject is not None:
-                    notices.append('Unhandled subject "%s" in "%s"' % (subject, title))
+                    notices.append('Unhandled subject "%s" in "%s"' % (subject, storyid))
 
                 subject = line[3:].strip()
                 lineacc = []
@@ -135,11 +135,15 @@ def main():
     log.info("reading staged themes in: " + target + "...")
 
     all_themes = set(th.name for th in webobject.Theme.load())
+    all_stories = set(st.name for st in webobject.Story.load())
     undef_themes = defaultdict(list)
+    undef_stories = defaultdict(list)
     themes = []
     errors = []
-    undefs = []
+    undef_theme_rows = []
+    undef_story_rows = []
 
+    # parse all the files
     for fpath in walk(target, ".*-stories.txt"):
         rfpath = os.path.relpath(fpath, target)
         log.info("parsing %s", fpath)
@@ -149,18 +153,25 @@ def main():
             log.warn("%s: %s", rfpath, notice)
             errors.append((rfpath, notice))
 
-        for title, subject, contents in stuff:
+        for storyid, subject, contents in stuff:
+            if storyid not in all_stories:
+                undef_stories[storyid].append(rfpath)
+
             if subject.endswith("Themes"):
                 for fields in contents:
                     theme = fields[0]
-                    themes.append((title, subject.strip("s"),) + fields + (rfpath,))
+                    themes.append((storyid, subject.strip("s"),) + fields + (rfpath,))
 
                     if theme not in all_themes:
-                        undef_themes[theme].append("%s: %s [%s]" % (rfpath, title, subject))
+                        undef_themes[theme].append("%s: %s [%s]" % (rfpath, storyid, subject))
 
+    # collate undefined themes and stories
     for theme, refs in undef_themes.iteritems():
-        undefs.append((theme, "", "", "", "", ", ".join(refs)))
+        undef_theme_rows.append((theme, "", "", "", "", ", ".join(refs)))
+    for sid, refs in undef_stories.iteritems():
+        undef_story_rows.append((sid, "","", ", ".join(sorted(set(refs)))))
 
+    # write tables of results
     write_table(
         os.path.join(target, "..", "auto", "notes_errors.csv"),
         ("file", "message"),
@@ -174,5 +185,10 @@ def main():
     write_table(
         os.path.join(target, "..", "auto", "notes_undefined_themes.csv"),
         ("Keyword", "Implications", "RelatedThemes", "Definition", "Example", "References"),
-        undefs,
+        undef_theme_rows,
+    )
+    write_table(
+        os.path.join(target, "..", "auto", "notes_undefined_stories.csv"),
+        ("StoryID", "Title", "ReleaseDate", "Description", "References"),
+        undef_story_rows,
     )
