@@ -55,6 +55,7 @@ def handle_response(obj_type, variant = None):
     string_limit = int(get('slimit', 100))
     row_limit = int(get('rlimit', 10000))
     fields = (get('fields') or '').split(',')
+    fuzzysearch = get('fuzzysearch', None)
     
     if variant == "proposedevents":
         # a list of events session user has proposed for insertion,
@@ -90,6 +91,36 @@ def handle_response(obj_type, variant = None):
             names = names, 
             limit = row_limit,
         )
+
+    if fuzzysearch is not None:
+        from difflib import SequenceMatcher as SM
+        import shlex
+
+        extra_fields = ("score",)
+
+        for obj in objs:
+            sscore = 0.0
+            scount = 0.0
+            needles = shlex.split(fuzzysearch)
+
+            for needle in needles:
+                if needle:
+                    scores = []
+                    haystacks = [ obj.name ] + [ getattr(obj, f) for f in fields if f not in ("name", "score") ]
+
+                    for idx, haystack in enumerate(haystacks):
+                        sm = SM(None, haystack, needle)
+                        blocks = list(sm.get_matching_blocks())
+                        if blocks:
+                            score = max(n for i, j, n in blocks) / float(len(needle))
+                            score /= 1 + idx / 10.0
+                            scores.append(score)
+                    if scores:
+                        sscore += max(scores)
+                        scount += 1
+
+            obj.score = sscore / scount if scount else 0.0
+            obj.extra_fields = extra_fields
 
     return obj_type.make_json(
         objs, 

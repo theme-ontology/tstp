@@ -18,6 +18,7 @@ class TSTPObject(object):
         "category",
         "description",
     )
+    extra_fields = ()
     indexes = (
         "name",
         "category",
@@ -237,6 +238,9 @@ class TSTPObject(object):
                 v = ""
 
                 if f in cls.fields:
+                    v = unicode(getattr(obj, f, ""))[:limit]
+
+                if f in obj.extra_fields:
                     v = unicode(getattr(obj, f, ""))[:limit]
 
                 if len(v) == limit: 
