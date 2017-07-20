@@ -122,6 +122,8 @@ def handle_response(obj_type, variant = None):
             obj.score = sscore / scount if scount else 0.0
             obj.extra_fields = extra_fields
 
+        objs.sort(key = lambda o: o.score, reverse = False)
+
     return obj_type.make_json(
         objs, 
         fields = fields, 

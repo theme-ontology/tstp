@@ -49,8 +49,7 @@
 
 </head>
 
-<body>
-<?php include "navbar.php"; ?>
+<body><?php include "navbar.php"; ?>
 
 <div class="container main-body">
     <div class="row">

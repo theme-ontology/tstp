@@ -8,7 +8,7 @@
 <?php include "header.php"; ?>
 
     <script>
-        var dataUrl = 'json.php?type=theme&fields=name,parents,description,score&slimit=200&rlimit=10000&fuzzysearch=';
+        var dataUrl = 'json.php?type=theme&fields=score,name,parents,description&slimit=200&rlimit=10000&fuzzysearch=';
         var reloads = 0;
 
         $(document).ready(function () {
@@ -23,35 +23,47 @@
 			        "paging" : false,
 
 					"order": [
+						[ 2, "asc" ],
 						[ 1, "asc" ],
-						[ 0, "asc" ],
 					],
+
+                    "language": {
+                        "search": "filter:"
+                    },
+
 			        "columnDefs" : [
+                        { 
+                            "render": function ( data, type, row ) {
+                                return parseFloat(data).toFixed(2);
+                            },
+                            "targets": 0, 
+                            "visible": false,
+                        },
 			        	{
 						    "render": function ( data, type, row ) {
 						    	urldata = encodeURIComponent(data);
 						        return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
 						    },
 			        		"className": "theme-cell",
-						    "targets": 0,
+						    "targets": 1,
+                            "width": "20%",
 						},
 			        	{
 						    "render": function ( data, type, row ) {
 						    	val = data.split(",")[0];
 						        return val;
 						    },
-						    "targets": 1,
+						    "targets": 2,
+                            "width": "10%",
 						},
 			        	{
 			        		"className": "description-cell",
-						    "targets": 2,
+						    "targets": 3,
 						},
-                        { "targets": 3, "visible": false,},
 			    	]
 			    } );
 			} );
         }
-
 
         function reloadData()
         {
@@ -61,13 +73,23 @@
             {
                 table = $('#themes_datatable').DataTable();
                 var fuzzy = $('#fieldFind').val();
-                var url = 'json.php?type=theme&fields=name,parents,description,score&slimit=200&rlimit=10000&fuzzysearch=' + fuzzy;
-                console.log(fuzzy);
-                table.order([
-                    [ 3, "desc" ],
-                ]);
-                table.column(3).visible(true);
-                table.ajax.url(url).load();
+                var url = 'json.php?type=theme&fields=score,name,parents,description&slimit=200&rlimit=10000&fuzzysearch=' + fuzzy;
+
+                if (fuzzy)
+                {
+                    table.order([
+                        [ 0, "desc" ],
+                    ]);
+                    table.column(0).visible(true);
+                } else {
+                    table.order([
+                        [ 2, "asc" ],
+                        [ 1, "asc" ],
+                    ]);
+                    table.column(0).visible(false);
+                }
+                table.clear().draw();
+                table.ajax.url(fuzzy ? url : dataUrl).load();
             }
         }
 
@@ -87,28 +109,30 @@
 <div class="container main-body">
     <div class="row">
 
-        <form onkeypress="return event.keyCode != 13;">
-            <fieldset class="form-group">
-                <label for="fieldFind">Fuzzy Search:</label>
-                <input id="fieldFind" type="text" class="form-control" onchange="scheduleReload()" oninput="scheduleReload()">
-            </fieldset>
-        </form>
+        <div style="padding: 1em 4em;">
+            <form autocomplete="off" onkeypress="return event.keyCode != 13;">
+                <fieldset class="form-group">
+                    <label for="fieldFind">Fuzzy Search:</label>
+                    <input id="fieldFind" type="text" class="form-control" style="background:#fff2e0;" autofocus 
+                        onchange="scheduleReload()" oninput="scheduleReload()">
+                </fieldset>
+            </form>
+        </div>
 
-
-        <div id="div_themes_datatable" class="col-md-12">
-        	<div class="basebox">
-	            <table id="themes_datatable" class="display table table-striped" cellspacing="0" width="100%">
-			        <thead>
-			            <tr>
-			                <th>Theme</th>
-			                <th>Parent</th>
-                            <th>Description</th>
+        <div id="div_stories_datatable" class="col-md-12">
+            <div class="basebox">
+                <table id="themes_datatable" class="display table table-striped" cellspacing="0" width="100%">
+        	        <thead>
+        	            <tr>
                             <th>Score</th>
-			            </tr>
-			        </thead>
-			    </table>
-			</div>
-		</div>
+        	                <th>Theme</th>
+        	                <th>Parent</th>
+                            <th>Description</th>
+        	            </tr>
+        	        </thead>
+        	    </table>
+            </div>
+        </div>
 
     </div>
 </div>
