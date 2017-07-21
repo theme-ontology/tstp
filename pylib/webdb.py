@@ -16,6 +16,7 @@ def get_metatheme_data():
     leaf_data: { leaf_theme => [(sid1, weight1), ...], ...},
     meta_data: { meta_theme => [(sid1, weight1), ...], ...},
     parents: { theme => [parent1, ...] },
+    children: { theme => [child1, ...] },
     toplevel: [ theme1, ...],
     """
     themes = webobject.Theme.load()
@@ -30,11 +31,14 @@ def get_metatheme_data():
     ret_child_lu = {}
 
     for theme in themes:
-        parents = [ t.strip() for t in theme.parents.split(",") ]
+        parents = [ t.strip() for t in theme.parents.split(",") if t.strip() ]
         parent_lu[theme.name] = parents
 
         for parent in parents:
             child_lu[parent].add(theme.name)
+
+        if not parents:
+            toplevel.add(theme.name)
 
     for st in storythemes:
         theme = st.name2
@@ -53,8 +57,6 @@ def get_metatheme_data():
 
             if theme in parent_lu:
                 theme_stack.extend(parent_lu[theme])
-            else:
-                toplevel.add(theme)
 
     for key, items in meta_data.iteritems():
         ret_meta_data[key] = sorted(items)
