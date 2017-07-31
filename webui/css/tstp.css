@@ -25,20 +25,20 @@ body {
     margin-bottom: 10px;
 }
 
-td.sid-cell {
+td.tstp-sid-cell {
     font-family: monospace;
 }
-td.theme-cell {
+td.tstp-theme-cell {
 }
-td.date-cell {
+td.tstp-date-cell {
     font-family: monospace;
     font-size: 12px;
 }
-td.description-cell {
+
+td.tstp-description-cell {
 	font-weight: normal;
 	font-family: Arial;
   word-wrap: break-word;
-  display: inline-block;
 }
 
 

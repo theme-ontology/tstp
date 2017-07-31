@@ -26,7 +26,7 @@
 						    	urldata = encodeURIComponent(data);
 						        return "<A href=\"story.php?name=" + urldata + "\">" + data + "</A>";
 						    },
-			        		"className": "sid-cell",
+			        		"className": "tstp-sid-cell",
 						    "targets": 0,
 						},
 			        	{
@@ -34,11 +34,11 @@
 						    "targets": 1,
 						},
 			        	{
-			        		"className": "date-cell",
+			        		"className": "tstp-date-cell",
 						    "targets": 2,
 						},
 			        	{
-			        		"className": "description-cell",
+			        		"className": "tstp-description-cell",
 						    "targets": 3,
 						},
 			    	]

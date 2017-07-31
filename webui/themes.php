@@ -44,7 +44,7 @@
 						    	urldata = encodeURIComponent(data);
 						        return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
 						    },
-			        		"className": "theme-cell",
+			        		"className": "tstp-theme-cell",
 						    "targets": 1,
                             "width": "20%",
 						},
@@ -57,7 +57,7 @@
                             "width": "10%",
 						},
 			        	{
-			        		"className": "description-cell",
+                            "className": "tstp-description-cell",
 						    "targets": 3,
 						},
 			    	]

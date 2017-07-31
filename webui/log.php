@@ -45,8 +45,9 @@
 
 			        "columnDefs" : [
 						{
+                            "className": "tstp-date-cell",
 							"targets": 0,
-							"width": "20%",
+							"width": "15%",
 						},
 						{ "targets": 2, "visible": false,},
 						{ "targets": 4, "visible": false,},
