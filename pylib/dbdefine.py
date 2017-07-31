@@ -27,7 +27,7 @@ TABLES = {
             `value` TEXT NOT NULL,
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_index` (`category`, `name`, `attr`),
-            KEY attribute_by_category_name (`category`, `name`(15))
+            KEY attribute_by_category_name (`category`, `name`(255))
         ) 
         DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
         ENGINE = MYISAM;
@@ -44,10 +44,10 @@ TABLES = {
             `attr` VARCHAR(15) NOT NULL,
             `value` TEXT NOT NULL,
             PRIMARY KEY (`id`),
-            UNIQUE KEY `unique_index` (`category`, `category1`, `name1`(15), `category2`, `name2`(15), `attr`),
+            UNIQUE KEY `unique_index` (`category`, `category1`, `name1`(128), `category2`, `name2`(128), `attr`),
             INDEX `category_index` (`category`),
-            KEY connection_by_category1_name1 (category1, name1(15)),
-            KEY connection_by_category2_name2 (category2, name2(15))
+            KEY connection_by_category1_name1 (category1, name1(255)),
+            KEY connection_by_category2_name2 (category2, name2(255))
         ) 
         DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
         ENGINE = MYISAM;
@@ -73,8 +73,8 @@ TABLES = {
             PRIMARY KEY (`id`),
             INDEX `category_index` (`category`),
             INDEX `user_index` (`userid`),
-            KEY event_by_category1_name1 (category1, name1(15)),
-            KEY event_by_category2_name2 (category2, name2(15))
+            KEY event_by_category1_name1 (category1, name1(255)),
+            KEY event_by_category2_name2 (category2, name2(255))
         ) 
         DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
         ENGINE = MYISAM;
@@ -103,7 +103,7 @@ def create_tables(recreate = False):
 
 if __name__ == '__main__':
     command = (sys.argv[1] if len(sys.argv) > 1 else "")
-    create_tables(command == recreate)
+    create_tables(command == "recreate")
 
 
 

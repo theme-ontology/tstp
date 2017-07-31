@@ -1,5 +1,5 @@
 import cgitb; cgitb.enable()
-import log
+import lib.log as log
 log.set_level('SILENT')
 log.set_templog("web.log")
 
