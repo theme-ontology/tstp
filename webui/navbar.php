@@ -111,7 +111,7 @@
     function loadCaptchaOnReady() 
     {
     	$('#formLogOut').hide();
-    	updateLogin(<?php echo intval($_SESSION["captchaBalance"]); ?>, 0);
+    	updateLogin(<?php echo (isset($_SESSION["captchaBalance"])) ? intval($_SESSION["captchaBalance"]) : 0; ?>, 0);
         $('#formCaptcha').ajaxForm({
         	"success" : function(responseText, statusText, xhr, $form) { 
         		tally = responseText[1];
@@ -122,7 +122,7 @@
     }
 </script>
 
-<nav class="navbar navbar-default <?php echo ($floatnavbar) ? "" : "navbar-fixed-top"; ?> ">
+<nav class="navbar navbar-default <?php echo (isset($floatnavbar)) ? "" : "navbar-fixed-top"; ?> ">
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
