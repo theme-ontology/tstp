@@ -8,9 +8,9 @@
 			//var_dump($_SERVER);
 			?></span>
 
-			 <A href="upload.php">upload</A>
-			 | <A href="resources.php">download</A>
-			 | <A href="log.php">log</A>
+			 <A href="upload">upload</A>
+			 | <A href="resources">download</A>
+			 | <A href="log">log</A>
 
 		</p>
 	</div>

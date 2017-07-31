@@ -6,10 +6,10 @@
 		global $ME;
 
 		$known = array(
-			"TSTP" => "index.php",
-            "Stories" => "stories.php",
-            "Themes" => "themes.php",
-            "Pictures" => "pictures.php",
+			"TSTP" => "index",
+            "Stories" => "stories",
+            "Themes" => "themes",
+            "Pictures" => "pictures",
 
             "index.php" => "TSTP",
             "stories.php" => "Stories",
