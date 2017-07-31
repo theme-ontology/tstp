@@ -1,5 +1,6 @@
 from collections import defaultdict
 import webobject
+import textwrap
 
 
 SUPPORTED_OBJECTS = {
@@ -96,6 +97,54 @@ def get_defenitions(target):
         rows.append(row)
 
     return rows
+
+
+def get_defenitions_text(target):
+    """
+    Returns
+    -------
+    Same as get_defenitions but in this project's special text format.
+    """
+    klass = SUPPORTED_OBJECTS[target]
+    objs = klass.load()
+    headers = [ f for f in klass.fields if "category" not in f ]
+    grouped = defaultdict(list)
+    lines = []
+
+    for obj in objs:
+        obj_name = getattr(obj, headers[0])
+        grouped[obj_name].append(obj)
+
+    for obj_name in sorted(grouped):
+        lines.append(obj_name)
+        lines.append("=" * len(obj_name))
+        lines.append("")
+
+        if target == "storythemes":
+            for field in [ "choice", "major", "minor" ]:
+                lines.append(":: " + field.capitalize() + " Themes")
+                items = []
+
+                for obj in grouped[obj_name]:
+                    if obj.weight == field:
+                        items.append("%s [%s]" % (obj.name2, obj.motivation))
+
+                items.sort()
+                lines.extend(item + "," for item in items)
+                lines.append("")
+
+        else:
+            for obj in grouped[obj_name]:
+                for field in headers[1:]:
+                    lines.append(":: " + field.capitalize())
+                    lines.append(textwrap.fill(
+                        getattr(obj, field), 78
+                    ))
+                    lines.append("")
+
+        lines.append("")
+
+    return "\n".join(lines)
 
 
 if __name__ == '__main__':

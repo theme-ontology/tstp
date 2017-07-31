@@ -44,15 +44,15 @@
 	            	<TABLE class="table table-striped">
 		            	<tbody>
 			            	<tr>
-				            	<td><A href = "download.php?what=storydefinitions">Story Definitions</A></td>
+				            	<td><A href = "download.php?what=storydefinitions&fmt=txt">Story Definitions</A></td>
 			            		<td>For each story, a description of what it is and other relevant data.</td>
 				            </tr>
 			            	<tr>
-				            	<td><A href = "download.php?what=themedefinitions">Theme Definitions</A></td>
+				            	<td><A href = "download.php?what=themedefinitions&fmt=txt">Theme Definitions</A></td>
 			            		<td>For each theme, the definition of the theme and other relevant data.</td>
 				            </tr>
 				            <tr>
-			            		<td><A href = "download.php?what=storythemes">Themes in Stories</A></td>
+			            		<td><A href = "download.php?what=storythemes&fmt=txt">Themes in Stories</A></td>
 			            		<td>For each story, all themes that have been assigned to it along with notes and comments.</td>
 			            	</tr>
 			            	</tbody>
