@@ -10,6 +10,7 @@
     <script>
         var dataUrl = 'json.php?type=theme&fields=score,name,parents,description&slimit=200&rlimit=10000&fuzzysearch=';
         var reloads = 0;
+        var prevsearch = "";
 
         $(document).ready(function () {
             loadDataOnReady();
@@ -67,12 +68,12 @@
 
         function reloadData()
         {
+            var fuzzy = $('#fieldFind').val();
             reloads -= 1;
 
-            if (reloads == 0)
+            if (reloads == 0 && fuzzy != prevsearch)
             {
                 table = $('#themes_datatable').DataTable();
-                var fuzzy = $('#fieldFind').val();
                 var url = 'json.php?type=theme&fields=score,name,parents,description&slimit=200&rlimit=10000&fuzzysearch=' + fuzzy;
 
                 if (fuzzy)
@@ -90,6 +91,7 @@
                 }
                 table.clear().draw();
                 table.ajax.url(fuzzy ? url : dataUrl).load();
+                prevsearch = fuzzy;
             }
         }
 
