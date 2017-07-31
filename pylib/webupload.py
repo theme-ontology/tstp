@@ -13,6 +13,7 @@ import traceback
 
 from db import do
 from lib.xls import read_xls, write_xls
+from lib.dataparse import expload_field
 from webobject import StoryTheme, Story, Theme, TSTPEvent
 from webphp import php_get, FILES, get_pending_path, get_userfile_path
 import webobject
@@ -153,55 +154,6 @@ def read_themes(filename):
         events.extend(st_new.make_edit_events(st_old))
 
     return events, sheetcount, rowcount
-
-
-def expload_field(field):
-    '''
-    Explode a field of raw data into quadruplets of (keyword,comment,implication,capacity).
-    '''
-    def dict2row(token):
-        kw = token.get('', '').strip()
-        com = token.get('[', '').strip()
-        imp = token.get('{', '').strip()
-        cap = token.get('<', '').strip()
-        return ( kw, com, imp, cap )
-    
-    token = {}
-    delcorr = { 
-        '[': ']', 
-        '{': '}',
-        '<': '>',
-    }
-    farr = re.split('([\[\]\{\}\<\>,])', field)
-    state = ''
-    
-    for part in farr:
-        if part in delcorr:
-            state = part
-
-        elif part in delcorr.values():
-            if delcorr.get(state, None) == part:
-                state = ''
-            else:
-                raise AssertionError('Malformed field (bracket mismatch):\n  %s' % field)
-
-        elif part == ',' and not state:
-            tokrow = dict2row( token )
-
-            if not tokrow[0].strip():
-                raise AssertionError('Malformed field (empty keyword %s):\n  %s' % (str(tokrow), field))
-            else:
-                yield tokrow
-
-            token = {}
-
-        else:
-            token[state] = token.get( state, '' ) + part
-            
-    tokrow = dict2row( token )
-
-    if tokrow[0].strip():
-        yield dict2row( token )
 
 
 def expload_compact_storythemes(filename):
