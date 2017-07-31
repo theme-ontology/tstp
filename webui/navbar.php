@@ -122,7 +122,7 @@
     }
 </script>
 
-<nav class="navbar navbar-default <?php echo (isset($floatnavbar)) ? "" : "navbar-fixed-top"; ?> ">
+<nav class="navbar navbar-default <?php echo (isset($floatnavbar) && $floatnavbar == true) ? "" : "navbar-fixed-top"; ?> ">
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
