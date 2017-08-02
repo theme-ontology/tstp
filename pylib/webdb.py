@@ -107,6 +107,15 @@ def get_defenitions_text(target):
     """
     klass = SUPPORTED_OBJECTS[target]
     objs = klass.load()
+    return get_defenitions_text_for_objects(objs)
+
+
+def get_defenitions_text_for_objects(objs):
+    if not objs:
+        return ""
+
+    o0 = objs[0]
+    target, klass = next((k, v) for k, v in SUPPORTED_OBJECTS.iteritems() if isinstance(o0, v))
     headers = [ f for f in klass.fields if "category" not in f ]
     grouped = defaultdict(list)
     lines = []

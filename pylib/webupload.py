@@ -134,9 +134,9 @@ def read_themes(filename):
         "Implications", 
         "Definition", 
     ]
-    stories, sheetcount, rowcount = read_xls(filename, headers)
+    themes, sheetcount, rowcount = read_xls(filename, headers)
     
-    keywords = sorted(set(x[0] for x in stories))
+    keywords = sorted(set(x[0] for x in themes))
     existing = Theme.load(names = keywords)
     exist_lu = {}
     events = []
@@ -144,7 +144,7 @@ def read_themes(filename):
     for st in existing:
         exist_lu[st.name] = st
         
-    for keyword, parents, description in stories:
+    for keyword, parents, description in themes:
         st_old = exist_lu.get(keyword, None)
         st_new = Theme.create(
             name = keyword,
