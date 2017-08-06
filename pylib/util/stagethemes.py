@@ -6,83 +6,15 @@ import csv
 from collections import defaultdict
 
 from lib.files import walk
-from lib.dataparse import expload_field
+from lib.dataparse import parse
 import webobject
 
 
-def parse_themes(txt):
-    """
-    parse a theme field.
-    """
-    field = " ".join(x.strip() for x in txt)
-    for kw, comment, _implication, _capacity in expload_field(field):
-        yield kw, comment
-
-
-SUBJECTS = {
-    "Ratings": lambda x: [],
-    "Choice Themes": parse_themes,
-    "Major Themes": parse_themes,
-    "Minor Themes": parse_themes,
-}
-
-
-def parse(file):
-    """
-    Parse a file of themes and related info.
-    """
-    stories = []
-    lines = []
-    notices = []
-    stuff = []
-
-    # stories are delimeted by story-id underlined with ===
-    with open(file, "r") as fh:
-        for line in fh.readlines():
-            if line.startswith("==="):
-                stories.append(lines)
-                lines = [ lines.pop() ]
-            lines.append(line.strip())
-    stories.append(lines)
-
-    # subjects begin with "::", content may be parsed in different ways
-    for lines in stories:
-        storyid = lines[0]
-        subject = None
-        lineacc = []
-
-        for idx, line in enumerate(lines):
-            # hack to handle EOF
-            if idx == len(lines) - 1:
-                lineacc.append(line)
-                line = ":: "
-
-            # parse previous subject when subject changes
-            if line.startswith(":: "):
-                if subject in SUBJECTS:
-                    parser = SUBJECTS[subject]
-
-                    try:
-                        stuff.append((storyid, subject, list(parser(lineacc))))
-                    except Exception:
-                        notices.append('Failed to parse data for "%s" in "%s"' % (subject, storyid))
-
-                elif subject is not None:
-                    notices.append('Unhandled subject "%s" in "%s"' % (subject, storyid))
-
-                subject = line[3:].strip()
-                lineacc = []
-
-            # accumulate lines of subject
-            else:
-                lineacc.append(line)
-
-    return stuff, notices
 
 
 def write_table(file, headers, rows):
     """
-    Produce a csv file woith some data.
+    Produce a csv file with some data.
     """
     with open(file, "wb") as fh:
         ww = csv.writer(fh, quoting = csv.QUOTE_MINIMAL, lineterminator = "\n")

@@ -53,6 +53,14 @@ class TSTPObject(object):
             
         return obj
 
+    def test_fields(self):
+        """
+        Check that all fields have been set.
+        """
+        for field in self.fields:
+            if not hasattr(self, field):
+                raise ValueError, "Missing value for %s" % field
+
     @classmethod
     def edit_object(cls, cat, name, attrs, vals):
         table = "web_attributes"
@@ -256,15 +264,18 @@ class TSTPObject(object):
         return json.dumps({"data" : rows})
 
     def terse_row(self, limit = 20):
+        row = []
+
         for attr in [ "name", "eventid" ]:
             if hasattr(self, attr):
                 row = [ getattr(self, attr) ]
 
         for f in self.fields[2:]:
-            v = unicode(getattr(self, f))[:limit]
-            if len(v) == limit:
-                v = v[:limit - 3].strip() + '...'
-            row.append(v)
+            if "category" not in f:
+                v = unicode(getattr(self, f))[:limit]
+                if len(v) == limit:
+                    v = v[:limit - 3].strip() + '...'
+                row.append(v)
 
         return tuple(row)
 

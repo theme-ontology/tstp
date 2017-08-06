@@ -29,6 +29,10 @@ def set_level(level):
     LEVEL = LEVELS.index(level)
 
 
+def printfunc(s):
+    print(s)
+    
+
 def printmsg(msg, level = 'INFO', args = None):
     dt = datetime.now()
     tstr = dt.strftime( '%m/%d %H:%M:%S' )
@@ -45,9 +49,9 @@ def printmsg(msg, level = 'INFO', args = None):
 
     if LEVELS.index(level) >= LEVEL:
         try:
-            print(logline)
+            printfunc(logline)
         except:
-            print("<failed to print logline>")
+            printfunc("<failed to print logline>")
 
 
 def debug(msg, *args):
