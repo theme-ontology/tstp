@@ -47,7 +47,44 @@ def commit_pending_events():
     TSTPEvent.commit_many(events)
     cancel_pending_events()
 
+
+def read_various_text(filename, name):
+    import lib.dataparse
+
+    if name.endswith("themedefinitions.txt"):
+        objs = list(lib.dataparse.read_themes_from_txt(filename))
+        themes = sorted(set(o.name for o in objs))
+        existing = Theme.load(names = themes)
+        key = lambda o: o.name
+
+    elif name.endswith("storydefenitions.txt"):
+        objs = list(lib.dataparse.read_stories_from_txt(filename))
+        sids = sorted(set(o.name for o in objs))
+        existing = Story.load(names = sids)
+        key = lambda o: o.name
+
+    elif name.endswith("stories.txt"):
+        is_assoc = True
+        objs = list(lib.dataparse.read_stories_from_txt(filename))
+        key = lambda o: (o.name1, o.name2)
+
+    else:
+        raise ValueError, "unknown file type: %s" % name
     
+    exist_lu = {}
+    events = []
+    
+    for obj in existing:
+        exist_lu[key(obj)] = obj
+
+    for obj_new in objs:
+        obj_old = exist_lu.get(key(obj_new), None)
+        events.extend(obj_new.make_edit_events(obj_old))
+
+    return events, 1, len(objs)
+
+
+
 def read_storythemes(filename):
     weights = {
         "Choice Theme": "choice",
@@ -230,7 +267,9 @@ def handle_upload():
 
         log.info("Handling %s file upload: %s", ftype, filename)
         
-        if ftype == "storythemes":
+        if ftype == "varioustxt":
+            events, sheetcount, rowcount = read_various_text(filename, name)
+        elif ftype == "storythemes":
             events, sheetcount, rowcount = read_storythemes(filename)
         elif ftype == "compactstorythemes":
             message = expload_compact_storythemes(filename)

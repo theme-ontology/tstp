@@ -30,9 +30,9 @@ def set_level(level):
 
 
 def printfunc(s):
-    print(s)
+    print(s.encode("utf-8", "replace"))
     
-
+    
 def printmsg(msg, level = 'INFO', args = None):
     dt = datetime.now()
     tstr = dt.strftime( '%m/%d %H:%M:%S' )
@@ -52,6 +52,7 @@ def printmsg(msg, level = 'INFO', args = None):
             printfunc(logline)
         except:
             printfunc("<failed to print logline>")
+            raise
 
 
 def debug(msg, *args):

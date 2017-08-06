@@ -152,6 +152,7 @@
 			$result = "something";
 		}
 	}
+
 ?>
 
 <?php
@@ -208,7 +209,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="basebox">
-            	Upload a spreadsheet with new data. 
+            	Upload a text file or spreadsheet with new data. 
             	The proposed changes will be displayed for verification before they are committed.
             	Check <A href="resources.php">resources</A> for templates to use.
             </div>
@@ -219,10 +220,11 @@
         			<fieldset class="form-group">
         				<label for="fieldType">What?</label>
     					<select id="fieldType" name="fieldType" type="file">
-    						<option value="storythemes">Upload List of Themes in Stories</option>
-    						<option value="themedefinitions">Upload Theme Definitions</option>
-    						<option value="storydefinitions">Upload Story Definitions</option>
-                            <option value="compactstorythemes">Expload Compact Themed Stories Sheet</option>
+                            <option value="varioustxt">Upload Text Data (txt)</option>
+    						<option value="storythemes">Upload List of Themes in Stories (xls)</option>
+    						<option value="themedefinitions">Upload Theme Definitions (xls)</option>
+    						<option value="storydefinitions">Upload Story Definitions (xls)</option>
+                            <option value="compactstorythemes">Expload Compact Themed Stories Sheet (xls)</option>
     					</select>
         			</fieldset>
         			<fieldset class="form-group">

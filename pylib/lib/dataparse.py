@@ -1,4 +1,5 @@
 import re
+import codecs
 
 import webobject
 import lib.xls
@@ -65,6 +66,29 @@ SUBJECTS = {
 }
 
 
+def blockjoin(lines):
+    """
+    Remove breaklines in paragraphs but not between.
+    """
+    acc = []
+    block = []
+
+    for line in lines:
+        line = line.strip()
+
+        if not line:
+            if block:
+                acc.append(" ".join(block))
+            block = []
+        else:
+            block.append(line)
+
+    if block:
+        acc.append(" ".join(block))
+
+    return "\n\n".join(acc)
+
+
 def parse(file):
     """
     Parse a file of themes and related info.
@@ -75,9 +99,9 @@ def parse(file):
     stuff = []
 
     # sections are delimeted by identifier underlined with ===
-    with open(file, "r") as fh:
+    with codecs.open(file, "r", encoding='utf-8') as fh:
         for line in fh.readlines():
-            if line.startswith("==="):
+            if line.startswith("===") and len(lines) > 1:
                 sections.append(lines)
                 lines = [ lines.pop() ]
             lines.append(line.strip())
@@ -101,12 +125,13 @@ def parse(file):
                     if subject in SUBJECTS:
                         parser = SUBJECTS[subject]
                     else:
-                        parser = lambda lines: [ " ".join(line.strip() for line in lines).strip() ]
+                        parser = lambda lines: [ blockjoin(lines) ]
 
                     try:
                         stuff.append((identifier, subject, list(parser(lineacc))))
                     except Exception:
                         notices.append('Failed to parse data for "%s" in "%s"' % (subject, identifier))
+                        raise
 
                 subject = line[3:].strip()
                 lineacc = []
@@ -186,6 +211,7 @@ def read_stories_from_txt(filename):
         "title": "title",
         "release date": "date",
         "description": "description",
+        "date": "date",
     }
 
     for notice in notices:
