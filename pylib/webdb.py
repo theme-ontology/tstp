@@ -146,10 +146,9 @@ def get_defenitions_text_for_objects(objs):
             for obj in grouped[obj_name]:
                 for field in headers[1:]:
                     lines.append(":: " + field.capitalize())
-                    lines.append(textwrap.fill(
-                        getattr(obj, field), 78
-                    ))
-                    lines.append("")
+                    for txt in getattr(obj, field).split("\n\n"):
+                        lines.append(textwrap.fill(txt, 78))
+                        lines.append("")
 
         lines.append("")
 
