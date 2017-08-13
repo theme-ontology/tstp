@@ -9,7 +9,7 @@ require(curl)
 source("helpers.r")
 
 # read story metadata from web and do basic processing 
-storydata <- fromJSON("http://ec2-52-56-219-127.eu-west-2.compute.amazonaws.com/tstp/webui/json.php?action=storydefinitions")
+storydata <- fromJSON("http://themeontology.org/json.php?action=storydefinitions")
 rownames(storydata) <- storydata[,1]
 colnames(storydata) <- c("StoryID", "Title", "AirDate", "Summary")
 storydata <- storydata[-1,]
@@ -33,7 +33,7 @@ storydata <- data.frame(storydata[,1:3], Writer = writers, Director = directors,
 storydata <- storydata[story_ids,]
 
 # read theme data from web and construct story list data structure to store story themes
-themedata <- fromJSON("http://ec2-52-56-219-127.eu-west-2.compute.amazonaws.com/tstp/webui/json.php?action=metathemedata")
+themedata <- fromJSON("http://themeontology.org/json.php?action=metathemedata")
 themes <- names(themedata[[1]])
 no_of_themes <- length(themes)
 storythemes <- vector("list", no_of_stories)

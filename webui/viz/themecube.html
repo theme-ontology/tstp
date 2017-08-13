@@ -12,7 +12,7 @@
                 return deg / 180.0 * Math.PI;
             }
 
-            var URL = '/tstp/webui/vizdata.php?subject=viz.themecube';
+            var URL = '../vizdata.php?subject=viz.themecube';
             var DATA;
             var FORCE_NODES;
             var FORCE;
@@ -30,6 +30,8 @@
             var SCALE = CY;
             var TSCALE = CY / 500.0 * 1.5;
             var NUDGE_DELTA = 0.2;
+
+            var IDLE_CALLS = 0;
 
             // three story-set definitions - TODO: make this editable
             var SERIES = [
@@ -88,37 +90,55 @@
                     DATA[i][16] = CX + x;
                     DATA[i][17] = CY - y;
 
-                    if (FORCE == undefined)
-                    {
-                        DATA[i][18] = DATA[i][16];
-                        DATA[i][19] = DATA[i][17];
-                    }
+                    DATA[i][18] = DATA[i][16];
+                    DATA[i][19] = DATA[i][17];
                 }
 
-                if (FORCE == undefined)
+                idle();
+            }
+
+            function idle()
+            {
+                IDLE_CALLS += 1;
+                setTimeout(onIdle, 1000);
+            }
+
+            function onIdle()
+            {
+                IDLE_CALLS -= 1;
+
+                if (IDLE_CALLS == 0)
                 {
-                    FORCE_NODES = DATA.map(function(d) { 
-                        return { 
-                            radius: d[15], 
-                            x: d[18], 
-                            y: d[19],
-                            tx: d[18], 
-                            ty: d[19],
-                            bb: { width: 50, height: 15 },
-                        }; 
-                    });
-                    initForce();
+                    initForceLayout();
                 }
-                else
-                {
-                    FORCE_NODES.map(function(d, i) { 
-                        d.tx = DATA[i][16];
-                        d.ty = DATA[i][17];
-                    });
-                    FORCE.nodes(FORCE_NODES);
-                    FORCE.alpha(0.75);
-                    FORCE.restart();
-                }
+            }
+
+            // set position and activate
+            function initForceLayout()
+            {
+                FORCE_NODES = DATA.map(function(d) { 
+                    return { 
+                        radius: d[15], 
+                        x: d[18], 
+                        y: d[19],
+                        tx: d[18], 
+                        ty: d[19],
+                        bb: { width: 50, height: 15 },
+                    }; 
+                });
+                initForce();
+            }
+
+            // change target and re-activate
+            function changeForceLayout()
+            {
+                FORCE_NODES.map(function(d, i) { 
+                    d.tx = DATA[i][16];
+                    d.ty = DATA[i][17];
+                });
+                FORCE.nodes(FORCE_NODES);
+                //FORCE.alpha(0.75);
+                FORCE.restart();
             }
 
             function initRotateAndProject()
@@ -388,7 +408,7 @@
                 FORCE_COUNTER = 0;
                 FORCE  = d3.forceSimulation()
                     .nodes(FORCE_NODES)
-                    .velocityDecay(0.2)
+                    .velocityDecay(0.02)
                     .alphaDecay(0.09)
                     .alphaMin(0.01)
                     .force("xposition", d3.forceX(function(d, i) { return d.tx; }))
@@ -430,8 +450,8 @@
                     var r = d.radius + 50,
                         nx1 = d.x - d.bb.width / 2 - 50,
                         nx2 = d.x + d.bb.width / 2 + 50,
-                        ny1 = d.y - d.bb.height / 2 - 10,
-                        ny2 = d.y + d.bb.height / 2 + 10;
+                        ny1 = d.y - d.bb.height / 2 - 15,
+                        ny2 = d.y + d.bb.height / 2 + 15;
 
                     quadtree.visit(function(node, x1, y1, x2, y2) 
                     {
@@ -449,7 +469,7 @@
                             if (y == 0)
                                 y = Math.random();
 
-                            if (Math.abs(x) < ww && y > 0 && y <= hh * 0.8) 
+                            if (Math.abs(x) < ww && y > 0 && y <= hh * 0.9) 
                             {
                                 var dy = (hh - y) * alpha * 2;
                                 d.y += dy;
