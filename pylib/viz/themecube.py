@@ -13,8 +13,9 @@ import lib.svg
 import log
 from copy import deepcopy
 
+from credentials import SERVER_URL
 
-BASE_URL = "http://127.0.0.1/tstp/webui/json.php?"
+BASE_URL = SERVER_URL + "json.php?"
 
 
 def rotate(v, a, b):

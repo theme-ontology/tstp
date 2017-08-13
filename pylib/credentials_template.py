@@ -21,3 +21,7 @@ DBS = {
 #: "tstp" will be used by the web 
 DBS['tstp'] = DBS['tstp@dreamhost']
 
+
+#: the url used to test this deployment, must end with /
+SERVER_URL = "http://127.0.0.1/tstp/webui/"
+
