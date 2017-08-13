@@ -66,6 +66,30 @@ SUBJECTS = {
 }
 
 
+def themejoin(lines):
+    """
+    Format lines of theme specification into a standard format.
+    """
+    outlines = []
+
+    if isinstance(lines, basestring):
+        field = lines
+    else:
+        field = " ".join(x.strip() for x in lines)
+
+    for kw, comment, implication, capacity in expload_field(field):
+        implication = implication.strip()
+        capacity = capacity.strip()
+        f = kw.strip() + " [%s]" % comment.strip()
+        if implication:
+            f += " {%s}" % implication
+        if capacity:
+            f += " <%s>" % capacity
+        outlines.append(f)
+
+    return ",\n".join(outlines) + ","
+
+
 def blockjoin(lines):
     """
     Remove breaklines in paragraphs but not between.
@@ -89,7 +113,7 @@ def blockjoin(lines):
     return "\n\n".join(acc)
 
 
-def parse(file):
+def parse(file, subjects = None):
     """
     Parse a file of themes and related info.
     """
@@ -97,6 +121,9 @@ def parse(file):
     lines = []
     notices = []
     stuff = []
+
+    if subjects is None:
+        subjects = SUBJECTS
 
     # sections are delimeted by identifier underlined with ===
     with codecs.open(file, "r", encoding='utf-8') as fh:
@@ -122,8 +149,8 @@ def parse(file):
             # parse previous subject when subject changes
             if line.startswith(":: "):
                 if subject:
-                    if subject in SUBJECTS:
-                        parser = SUBJECTS[subject]
+                    if subject in subjects:
+                        parser = subjects[subject]
                     else:
                         parser = lambda lines: [ blockjoin(lines) ]
 

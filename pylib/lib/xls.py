@@ -1,8 +1,10 @@
+import re
+
 # import xlrd/xlwt only locally so that some features may survive 
 # if packages are missing
 
 
-def xls_sheet_to_memory(filename, sheets='ALL'):
+def xls_sheet_to_memory(filename, sheets = 'ALL'):
     """ 
     Read xls file into memory as lists of tuples, as dict of sheets.
     """
@@ -27,13 +29,13 @@ def xls_sheet_to_memory(filename, sheets='ALL'):
     return outdict
 
 
-def read_xls(filename, headers):
+def read_xls(filename, headers = None, sheetname = ".*"):
     """
     Return cells in rows with given headers for all sheets in file.
     """
     sheetcount = 0
     rowcount = 0
-    
+
     try:
         sheets = xls_sheet_to_memory(filename)
     except (OSError, KeyError):
@@ -43,19 +45,26 @@ def read_xls(filename, headers):
     idxs = []
     
     for sheet in sheets:
-        sheetcount += 1
-        for idx, row in enumerate(sheets[sheet]):
-            if idx == 0:
-                idxs = []
-                for header in headers:
-                    try:
-                        idxs.append(row.index(header))
-                    except ValueError:
-                        raise IOError("Missing header: '%s' in %s" % (header, str(row)))
-                continue
-            
-            rowcount += 1
-            results.append([ row[i] for i in idxs ])
+        if re.match(sheetname, sheet):
+            sheetcount += 1
+            for idx, row in enumerate(sheets[sheet]):
+                if idx == 0:
+                    if headers is None:
+                        headers = row
+                        results.append(row)
+
+                    idxs = []
+
+                    for header in headers:
+                        try:
+                            idxs.append(row.index(header))
+                        except ValueError:
+                            raise IOError("Missing header: '%s' in %s" % (header, str(row)))
+                            
+                    continue
+                
+                rowcount += 1
+                results.append([ row[i] for i in idxs ])
     
     return results, sheetcount, rowcount
 
