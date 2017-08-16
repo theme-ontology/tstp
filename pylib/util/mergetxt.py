@@ -57,7 +57,6 @@ FIELDORDER = [
 def main():
     topics = defaultdict(dict)
     fieldorder = list(FIELDORDER)
-    lines = []
 
     for arg in sys.argv[2:]:
         if arg.startswith("-"):
@@ -75,9 +74,21 @@ def main():
                 FIELDFORMATTERS.get(field.lower(), None) 
                 or (lambda lines: "\n".join(l.strip() for l in lines))
             )
-            topics[topic].setdefault(field, formater(lines))
+
+            try:
+                value = formater(lines)
+            except AssertionError as exc:
+                print >>sys.stderr, 'ERROR: ', arg
+                print >>sys.stderr, '.. in: ', topic, '::', field
+                print >>sys.stderr, '..', str(exc)
+                print >>sys.stderr, '.. SKIPPING!'
+                continue
+
+            topics[topic].setdefault(field, value)
             if field not in fieldorder:
                 fieldorder.append(field)
+
+    lines = []
 
     for topic in sorted(topics):
         lines.append(topic)

@@ -22,3 +22,10 @@ def walk(path, pattern = ".*", levels = -1):
             for res in walk(spath, pattern, levels - 1):
                 yield res
 
+
+def mkdirs(path):
+    """
+    Make dir including parent dirs if they do not exist.
+    """
+    if not os.path.isdir(path):
+        os.makedirs(path)

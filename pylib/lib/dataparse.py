@@ -75,9 +75,11 @@ def themejoin(lines):
     if isinstance(lines, basestring):
         field = lines
     else:
-        field = " ".join(x.strip() for x in lines)
+        field = " ".join(x.strip() for x in lines).strip(' ,')
 
-    for kw, comment, implication, capacity in expload_field(field):
+    fieldinfo = list(expload_field(field))
+
+    for kw, comment, implication, capacity in fieldinfo:
         implication = implication.strip()
         capacity = capacity.strip()
         f = kw.strip() + " [%s]" % comment.strip()
