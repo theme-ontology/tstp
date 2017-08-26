@@ -43,6 +43,7 @@
 <div class="container">
     <div class="row">
 
+    <!-- visualizations -->
         <div class="col-sm-12 col-md-8 col-lg-6">
 			<div class="panel panel-default">
 				<div class="panel-body">
@@ -63,6 +64,28 @@
                         </tbody>
 	            	</TABLE>
             	</div>
+            </div>
+        </div>
+
+
+    <!-- introductory material -->
+        <div class="col-sm-12 col-md-8 col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <H3 class="px-3">Introduction</H3>
+                    <TABLE class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <td><A href = "data/how-to-theme-flowchart.pdf">How to Theme, part I</A></td>
+                                <td>The four principal theme domains.</td>
+                            </tr>
+                            <tr>
+                                <td><A href = "data/how-to-theme-flowchart-extended.pdf">How to Theme, part II</A></td>
+                                <td>Breakdown of all theme categories.</td>
+                            </tr>
+                        </tbody>
+                    </TABLE>
+                </div>
             </div>
         </div>
 
