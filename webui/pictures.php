@@ -5,36 +5,6 @@
 <title>TSTP</title>
 <?php include "header.php"; ?>
 
-<script>
-    // replace href=":xxxx/relative/path" type specs
-    function fixRelativePort(target)
-    {
-        if (target.tagName.toLowerCase() == 'a')
-        {
-            var port = target.getAttribute('href').match(/^:(\d+)(.*)/);
-            if (port)
-            {
-                if (target.port == "8080")
-                {
-                    target.href = port[2];
-                    target.port = String(parseInt(port[1]) + 1);
-                } 
-                else
-                {
-                    target.href = port[2];
-                    target.port = port[1];		      
-                }
-            }
-        }        
-    }
-
-	// delegate event for performance, and save attaching a million events to each anchor
-	document.addEventListener('click', function(event) {
-        fixRelativePort(event.target);
-	}, false);
-
-</script>
-
 </head>
 
 <body>

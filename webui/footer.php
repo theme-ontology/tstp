@@ -11,6 +11,7 @@
 			 <A href="upload">upload</A>
 			 | <A href="resources">download</A>
 			 | <A href="log">log</A>
+			 | <A href=":8080/tstp/webui/">debug</A>
 
 		</p>
 	</div>
