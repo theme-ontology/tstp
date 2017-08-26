@@ -16,6 +16,16 @@
             loadDataOnReady();
         });
 
+        function makeThemeLink(data, color = null)
+        {
+            urldata = encodeURIComponent(data);
+            if (color)
+            {
+                return '<A style="color:' + color + ';" href="theme.php?name=' + urldata + '">' + data + '</A>';
+            }
+            return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
+        }
+
         function loadDataOnReady() {
             $(document).ready(function() {
 			    $('#themes_datatable').DataTable( {
@@ -42,8 +52,7 @@
                         },
 			        	{
 						    "render": function ( data, type, row ) {
-						    	urldata = encodeURIComponent(data);
-						        return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
+						        return makeThemeLink(data);
 						    },
 			        		"className": "tstp-theme-cell",
 						    "targets": 1,
@@ -52,7 +61,7 @@
 			        	{
 						    "render": function ( data, type, row ) {
 						    	val = data.split(",")[0];
-						        return val;
+                                return makeThemeLink(val, "black");
 						    },
 						    "targets": 2,
                             "width": "10%",
