@@ -13,9 +13,9 @@
 			 | <A href="log">log</A>
 
 <?php if ($_SERVER["SERVER_PORT"] == "8080") { ?>
-			 | <A href=":79">prod</A>
+			 | <A href="http://www.themeontology.org/">prod</A>
 <?php } else { ?>
-			 | <A href=":8080/tstp/webui/">uat</A>
+			 | <A href="http://www.themeontology.org:8080/tstp/webui/">uat</A>
 <?php } ?>
 
 		</p>
