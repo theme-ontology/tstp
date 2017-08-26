@@ -13,10 +13,12 @@
     <script>
         var g_objType = "theme";
         var g_objName = "<?php echo $THEME; ?>";
-    	var g_objFields = [ "name", "title", "description" ];
+        var g_objFields = [ "name", "title", "description" ];
+        var g_objInfoBoxes = [ "parents", "children" ];
     	var g_objData;
     </script>
     <script type="text/javascript" src="js/tstp_webform.js"></script>
+    <script type="text/javascript" src="js/tstp_objinfo.js"></script>
 
     <script>
         $(document).ready(function () {
@@ -92,6 +94,13 @@
     			<fieldset class="form-group">
     				<button onClick="submitData()" class="btn btn-primary btn-block">Submit Changes</button>
     			</fieldset>
+
+<?php // Theme INFO //?>
+                <div id="div_infobox" style="display:none; padding: 0px 0px; margin: 0px 0px;">
+                    <div id="div_parents"></div>
+                    <div id="div_children"></div>
+                </div>
+
 	        </div>
         </div>
     </div>

@@ -160,6 +160,11 @@ def handle_query():
         from webdb import get_metatheme_data
         return json.dumps(get_metatheme_data())
 
+    if act_type == "stats" and req_type == "theme":
+        from lib.datastats import get_theme_stats
+        obj_name = get("name")
+        return json.dumps(get_theme_stats(obj_name))
+
     if act_type in webdb.SUPPORTED_OBJECTS:
         return json.dumps(webdb.get_defenitions(act_type))
 
