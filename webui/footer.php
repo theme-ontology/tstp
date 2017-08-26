@@ -13,7 +13,11 @@
 			 | <A href="log">log</A>
 
 <?php if ($_SERVER["SERVER_PORT"] == "8080") { ?>
+<<<<<<< HEAD
 			 | <A href="http://www.themeontology.org/">prod</A>
+=======
+			 | <A href=":79">prod</A>
+>>>>>>> 559e4575665b9e9b24f3f1ee3b731a81ce328f82
 <?php } else { ?>
 			 | <A href="http://www.themeontology.org:8080/tstp/webui/">uat</A>
 <?php } ?>
