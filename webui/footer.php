@@ -11,7 +11,12 @@
 			 <A href="upload">upload</A>
 			 | <A href="resources">download</A>
 			 | <A href="log">log</A>
-			 | <A href=":8080/tstp/webui/">debug</A>
+
+<?php if ($_SERVER["SERVER_PORT"] == "8080") { ?>
+			 | <A href=":79">prod</A>
+<?php } else { ?>
+			 | <A href=":8080/tstp/webui/">uat</A>
+<?php } ?>
 
 		</p>
 	</div>
