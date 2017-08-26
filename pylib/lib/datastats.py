@@ -35,6 +35,9 @@ def get_theme_stats(theme):
         elif theme in thp:
             children.append(th.name)
 
+    parents.sort()
+    children.sort()
+    
     return {
         "parents": parents,
         "children": children,

@@ -53,12 +53,19 @@ function receivedObjInfoData(result)
                 html = ' <A href="theme.php?name=' + th + '">' + th + '</A>';
                 parents_links.push(html);
             }
-            console.log(children);
             for (ii = 0; ii < children.length; ii++)
             {
                 th = children[ii];
                 html = ' <A href="theme.php?name=' + th + '">' + th + '</A>';
                 children_links.push(html);
+            }
+            if (parents_links.length == 0)
+            {
+                parents_links.push("&lt;none&gt;");
+            }
+            if (children_links.length == 0)
+            {
+                children_links.push("&lt;none&gt;");
             }
             parents_html += parents_links.join(", ") + ".";
             children_html += children_links.join(", ") + ".";
