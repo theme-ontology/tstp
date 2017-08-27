@@ -57,4 +57,12 @@ function tstp_run_python($cmd) {
 }
 
 
+function tstp_simple_run($cmd) {
+    $fd = popen($cmd, "r");
+    $result = stream_get_contents($fd);
+    fclose($fd);
+    return $result;
+}
+
+
 ?>

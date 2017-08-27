@@ -1,4 +1,5 @@
 import lib.dataparse
+from collections import defaultdict, deque
 
 
 def themes_with_usage():
@@ -44,3 +45,44 @@ def get_theme_stats(theme):
     }
 
 
+def get_theme_tree():
+    """
+    return (parents, children, lforder) as (
+        { theme => [ parent1, parent2, ... ] },
+        { theme => [ child1, child2, ... ] },
+        [ t1, t2, ...],
+    ) where t1, t2 is a reversed BFS.
+    """
+    parents = {}
+    children = defaultdict(set)
+
+    for thobj in lib.dataparse.read_themes_from_db():
+        theme = thobj.name
+        thp = filter(None, [ x.strip() for x in thobj.parents.split(",") ])
+        parents[theme] = sorted(set(thp))
+
+        if theme not in children:
+            children[theme] = set()
+
+        for parent in parents[theme]:
+            children[parent].add(theme)
+            if parent not in parents:
+                parents[parent] = []
+
+    children = { k : sorted(v) for k, v in children.iteritems() }
+
+    leafs = [ th for th, thc in children.iteritems() if len(thc) == 0 ]
+    lforder = []
+    qq = deque(leafs)
+    ss = set()
+
+    while qq:
+        theme = qq.popleft()
+        lforder.append(theme)
+        
+        for parent in parents[theme]:
+            if parent not in ss:
+                qq.append(parent)
+                ss.add(parent)
+
+    return parents, children, lforder

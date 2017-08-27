@@ -31,6 +31,12 @@
                                     This delineates, to an extent, how the show changed over the years.
                                 </td>
                             </tr>
+                            <tr>
+                                <td><A href = "viz/themehierarchy.php">Theme Hierarchy Reference Sheet</A></td>
+                                <td>
+                                    Overview of all themes in the current hierarchy.
+                                </td>
+                            </tr>
                         </tbody>
 	            	</TABLE>
             	</div>
@@ -46,12 +52,12 @@
                     <TABLE class="table table-striped">
                         <tbody>
                             <tr>
-                                <td><A href = "data/how-to-theme-flowchart.pdf">How to Theme, part I</A></td>
-                                <td>The four principal theme domains.</td>
+                                <td><A href = "data/how-to-theme-flowchart-extended.pdf">How to Theme, part I</A></td>
+                                <td>Breakdown of all theme categories.</td>
                             </tr>
                             <tr>
-                                <td><A href = "data/how-to-theme-flowchart-extended.pdf">How to Theme, part II</A></td>
-                                <td>Breakdown of all theme categories.</td>
+                                <td><A href = "data/how-to-theme-flowchart.pdf">How to Theme, part II</A></td>
+                                <td>How to choose between top level theme categories.</td>
                             </tr>
                         </tbody>
                     </TABLE>
