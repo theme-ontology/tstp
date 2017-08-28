@@ -59,7 +59,7 @@ def parse_themes(txt):
 
 
 SUBJECTS = {
-    "Ratings": lambda lines: [ t.strip() for t in line.split(", ") for line in lines ],
+    "Ratings": lambda lines: [ t.strip() for line in lines for t in line.split(", ") ],
     "Choice Themes": parse_themes,
     "Major Themes": parse_themes,
     "Minor Themes": parse_themes,
@@ -196,7 +196,7 @@ def read_storythemes_from_db(limit = 1000000):
         yield obj   
 
 
-def read_themes_from_txt(filename):
+def read_themes_from_txt(filename, verbose = True):
     """
     Themes in our special text file format.
     """
@@ -222,15 +222,20 @@ def read_themes_from_txt(filename):
         if attr and attr in themeobj.fields:
             setattr(themeobj, attr, data[0])
         else:
-            lib.log.warn("%s: %s.%s - don't grok", filename, theme, field)
+            if verbose:
+                lib.log.warn("%s: %s.%s - don't grok", filename, theme, field)
 
     for key in sorted(out_themes):
         themeobj = out_themes[key]
-        themeobj.test_fields()
-        yield themeobj
+        try:
+            themeobj.test_fields()
+            yield themeobj
+        except ValueError as e:
+            if verbose:
+                lib.log.warn("%s: %s.%s - %s", filename, theme, field, str(e))
 
 
-def read_stories_from_txt(filename):
+def read_stories_from_txt(filename, verbose = True):
     """
     Stories in our special text file format.
     """
@@ -258,15 +263,20 @@ def read_stories_from_txt(filename):
         if attr and attr in obj.fields:
             setattr(obj, attr, data[0])
         else:
-            lib.log.warn("%s: %s.%s - don't grok", filename, item, field)
+            if verbose:
+                lib.log.warn("%s: %s.%s - don't grok", filename, item, field)
 
     for key in sorted(out):
         obj = out[key]
-        obj.test_fields()
-        yield obj
+        try:
+            obj.test_fields()
+            yield obj
+        except ValueError as e:
+            if verbose:
+                lib.log.warn("%s: %s.%s - %s", filename, item, field, str(e))
 
 
-def read_storythemes_from_txt(filename):
+def read_storythemes_from_txt(filename, verbose = True):
     """
     Themes-in-stories in our special text file format.
     """
@@ -279,12 +289,11 @@ def read_storythemes_from_txt(filename):
     for sid, field, data in stuff:
         if field.lower().endswith("themes"):
             weight = field.split(" ")[0].lower()
-            assert weight in ("absent", "minor", "major", "choice")
-
-            for theme, motivation in data:
-                yield webobject.StoryTheme.create(
-                    sid, theme, weight, motivation
-                )
+            if weight in ("absent", "minor", "major", "choice"):
+                for theme, motivation in data:
+                    yield webobject.StoryTheme.create(
+                        sid, theme, weight, motivation
+                    )
 
 
 def read_themes_from_xls(filename):

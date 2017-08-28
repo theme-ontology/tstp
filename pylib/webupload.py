@@ -51,22 +51,17 @@ def commit_pending_events():
 def read_various_text(filename, name):
     import lib.dataparse
 
-    if name.endswith("themedefinitions.txt"):
+    if name.endswith("th.txt"):
         objs = list(lib.dataparse.read_themes_from_txt(filename))
         themes = sorted(set(o.name for o in objs))
         existing = Theme.load(names = themes)
         key = lambda o: o.name
 
-    elif name.endswith("storydefenitions.txt"):
+    elif name.endswith("st.txt"):
         objs = list(lib.dataparse.read_stories_from_txt(filename))
         sids = sorted(set(o.name for o in objs))
         existing = Story.load(names = sids)
         key = lambda o: o.name
-
-    elif name.endswith("stories.txt"):
-        is_assoc = True
-        objs = list(lib.dataparse.read_stories_from_txt(filename))
-        key = lambda o: (o.name1, o.name2)
 
     else:
         raise ValueError, "unknown file type: %s" % name

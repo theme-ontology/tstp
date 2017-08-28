@@ -1,3 +1,7 @@
+"""
+Reads themes from a .txt file. Produces a csv file.
+Deprecated.
+"""
 import sys
 import log
 import os
