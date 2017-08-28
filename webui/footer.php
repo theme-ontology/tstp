@@ -10,6 +10,7 @@
 
 			 <A href="upload">upload</A>
 			 | <A href="resources">download</A>
+			 | <A href="util">util</A>
 			 | <A href="log">log</A>
 
 <?php if ($_SERVER["SERVER_PORT"] == "8080") { ?>

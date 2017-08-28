@@ -14,8 +14,10 @@ def main():
     nargs = len(args)
 
     if args[0] == "clear":
-        if raw_input("Clear Database? (yes/no) ") == "yes":
-            dbdefine.create_tables(True)
+        if len(args) < 2 or args[1] != "nowarn":
+            if raw_input("Clear Database? (yes/no) ") != "yes":
+                return
+        dbdefine.create_tables(True)
 
     elif args[0] == "import":
         themes = defaultdict(list)
@@ -57,6 +59,32 @@ def main():
                     else:
                         dd2[(obj.name1, obj.name2)].append((path, obj))
 
+        # note any parent-less themes
+        for key, ll in rthemes.iteritems():
+            for path, theme in ll:
+                parents = filter(None, [ x.strip() for x in theme.parents.split(",") ])
+                if not parents:
+                    log.info('Top Level Theme "%s" in %s', key, path)
+                elif key == "fictional gadget":
+                    print theme, "::", theme.parents
+                for parent in parents:
+                    if parent not in rthemes:
+                        log.info('Undefined parent theme "%s" for "%s" in %s', parent, key, path)
+
+        # drop any themes with only undefined parents
+        changed = True
+        while (changed):
+            changed = False
+            for key in rthemes.keys():
+                ll = rthemes[key]
+                for path, theme in ll:
+                    parents = filter(None, [ x.strip() for x in theme.parents.split(",") ])
+                    if parents and all(p not in rthemes for p in parents):
+                        log.info('Dropping theme with undefined parents: "%s": "%s"', key, parents)
+                        changed = True
+                        del rthemes[key]
+                        break;
+
         # drop story-themes for which either story or theme is not defined
         for story, theme in rstorythemes.keys():
             drop = False
@@ -78,18 +106,6 @@ def main():
                     spec = [ path for path, _ in ll ]
                     log.warn('Multiple definitions of %s "%s": %s.', thing, key, spec)
 
-        # note any parent-less themes
-        for key, ll in rthemes.iteritems():
-            for path, theme in ll:
-                parents = filter(None, [ x.strip() for x in theme.parents.split(",") ])
-                if not parents:
-                    log.info('Top Level Theme "%s" in %s', key, path)
-                elif key == "fictional gadget":
-                    print theme, "::", theme.parents
-                for parent in parents:
-                    if parent not in rthemes:
-                        log.info('Undefined parent theme "%s" for "%s" in %s', parent, key, path)
-
         # create and commit events
         for thing, dd in rorder:
             for key, ll in dd.iteritems():
@@ -98,7 +114,9 @@ def main():
 
         log.info('Committing %d edit events...', len(events))
         log.set_level('WARN')
-        #TSTPEvent.commit_many(events)
+        TSTPEvent.commit_many(events)
+        log.set_level('INFO')
+        log.info('done!')
 
 
 

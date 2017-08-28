@@ -69,8 +69,7 @@
     <div class="row">
 <?php
 require_once("../pythonlib.php");
-chdir("../../scripts");
-echo tstp_simple_run(getcwd() . '/pyrun viz.themehierarchy 2>&1');
+echo tstp_pyrun('viz.themehierarchy 2>&1');
 ?>
     </div>
 </div>

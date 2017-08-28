@@ -25,3 +25,6 @@ DBS['tstp'] = DBS['tstp@dreamhost']
 #: the url used to test this deployment, must end with /
 SERVER_URL = "http://127.0.0.1/tstp/webui/"
 
+#: where is the theming git repository located?
+GIT_THEMING_PATH = "f:\\theming"
+

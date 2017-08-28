@@ -1,22 +1,34 @@
 <?php
-$DIR_LOCATIONS = array( 
-    "F:\Workspace\PyTrekTools",
-    "/home/odinlake/tstpdm/scripts/lib/python2.6/site-packages/",
-);
 
-$pp = getenv("PYTHONPATH");
+$legacy_setup_done = false;
 
-if ($pp === FALSE) $pp = "";
-else $pp += ";";
+function legacy_setup() {
+    global $legacy_setup_done;
 
-foreach ($DIR_LOCATIONS as $dir)
-{
-    if (file_exists($dir))
-    {
-        putenv("PYTHONPATH=$pp$dir");
-        break;
+    if (!$legacy_setup_done) {
+        $legacy_setup_done = true;
+
+        $DIR_LOCATIONS = array( 
+            "F:\Workspace\PyTrekTools",
+            "/home/odinlake/tstpdm/scripts/lib/python2.6/site-packages/",
+        );
+
+        $pp = getenv("PYTHONPATH");
+
+        if ($pp === FALSE) $pp = "";
+        else $pp += ";";
+
+        foreach ($DIR_LOCATIONS as $dir)
+        {
+            if (file_exists($dir))
+            {
+                putenv("PYTHONPATH=$pp$dir");
+                break;
+            }
+        }
     }
 }
+
 
 // put back server variables!
 foreach($_SERVER as $key => $value)
@@ -27,7 +39,10 @@ foreach($_SERVER as $key => $value)
 	}
 }
 
+
 function tstp_run_python($cmd) {
+    legacy_setup();
+    
 	$fn = "";
 
 	// note: OS/Apache interferes with stdin PIPE when using proc_open
@@ -64,5 +79,27 @@ function tstp_simple_run($cmd) {
     return $result;
 }
 
+
+function tstp_basedir() {
+    $s = "tstp";
+    $n = strlen($s);
+    $d = "";
+    do {
+        $pd = $d;
+        $d = rtrim(getcwd(), "\\/");
+        if (substr($d, -$n) === $s) break;
+        else chdir("..");
+    } while ($pd != $d);
+    return getcwd();
+}
+
+
+function tstp_pyrun($cmd) {
+    $cmd = tstp_basedir() . '/scripts/pyrun ' . $cmd;
+    $fd = popen($cmd, "r");
+    $result = stream_get_contents($fd);
+    fclose($fd);
+    return $result;
+}
 
 ?>
