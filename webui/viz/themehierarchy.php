@@ -70,7 +70,7 @@
 <?php
 require_once("../pythonlib.php");
 chdir("../../scripts");
-echo tstp_simple_run('pyrun viz.themehierarchy 2>/dev/null');
+echo tstp_simple_run(getcwd() . '/pyrun viz.themehierarchy 2>&1');
 ?>
     </div>
 </div>
