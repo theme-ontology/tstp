@@ -19,7 +19,7 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
         for row in table.find_all("tr"):
             tdfields = row.find_all("td")
 
-            if len(tdfields) > 6:
+            if len(tdfields) > max(cols):
                 titlefield = tdfields[cols[0]]
                 directorfield = tdfields[cols[1]]
                 authorfield = tdfields[cols[2]]

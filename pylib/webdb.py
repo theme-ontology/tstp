@@ -110,7 +110,7 @@ def get_defenitions_text(target):
     return get_defenitions_text_for_objects(objs)
 
 
-def get_defenitions_text_for_objects(objs):
+def get_defenitions_text_for_objects(objs, empty_storythemes_headers = False):
     if not objs:
         return ""
 
@@ -129,26 +129,27 @@ def get_defenitions_text_for_objects(objs):
         lines.append("=" * len(obj_name))
         lines.append("")
 
-        if target == "storythemes":
-            for field in [ "choice", "major", "minor" ]:
-                lines.append(":: " + field.capitalize() + " Themes")
-                items = []
-
-                for obj in grouped[obj_name]:
-                    if obj.weight == field:
-                        items.append("%s [%s]" % (obj.name2, obj.motivation))
-
-                items.sort()
-                lines.extend(item + "," for item in items)
-                lines.append("")
-
-        else:
+        if target != "storythemes":
             for obj in grouped[obj_name]:
                 for field in headers[1:]:
                     lines.append(":: " + field.capitalize())
                     for txt in getattr(obj, field).split("\n\n"):
                         lines.append(textwrap.fill(txt, 78))
                         lines.append("")
+
+        if target == "storythemes" or empty_storythemes_headers:
+            for field in [ "choice", "major", "minor" ]:
+                lines.append(":: " + field.capitalize() + " Themes")
+                items = []
+
+                if not empty_storythemes_headers:
+                    for obj in grouped[obj_name]:
+                        if obj.weight == field:
+                            items.append("%s [%s]" % (obj.name2, obj.motivation))
+
+                items.sort()
+                lines.extend(item + "," for item in items)
+                lines.append("")
 
         lines.append("")
 
