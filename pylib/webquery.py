@@ -11,6 +11,9 @@ import json
 import pprint
 import sys
 from db import do
+import re
+import urllib
+from collections import defaultdict
 
 from webphp import php_get as get
 import webdb
@@ -56,7 +59,10 @@ def handle_response(obj_type, variant = None):
     row_limit = int(get('rlimit', 10000))
     fields = (get('fields') or '').split(',')
     fuzzysearch = get('fuzzysearch', None)
-    
+    collapsecollections = get('collapsecollections', None)
+    regexpnamefilter = get('regexpnamefilter', None)
+    collectionfilter = get('collectionfilter', None)
+
     if variant == "proposedevents":
         # a list of events session user has proposed for insertion,
         # not yet stored in database
@@ -92,6 +98,7 @@ def handle_response(obj_type, variant = None):
             limit = row_limit,
         )
 
+    ## order items according to a search string and "fuzzy" string matching heuristics
     if fuzzysearch is not None:
         from difflib import SequenceMatcher as SM
         import shlex
@@ -123,6 +130,44 @@ def handle_response(obj_type, variant = None):
             obj.extra_fields = extra_fields
 
         objs.sort(key = lambda o: o.score, reverse = False)
+
+    ## show one series entry instead of every episode in a series, etc.
+    if collapsecollections == "on" and issubclass(obj_type, webobject.Story):
+        nobjs = []
+        regexes = [
+            (re.compile(expr), cc)
+            for expr, cc in webdb.OBJECT_COLLECTIONS.iteritems()
+        ]
+        collections = defaultdict(int)
+
+        for obj in objs:
+            for ex, cc in regexes:
+                if ex.match(obj.name):
+                    collections[cc] += 1
+                    break;
+            else:
+                nobjs.append(obj)
+
+        for cc in sorted(collections):
+            nn = collections[cc]
+            nobjs.append(obj_type.create(
+                name = "collection: " + cc,
+                title = cc,
+                date = "various",
+                description = "A collection of %d stories: \"%s\"" % (nn, cc),
+            ))
+
+        objs = nobjs
+
+    # filter by collection name or general regex
+    if collectionfilter is not None:
+        for expr, cc in webdb.OBJECT_COLLECTIONS.iteritems():
+            if cc == collectionfilter:
+                regexpnamefilter = urllib.unquote(expr).decode('utf8')
+
+    if regexpnamefilter is not None:
+        r = re.compile(regexpnamefilter)
+        objs = filter((lambda o: r.match(o.name)), objs)
 
     return obj_type.make_json(
         objs, 

@@ -3,6 +3,17 @@ import webobject
 import textwrap
 
 
+OBJECT_COLLECTIONS = {
+    r"tos\dx\d\d": "Star Trek: The Original Series",
+    r"tas\dx\d\d": "Star Trek: The Animated Series",
+    r"tng\dx\d\d": "Star Trek: The Next Generation",
+    r"ds9\dx\d\d": "Star Trek: Deep Space 9",
+    r"voy\dx\d\d": "Star Trek: Voyager",
+    r"ent\dx\d\d": "Star Trek: Enterprise",
+    r"bbf\dx\d\d": "Babylon 5",
+}
+
+
 SUPPORTED_OBJECTS = {
     "storydefinitions": webobject.Story,
     "themedefinitions": webobject.Theme,

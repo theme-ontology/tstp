@@ -22,18 +22,21 @@
     {
         if (target.tagName.toLowerCase() == 'a')
         {
-            var port = target.getAttribute('href').match(/^:(\d+)(.*)/);
-            if (port)
-            {
-                if (target.port == "8080")
+            var href = target.getAttribute('href');
+            if (href) {
+                var port = href.match(/^:(\d+)(.*)/);
+                if (port)
                 {
-                    target.href = port[2];
-                    target.port = String(parseInt(port[1]) + 1);
-                } 
-                else
-                {
-                    target.href = port[2];
-                    target.port = port[1];            
+                    if (target.port == "8080")
+                    {
+                        target.href = port[2];
+                        target.port = String(parseInt(port[1]) + 1);
+                    } 
+                    else
+                    {
+                        target.href = port[2];
+                        target.port = port[1];            
+                    }
                 }
             }
         }        

@@ -8,6 +8,8 @@
 <?php include "header.php"; ?>
 
     <script>
+        var BASE_URL = "json.php?type=story&fields=name,title,date,description&slimit=200&rlimit=10000";
+
         $(document).ready(function () {
             loadDataOnReady();
         });
@@ -15,7 +17,7 @@
         function loadDataOnReady() {
             $(document).ready(function() {
 			    $('#stories_datatable').DataTable( {
-			        "ajax": 'json.php?type=story&fields=name,title,date,description&slimit=200&rlimit=10000',
+			        "ajax": BASE_URL + '&collapsecollections=on',
 			        "pageLength" : 50,
 			        "paging" : false,
                     "order": [],
@@ -23,8 +25,13 @@
 			        "columnDefs" : [
 			        	{
 						    "render": function ( data, type, row ) {
-						    	urldata = encodeURIComponent(data);
-						        return "<A href=\"story.php?name=" + urldata + "\">" + data + "</A>";
+                                if (data.startsWith("collection:")) {
+                                    var csid = data.substring(12);
+                                    return "<A style='cursor:pointer;' onclick='loadCollectionData(\"" + csid + "\")'>" + data + "</A>";
+                                }
+
+					            var urldata = encodeURIComponent(data);
+					            return "<A href=\"story.php?name=" + urldata + "\">" + data + "</A>";
 						    },
 			        		"className": "tstp-sid-cell",
 						    "targets": 0,
@@ -44,6 +51,14 @@
 			    	]
 			    } );
 			} );
+        }
+
+        function loadCollectionData(sid) {
+            var table = $('#stories_datatable').DataTable();
+            var urldata = encodeURIComponent(sid);
+            var url = BASE_URL + "&collectionfilter=" + urldata;
+            table.clear().draw();
+            table.ajax.url(url).load();
         }
     </script>
 
