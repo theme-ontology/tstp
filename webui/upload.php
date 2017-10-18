@@ -5,6 +5,28 @@
 <title>TSTP</title>
 <?php include "header.php"; ?>
 
+</head>
+<body>
+<?php include "navbar.php"; ?>
+
+<div class="row">
+    <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2">
+        <div style="width:70em;">
+            <H1>The workflow has changed</H1>
+            <P>
+                The data is defined in 
+                <A href="https://github.com/odinlake/theming">our git repository</A>.
+                It is imported to the website via the 
+                <A href="/util">util</A>
+                page.
+            </P>
+        </div>
+    </div>
+</div>
+
+
+<?php
+/*
     <script>
     	var eventsTable;
     	var displayMessages = [];
@@ -292,7 +314,11 @@
 </div>
 
 
+*/
+?>
+
 <?php include "footer.php"; ?>
 
 </body>
+
 </html>

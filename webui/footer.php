@@ -8,7 +8,7 @@
 			//var_dump($_SERVER);
 			?></span>
 
-			 <A href="upload">upload</A>
+			 <A href="upload">workflow</A>
 			 | <A href="resources">download</A>
 			 | <A href="util">util</A>
 			 | <A href="log">log</A>
