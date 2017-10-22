@@ -46,7 +46,8 @@ def cached_special_query(act_type, req_type, obj_name):
 
     if os.path.isfile(path):
         log.debug("returning cached: %s", path)
-        return pickle.load(path)
+        with open(path, "rb") as fh:
+            return pickle.load(fh)
     else:
         log.warn("missing cache: %s", path)
 
