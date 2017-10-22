@@ -30,8 +30,9 @@
             $(document).ready(function() {
 			    $('#themes_datatable').DataTable( {
 			        "ajax": dataUrl,
-			        "pageLength" : 50,
-			        "paging" : false,
+                    "pageLength" : 100,
+                    "paging" : true,
+                    "lengthMenu": [ 10, 100, 1000, 10000 ],
 
 					"order": [
 						[ 2, "asc" ],

@@ -18,8 +18,9 @@
             $(document).ready(function() {
 			    $('#stories_datatable').DataTable( {
 			        "ajax": BASE_URL + '&collapsecollections=on',
-			        "pageLength" : 50,
-			        "paging" : false,
+			        "pageLength" : 100,
+			        "paging" : true,
+                    "lengthMenu": [ 10, 100, 1000, 10000 ],
                     "order": [],
 
 			        "columnDefs" : [
