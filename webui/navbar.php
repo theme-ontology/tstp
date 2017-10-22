@@ -6,12 +6,12 @@
 		global $ME;
 
 		$known = array(
-			"TSTP" => "index",
+			"themeontology.org" => "index",
             "Stories" => "stories",
             "Themes" => "themes",
             "Pictures" => "pictures",
 
-            "index.php" => "TSTP",
+            "index.php" => "themeontology.org",
             "stories.php" => "Stories",
             "story.php" => "Stories",
             "themes.php" => "Themes",
@@ -22,13 +22,13 @@
 		$cls = ($known[$ME] == $name) ? "active" : "";
 		$link = $known[$name];
 
-		if ($name == "TSTP")
+		if ($name == "themeontology.org")
 		{
             if ($cls != "active")
             {
-			     echo "<a class=\"navbar-brand \" href=\"$link\">$name</a>\n";
+			     echo "<a class=\"navbar-brand \" style=\"font-variant:small-caps;\" href=\"$link\">$name</a>\n";
             } else {
-                 echo "<a class=\"active-navbar navbar-brand \" style=\"color:black;\" href=\"$link\">$name</a>\n";
+                 echo "<a class=\"active-navbar navbar-brand \" style=\"font-variant:small-caps;\" href=\"$link\">$name</a>\n";
              }
 		} 
 		else 
@@ -132,7 +132,7 @@
         <span class="icon-bar"></span>
       </button>
 <?php
-	make_link("TSTP");
+	make_link("themeontology.org");
 ?>
     </div>
 
