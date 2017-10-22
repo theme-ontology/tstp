@@ -21,9 +21,15 @@
 	            	<TABLE class="table table-striped">
 		            	<tbody>
                             <tr>
+                                <td><A href = "viz/dist-storytheme.html">Themes per story</A></td>
+                                <td>
+                                    How many minor/major/choice themes are assigned to each story?
+                                </td>
+                            </tr>
+                            <!--tr>
                                 <td><A href = ":3838/shiny/">Story Simularity</A></td>
                                 <td>Pick a story and see other stories that are thematically similar.</td>
-                            </tr>
+                            </tr-->
                             <tr>
                                 <td><A href = "viz/themecube.html">Star Trek tos/tas/tng Theme Domain Distribution</A></td>
                                 <td>

@@ -1,0 +1,238 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>TSTP</title>
+
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../css/tstp.css">
+
+        <script>
+            var URL = '../json.php?action=metathemedata';
+            var hist = [[], [], []];
+            var maxbin = 0;
+
+            // fetch data and start the behemoth
+            d3.request(URL, function(error, response) {
+                var data = JSON.parse(response.response);
+                var leaf_themes = data[0];
+                var count = {};
+
+                for (var i = 0; i < 31; i++)
+                {
+                    hist[0].push(0);
+                    hist[1].push(0);
+                    hist[2].push(0);
+                }
+
+                function getd(map, item, def) {
+                    if (!(item in map)) 
+                        map[item] = def;
+                    return map[item];
+                }
+
+                for (var theme in leaf_themes)
+                {
+                    var theme_uses = leaf_themes[theme];
+
+                    for (var idx in theme_uses)
+                    {
+                        var entry = theme_uses[idx];
+                        var wcount = getd(count, entry[0], {});
+                        var n = getd(wcount, entry[1], 0);
+                        count[entry[0]][entry[1]] = n < 30 ? n + 1 : n;
+                    }
+                }
+
+                for (var key in count)
+                {
+                    var entry = count[key];
+                    hist[0][entry["minor"]] += 1;
+                    hist[1][entry["major"]] += 1;
+                    hist[2][entry["choice"]] += 1;
+                }
+
+                for (var w in hist)
+                {
+                    for (n in hist[w])
+                    {
+                        if (hist[w][n] > maxbin)
+                            maxbin = hist[w][n];
+                    }
+                }
+
+                window.addEventListener("resize", redraw);
+                redraw();
+            });
+
+            function redraw()
+            {
+                var svg = d3.select("#canvas");
+                var bb = svg.node().getBoundingClientRect();
+                var dx = Math.floor((bb.width - 20) / 31);
+                var dy = Math.max(1, Math.floor((bb.height - 30) / maxbin));
+                var fh = function(d, i) { return dy * d; };
+                var fy = function(d, i) { return bb.height - dy * d - 30; };
+                var fx = function(j) { 
+                    return function (d, i) { 
+                        return 20 + i * dx + (barwidth + 1) * j; 
+                    }
+                };
+                var barwidth = dx / 4;
+                var dtext = Math.floor(Math.max(1, 100 / dx));
+                var ybar = Math.max(1, Math.floor(maxbin / 40) * 10);
+
+                svg.selectAll(".ygrid")
+                    .data([ ybar ])
+                    .enter()
+                        .append("line")
+                        .attr("class", "ygrid");
+                svg.selectAll(".ygrid")
+                    .attr("x1", 30)
+                    .attr("y1", fy)
+                    .attr("x2", bb.width - 10)
+                    .attr("y2", fy);
+
+                svg.selectAll(".yvalue")
+                    .data([ ybar ])
+                    .enter()
+                        .append("text")
+                        .attr("class", "yvalue")
+                svg.selectAll(".yvalue")
+                        .attr("x", 20)
+                        .attr("y", fy)
+                        .text(function (d, i) { return d; });
+
+                svg.selectAll(".bar0")
+                    .data(hist[0])
+                    .enter()
+                        .append("rect")
+                        .attr("class", "bar0");
+                svg.selectAll(".bar0")
+                        .attr("x", fx(0))
+                        .attr("y", fy)
+                        .attr("width", barwidth)
+                        .attr("height", fh);
+
+                svg.selectAll(".bar1")
+                    .data(hist[1])
+                    .enter().append("rect")
+                    .attr("class", "bar1");
+                svg.selectAll(".bar1")
+                        .attr("x", fx(1))
+                        .attr("y", fy)
+                        .attr("width", barwidth)
+                        .attr("height", fh);
+
+                svg.selectAll(".bar2")
+                    .data(hist[2])
+                    .enter()
+                        .append("rect")
+                        .attr("class", "bar2");
+                svg.selectAll(".bar2")
+                        .attr("x", fx(2))
+                        .attr("y", fy)
+                        .attr("width", barwidth)
+                        .attr("height", fh);
+
+                svg.selectAll(".xbin")
+                    .data(hist[0])
+                    .enter()
+                        .append("text")
+                        .attr("class", "xbin");
+                svg.selectAll(".xbin")
+                        .attr("x", fx(1))
+                        .attr("y", bb.height - 10)
+                        .text(function(d, i) { return (i > 0 && i % dtext == 0) ? (i < 30 ? i : "30+") : ""; });                
+
+                svg.selectAll(".ytitle")
+                    .data([ bb.height ])
+                    .enter()
+                        .append("text")
+                        .attr("class", "ytitle")
+                        .text("number of stories");
+                svg.selectAll(".ytitle")
+                    .attr("transform", function(d) { 
+                        return "translate(" + 10 + "," + (d / 2 + 50) + ")rotate(-90)";
+                    });
+
+            }
+
+        </script>
+
+        <style>
+            body {
+                text-align: center;
+                padding: 5em;
+                margin-bottom: 0px;
+                overflow: hidden;
+            }
+            svg {
+                background: none;
+                cursor: default;
+                max-width: 2000px;
+                max-height: 800px;
+                width: 100%;
+                height: 90%;
+            }
+            svg.legend {
+                width: 500px;
+                height: 40px;
+            }
+            text {
+                fill: black;
+                font-family: Arial;
+            }
+            rect.bar0, rect.lbar0 {
+                fill: hsl(0, 40%, 60%);
+            }
+            rect.bar1, rect.lbar1 {
+                fill: hsl(90, 40%, 60%);
+            }
+            rect.bar2, rect.lbar2 {
+                fill: hsl(180, 40%, 60%);
+            }
+            text.xbin {
+                text-anchor: center;
+            }
+            text.yvalue {
+                text-anchor: end;
+                dominant-baseline: middle;
+            }
+            text.yvalue {
+                text-anchor: center;
+            }
+            text.legendentry {
+                text-anchor: start;
+            }
+            line.ygrid {
+                stroke: #cccccc;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div style="text-align: right;">
+            <svg class="legend" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <g id="legend" transform="translate(50, 10)">
+                    <rect class="lbar0" x="0" y="10" width="20" height="10" />
+                    <rect class="lbar1" x="150" y="10" width="20" height="10" />
+                    <rect class="lbar2" x="300" y="10" width="20" height="10" />
+                    <text class="legendentry" x="25" y="20">minor themes</text>
+                    <text class="legendentry" x="175" y="20">major themes</text>
+                    <text class="legendentry" x="325" y="20">choice themes</text>
+                </g>
+            </svg>
+        </div>
+        <div style="position:relative; top:-50px; hieght:100%;">
+            <svg id="canvas" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            </svg>
+            <H5>distribution of themes per story</H5>
+        </div>
+
+    </body>
+
+</html>
+
+
+
