@@ -3,20 +3,20 @@ import log
 log.set_level('SILENT')
 log.set_templog("web.log")
 
-import os
 import webobject
 import traceback
 import cgi
 import json
-import pprint
-import sys
-from db import do
 import re
 import urllib
 from collections import defaultdict
 
 from webphp import php_get as get
 import webdb
+
+from webquerylib import (
+    cached_special_query,
+)
 
 
 OBJECT_TYPES = {
@@ -192,32 +192,18 @@ def handle_query():
     act_type = get("action")
     req_type = get("type")
     obj_type = OBJECT_TYPES.get(req_type)
+    obj_name = get("name")
 
-    ## special queries
-    if act_type == "themelist":
-        themes = list( x[0] for x in do("""
-            SELECT DISTINCT name from `web_attributes`
-            WHERE category = "theme"
-        """))
-        return json.dumps(themes)
+    log.debug("responding to: %s, %s, %s", act_type, req_type, obj_name)
 
-    if act_type == "metathemedata":
-        from webdb import get_metatheme_data
-        return json.dumps(get_metatheme_data())
-
-    if act_type == "stats" and req_type == "theme":
-        from lib.datastats import get_theme_stats
-        obj_name = get("name")
-        return json.dumps(get_theme_stats(obj_name))
-
-    if act_type in webdb.SUPPORTED_OBJECTS:
-        return json.dumps(webdb.get_defenitions(act_type))
+    res = cached_special_query(act_type, req_type, obj_name)
+    if res:
+        return res
 
     ## queries for each object type available
     if obj_type:
         if act_type == "submit":
             handle_submit(obj_type)
-
         return handle_response(obj_type, req_type)
     
     else:
