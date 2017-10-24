@@ -7,10 +7,10 @@
         <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="../css/tstp.css">
 
-        <script src="dist-storytheme.js">
+        <script src="dist-themeusage.js">
         </script>
         <script>
-            do_storytheme("#canvas_storytheme");
+            do_themeusage("#canvas_themeusage");
         </script>
 
         <style>
@@ -35,6 +35,11 @@
             text {
                 fill: black;
                 font-family: Arial;
+            }
+            rect {
+                stroke: black;
+                stroke-width: 0.5px;
+                stroke-opacity: 0.2;
             }
             rect.bar0, rect.lbar0 {
                 fill: hsl(0, 40%, 60%);
@@ -61,6 +66,19 @@
             line.ygrid {
                 stroke: #cccccc;
             }
+            div#tooltip {
+                visibility: hidden; 
+                position: absolute;
+                background: rgba(255, 255, 255, 0.8);
+                border: 1px solid #cccccc;
+                pointer-events: none;
+                padding: 1em 1.5em;
+                max-width: 30em;
+                text-align: left;
+            }
+            #tooltip font {
+                color: #996644;
+            }
         </style>
     </head>
 
@@ -78,9 +96,14 @@
             </svg>
         </div>
         <div style="position:relative; top:-50px; hieght:100%;">
-            <svg id="canvas_storytheme" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <svg id="canvas_themeusage" version="1.1" xmlns="http://www.w3.org/2000/svg">
             </svg>
-            <H5>distribution of themes per story</H5>
+            <H5>most used themes</H5>
+        </div>
+        <div id="tooltip">
+            The theme <font id="themename"></font>
+            was used as <font id="themeweight"></font> theme in <font id="storycount"></font> stories
+            making it the <font id="themeorder"></font> most used theme of that kind.
         </div>
 
     </body>
