@@ -16,6 +16,7 @@ function TSTP_storytheme_do(svgname, tooltipname, data)
     var hist = [[], [], []];
     var weightdefs = [ "minor", "major", "choice" ];
     var maxbin = 0;
+    var redrawcount = 0;
 
     if (data === null) 
         return TSTP_storytheme_data(function(data) {
@@ -72,8 +73,21 @@ function TSTP_storytheme_do(svgname, tooltipname, data)
             }
         }
 
-        window.addEventListener("resize", redraw);
+        window.addEventListener("resize", schedule_redraw);
         redraw();
+    }
+
+    function schedule_redraw()
+    {
+        redrawcount += 1;
+        setTimeout(function() { redraw_once(); }, 100)
+    }
+
+    function redraw_once()
+    {
+        redrawcount -= 1;
+        if (redrawcount == 0) 
+            redraw();
     }
 
     function redraw()
