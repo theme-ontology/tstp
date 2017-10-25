@@ -7,10 +7,15 @@
         <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="../css/tstp.css">
 
-        <script src="dist-themeusage.js">
-        </script>
+        <script src="dist-themeusage.js"></script>
+        <script src="dist-storytheme.js"></script>
+
         <script>
-            do_themeusage("#canvas_themeusage");
+            // same underlying data
+            TSTP_storytheme_data(function(data) {
+                TSTP_themeusage_do("#canvas_themeusage", "#tooltip_themeusage", data);
+                TSTP_storytheme_do("#canvas_storytheme", "#tooltip_storytheme", data);
+            });
         </script>
 
         <style>
@@ -24,9 +29,9 @@
                 background: none;
                 cursor: default;
                 max-width: 2000px;
-                max-height: 800px;
+                min-width: 500px;
                 width: 100%;
-                height: 90%;
+                height: 500px;
             }
             svg.legend {
                 width: 500px;
@@ -66,7 +71,7 @@
             line.ygrid {
                 stroke: #cccccc;
             }
-            div#tooltip {
+            div.mytooltip {
                 visibility: hidden; 
                 position: absolute;
                 background: rgba(255, 255, 255, 0.8);
@@ -76,7 +81,7 @@
                 max-width: 30em;
                 text-align: left;
             }
-            #tooltip font {
+            .mytooltip font {
                 color: #996644;
             }
         </style>
@@ -95,20 +100,30 @@
                 </g>
             </svg>
         </div>
-        <div style="position:relative; top:-50px; hieght:100%;">
+
+        <div style="position:relative; top:-50px;">
+            <svg id="canvas_storytheme" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            </svg>
+            <H5>distribution of themes per story</H5>
+        </div>
+
+        <div style="position:relative; top:-50px;">
             <svg id="canvas_themeusage" version="1.1" xmlns="http://www.w3.org/2000/svg">
             </svg>
             <H5>most used themes</H5>
         </div>
-        <div id="tooltip">
+
+        <div id="tooltip_storytheme" class="mytooltip">
+            There are <font id="numstories"></font> stories 
+            that each have been assigned precisely <font id="numthemes"></font> 
+            <font id="themeweight"></font> themes.
+        </div>
+        <div id="tooltip_themeusage" class="mytooltip">
             The theme <font id="themename"></font>
             was used as <font id="themeweight"></font> theme in <font id="storycount"></font> stories
             making it the <font id="themeorder"></font> most used theme of that kind.
         </div>
-
     </body>
 
 </html>
-
-
 

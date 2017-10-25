@@ -21,9 +21,10 @@
 	            	<TABLE class="table table-striped">
 		            	<tbody>
                             <tr>
-                                <td><A href = "viz/dist-storytheme.html">Themes per story</A></td>
+                                <td><A href = "viz/dist-themeusage.html">Themes distribution</A></td>
                                 <td>
-                                    How many minor/major/choice themes are assigned to each story?
+                                    How many minor/major/choice themes are assigned to each story? 
+                                    What are the most frequently used themes?
                                 </td>
                             </tr>
                             <!--tr>

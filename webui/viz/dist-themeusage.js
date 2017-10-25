@@ -1,10 +1,28 @@
 
-function do_themeusage(svgname)
+function TSTP_themeusage_data(cb)
 {
     var URL = '../json.php?action=metathemedata';
+
+    // fetch data and start the behemoth
+    d3.request(URL, function(error, response) {
+        var data = JSON.parse(response.response);
+        cb(data);
+    });
+}
+
+
+function TSTP_themeusage_do(svgname, tooltipname, data)
+{
     var DATA = [[], [], []];
     var weightdefs = [ "minor", "major", "choice" ];
     var maxbin = 0;
+
+    if (data === null) 
+        return TSTP_themeusage_data(function(data) {
+            TSTP_themeusage_do(svgname, data);
+        });
+
+    init(data);
 
     function defaultDict(createValue) {
         return new Proxy(Object.create(null), {
@@ -16,9 +34,8 @@ function do_themeusage(svgname)
         });
     }
 
-    // fetch data and start the behemoth
-    d3.request(URL, function(error, response) {
-        var data = JSON.parse(response.response);
+    function init(data)
+    {
         var leaf_themes = data[0];
         var count = defaultDict(function() { 
             return defaultDict(function() { return 0; }); 
@@ -55,7 +72,7 @@ function do_themeusage(svgname)
 
         window.addEventListener("resize", redraw);
         redraw();
-    });
+    }
 
     function redraw()
     {
@@ -90,20 +107,20 @@ function do_themeusage(svgname)
                         d3.select(this).transition().duration(1)
                             .style('fill-opacity', 0.9)
                             .style('filter', 'brightness(75%)');
-                        var tt = d3.select("#tooltip");
+                        var tt = d3.select(tooltipname);
                         tt.style("visibility", "visible");
                     })
                     .on('mouseout', function () {
                         d3.select(this).transition().duration(100)
                             .style('fill-opacity', 1.0)
                             .style('filter', 'brightness(100%)');
-                        var tt = d3.select("#tooltip");
+                        var tt = d3.select(tooltipname);
                         tt.style("visibility", "hidden");
                     })
                     .on('mousemove', function (d, i) {
                         var xx = d3.event.pageX;
                         var yy = d3.event.pageY;
-                        var tt = d3.select("#tooltip");
+                        var tt = d3.select(tooltipname);
                         tt.style("left", xx + "px");
                         tt.style("top", yy + "px");
                         tt.select("#themename").text(d[0]);
