@@ -24,6 +24,8 @@ function TSTP_storytheme_do(svgname, tooltipname, data)
         });
 
     init(data);
+    window.addEventListener("resize", schedule_redraw);
+    redraw();
 
     function init(data)
     {
@@ -72,9 +74,6 @@ function TSTP_storytheme_do(svgname, tooltipname, data)
                     maxbin = hist[w][n];
             }
         }
-
-        window.addEventListener("resize", schedule_redraw);
-        redraw();
     }
 
     function schedule_redraw()

@@ -51,6 +51,8 @@ def main():
         rorder = [ ("theme", rthemes), ("story", rstories), ("storytheme", rstorythemes) ]
         events = []
 
+        undefined = []
+
         for dd1, dd2 in rmatch:
             for path, ll in dd1.iteritems():
                 for obj in ll:
@@ -70,6 +72,7 @@ def main():
                 for parent in parents:
                     if parent not in rthemes:
                         log.info('Undefined parent theme "%s" for "%s" in %s', parent, key, path)
+                        undefined.append(("parent theme", parent, key, path))
 
         # drop any themes with only undefined parents
         changed = True
@@ -86,13 +89,17 @@ def main():
                         break;
 
         # drop story-themes for which either story or theme is not defined
+        for theme in sorted(set(x[1] for x in rstorythemes.keys())):
+            if theme not in rthemes:
+                log.warn('Found undefined theme: "%s"...', theme)
+        for story in sorted(set(x[0] for x in rstorythemes.keys())):
+            if story not in rstories:
+                log.warn('Found undefined story: "%s"...', story)
         for story, theme in rstorythemes.keys():
             drop = False
             if theme not in rthemes:
-                log.warn('Found undefined theme: "%s"...', theme)
                 drop = True
             if story not in rstories:
-                log.warn('Found undefined story: "%s"...', story)
                 drop = True
             if drop:
                 spec = [ path for path, _ in rstorythemes[(story, theme)] ]
