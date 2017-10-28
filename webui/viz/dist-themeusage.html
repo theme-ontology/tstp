@@ -8,12 +8,14 @@
         <link rel="stylesheet" type="text/css" href="../css/tstp.css">
 
         <script src="dist-themeusage.js"></script>
+        <script src="dist-themeusage2.js"></script>
         <script src="dist-storytheme.js"></script>
 
         <script>
             // same underlying data
             TSTP_storytheme_data(function(data) {
                 TSTP_themeusage_do("#canvas_themeusage", "#tooltip_themeusage", data);
+                TSTP_themeusage2_do("#canvas_themeusage2", "#tooltip_themeusage2", data);
                 TSTP_storytheme_do("#canvas_storytheme", "#tooltip_storytheme", data);
             });
         </script>
@@ -109,6 +111,12 @@
         </div>
 
         <div style="position:relative; top:-60px;">
+            <svg id="canvas_themeusage2" class="canvas" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            </svg>
+            <H5>distribution of stories per theme</H5>
+        </div>
+
+        <div style="position:relative; top:-60px;">
             <svg id="canvas_themeusage" class="canvas" version="1.1" xmlns="http://www.w3.org/2000/svg">
             </svg>
             <H5>most used themes</H5>
@@ -118,6 +126,12 @@
             There are <font id="numstories"></font> stories 
             that each have been assigned precisely <font id="numthemes"></font> 
             <font id="themeweight"></font> themes.
+        </div>
+
+        <div id="tooltip_themeusage2" class="mytooltip">
+            There are <font id="numthemes"></font> themes 
+            that have been used as <font id="themeweight"></font> theme
+            in precisely <font id="numstories"></font> stories.
         </div>
 
         <div id="tooltip_themeusage" class="mytooltip">
