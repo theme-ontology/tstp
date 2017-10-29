@@ -17,6 +17,7 @@ function TSTP_themeusage_do(svgname, tooltipname, data)
     var weightdefs = [ "minor", "major", "choice" ];
     var maxbin = 0;
     var redrawcount = 0;
+    var BINS = 70;
 
     if (data === null) 
         return TSTP_themeusage_data(function(data) {
@@ -67,7 +68,7 @@ function TSTP_themeusage_do(svgname, tooltipname, data)
         for (widx in weightdefs)
         {
             DATA[widx].sort(function(lhs, rhs) { return rhs[1] - lhs[1]; });
-            DATA[widx].splice(30);
+            DATA[widx].splice(BINS);
             maxbin = Math.max(maxbin, DATA[widx][0][1]);
         }
 
@@ -92,7 +93,7 @@ function TSTP_themeusage_do(svgname, tooltipname, data)
     {
         var svg = d3.select(svgname);
         var bb = svg.node().getBoundingClientRect();
-        var dx = Math.floor((bb.width - 20) / 31);
+        var dx = Math.floor((bb.width - 20) / (BINS + 1));
         var dy = Math.max(1, Math.floor((bb.height - 30) / maxbin));
         var fh = function(d, i) { return dy * d[1]; };
         var fy = function(d, i) { return bb.height - dy * d[1] - 30; };
@@ -183,7 +184,7 @@ function TSTP_themeusage_do(svgname, tooltipname, data)
         svg.selectAll(".xbin")
                 .attr("x", fx(1))
                 .attr("y", bb.height - 10)
-                .text(function(d, i) { return (i % dtext == 0) ? (i + 1) : ""; });
+                .text(function(d, i) { return (i % dtext == 0) ? mkorder(i + 1) : ""; });
 
         svg.selectAll(".ytitle")
             .data([ bb.height ])
