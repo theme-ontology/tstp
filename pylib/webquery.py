@@ -108,10 +108,11 @@ def handle_response(obj_type, variant = None):
         for obj in objs:
             sscore = 0.0
             scount = 0.0
-            needles = shlex.split(fuzzysearch)
+            needles = shlex.split(fuzzysearch.replace("'", "\\'"))
 
             for needle in needles:
                 if needle:
+                    needle = needle.replace("\\", "")
                     scores = []
                     haystacks = [ obj.name ] + [ getattr(obj, f) for f in fields if f not in ("name", "score") ]
 
