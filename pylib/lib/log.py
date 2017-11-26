@@ -7,9 +7,21 @@ from datetime import datetime
 import timeit
 
 
+import sys
+import codecs
+sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+
+
 LEVELS = [ 'DEBUG', 'STATUS', 'INFO', 'WARN', 'ERROR', 'SILENT' ]
 LEVEL = 0
 LOGFILE = None
+LOGTARGET = sys.stdout
+
+
+def redirect(loc = "stderr"):
+    global LOGTARGET
+    LOGTARGET = getattr(sys, loc)
 
 
 def set_templog(filename):
@@ -30,7 +42,7 @@ def set_level(level):
 
 
 def printfunc(s):
-    print(s.encode("utf-8", "replace"))
+    LOGTARGET.write(s.encode("utf-8", "replace"))
     
     
 def printmsg(msg, level = 'INFO', args = None):

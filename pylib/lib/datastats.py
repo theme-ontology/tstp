@@ -1,7 +1,17 @@
 import lib.dataparse
+from lib.func import memoize
 from collections import defaultdict, deque
 
 
+ROOTS = [
+    "alternate reality",
+    "society",
+    "the human condition",
+    "the pursuit of knowledge",
+]
+
+
+@memoize
 def themes_with_usage():
     """
     Returns { theme_name => theme_object } where for each theme object th,
@@ -22,6 +32,38 @@ def themes_with_usage():
     return result
 
 
+@memoize
+def metathemes_with_usage():
+    """
+    Returns { theme_name => [ sid1, sid2, ... ] } for all themes that have
+    at least one child.
+    """
+    parents_lu, children_lu, lforder = lib.datastats.get_theme_tree()
+    themes_lu = lib.datastats.themes_with_usage()
+    levels = lib.datastats.get_metathemes_by_level()
+    result = {}
+
+    for level, themes in enumerate(levels):
+        for theme in themes:
+            children = deque(children_lu[theme])
+            visited = set(children)
+            stories = dict(themes_lu[theme].stories)
+
+            while children:
+                child = children.popleft()
+                stories.update(themes_lu[child].stories)
+
+                for cc in children_lu[child]:
+                    if cc not in visited:
+                        children.append(cc)
+                        visited.add(cc)
+
+            result[theme] = stories
+
+    return result
+
+
+@memoize
 def get_theme_stats(theme):
     """
     Returns { parents => [...], children => [...] }.
@@ -45,6 +87,7 @@ def get_theme_stats(theme):
     }
 
 
+@memoize
 def get_theme_tree():
     """
     return (parents, children, lforder) as (
@@ -86,3 +129,38 @@ def get_theme_tree():
                 ss.add(parent)
 
     return parents, children, lforder
+
+
+@memoize
+def get_metathemes_by_level():
+    """
+    Return all themes that are parents as:
+    [ 
+        [root1, root2, ...], 
+        [l1theme1, l2theme2, ...], 
+        [l2theme1, ...], 
+        ... 
+    ]
+    """
+    parents, children, bfs = get_theme_tree()
+    level = {}
+    result = []
+
+    for theme in reversed(bfs):
+        if children[theme]:
+            ps = parents[theme]
+            pl = max(level.get(t, -1) for t in ps) if ps else -1
+            nn = max(level.get(theme, 0), pl + 1)
+
+            if nn > 0 or theme in ROOTS:
+                level[theme] = nn
+
+    themes = sorted(level.iteritems(), key = lambda x: (x[1], x[0]))
+
+    for theme, nn in themes:
+        while len(result) <= nn:
+            result.append([])
+        result[nn].append(theme)
+
+    return result
+
