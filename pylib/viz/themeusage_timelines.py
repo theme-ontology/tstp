@@ -10,7 +10,6 @@ lib.log.redirect()
 
 
 def main():
-    #print smooth(np.array([0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0]), 7)
     make_viz()
 
 
@@ -48,12 +47,6 @@ def make_viz():
         "the pursuit of knowledge": "#0F0F6F",
         "alternate reality": "#6F5F0F",
     }
-
-    parents_lu, children_lu, lforder = lib.datastats.get_theme_tree()
-    themes_lu = lib.datastats.metathemes_with_usage()
-    levels = lib.datastats.get_metathemes_by_level()
-    metathemes = {}
-    sids = set()
     prefixes = {
         'tos': 0,
         'tas': 1,
@@ -100,6 +93,25 @@ def make_viz():
         },
     })
 
+    parents_lu, children_lu, lforder = lib.datastats.get_theme_tree()
+    themes_lu = lib.datastats.metathemes_with_usage()
+    leafthemes_lu = lib.datastats.themes_with_usage()
+    levels = lib.datastats.get_metathemes_by_level()
+    metathemes = {}
+    leafthemes = []
+    sids = set()
+
+    for theme, obj in leafthemes_lu.iteritems():
+        score = 0
+
+        for sid, st in obj.stories.iteritems():
+            if sid[:3] in prefixes:
+                score += weights[st.weight] * 3 + 1
+
+        leafthemes.append((score, theme, obj.stories, obj.parents.split(",")[0]))
+
+    leafthemes.sort(reverse = True)
+
     for level, themes in enumerate(levels):
         for theme in themes:
             metathemes[theme] = level
@@ -128,6 +140,40 @@ def make_viz():
                 xx = sids[sid] * dx
                 svg.line(xx, 0, xx, 7000, cls = "gridminor" if ss > 1 else "gridmajor")
 
+    def drawit(aa, xx, yy, theme, level, plevel, color, compact = False, ccolor = "#000000"):
+        ddy = 10 if compact else 30
+        dy = 6 if compact else 13
+
+        svg.line(0, yy + ddy, width, yy + ddy, cls = "gridminor")
+        pts = make_pts(aa[0] + aa[1] + aa[2], yy, dx, width, dy, ddy)
+        svg.polygon(pts, cls = "themeweight0")
+        pts = make_pts(aa[1] + aa[2], yy, dx, width, dy, ddy)
+        svg.polygon(pts, cls = "themeweight1", style = { "fill": color })
+        pts = make_pts(aa[2], yy, dx, width, dy, ddy)
+        svg.polygon(pts, cls = "themeweight2")
+
+        if not compact:
+            svg.text(25 + 15 * level, yy + textoffset, theme)
+
+        elevel = max(0, min(level, plevel))
+        x1 = 10 + 15 * elevel
+        x2 = 22 + 15 * level
+        xx2 = max(x1, 10 + 15 * level)
+        y2 = yy + textoffset - 3
+
+        if level > 0:
+            y1 = levelyy[elevel] + textoffset - 3
+            svg.line(x1, y1, x1, y2, cls = "treeline")
+            svg.line(x1, y2, x2, y2, cls = "treeline")
+            svg.line(x1, y1, x1, y2, cls = "treeline")
+
+        if compact:
+            y2 -= 7
+
+        radius = 3 if ccolor == "#000000" else 4 if compact else 5
+
+        svg.circle(xx2, y2, radius, cls = "treenode", style = { "fill": ccolor })
+
     while dfs:
         level, theme = dfs.pop()
         nlevel = [ ch for ch in sorted(children_lu[theme]) if ch in metathemes and ch not in visited ]
@@ -151,33 +197,36 @@ def make_viz():
         for i, a in enumerate(aa):
             aa[i] = np.maximum(a, smooth(a))
 
-        svg.line(0, yy + 30, width, yy + 30, cls = "gridminor")
-        pts = make_pts(aa[0] + aa[1] + aa[2], yy, dx, width)
-        svg.polygon(pts, cls = "themeweight0")
-        pts = make_pts(aa[1] + aa[2], yy, dx, width)
-        svg.polygon(pts, cls = "themeweight1", style = { "fill": color })
-        pts = make_pts(aa[2], yy, dx, width)
-        svg.polygon(pts, cls = "themeweight2")
-        svg.text(25 + 15 * level, yy + textoffset, theme)
-
-        elevel = max(0, min(level, plevel))
-        x1 = 10 + 15 * elevel
-        x2 = 22 + 15 * level
-        xx2 = max(x1, 10 + 15 * level)
-        y2 = yy + textoffset - 3
-
-        if level > 0:
-            y1 = levelyy[elevel] + textoffset - 3
-            svg.line(x1, y1, x1, y2, cls = "treeline")
-            svg.line(x1, y2, x2, y2, cls = "treeline")
-            svg.line(x1, y1, x1, y2, cls = "treeline")
-
-        svg.circle(xx2, y2, 3, cls = "treenode")
+        drawit(aa, xx, yy, theme, level, plevel, color)
 
         plevel = level
         levelyy[level] = yy
         yy += groupspacing
 
+    yy += groupspacing
 
-    print svg.make(1000, 5000)
+    for idx, (score, theme, stories, parent) in enumerate(leafthemes[:70]):
+        while parents_lu[parent]:
+            parent = parents_lu[parent][0]
+
+        aa = [ np.zeros(len(sids)) for _ in xrange(3) ]
+
+        for sid, st in stories.iteritems():
+            ii = sids.get(sid, None)
+            jj = weights[st.weight]
+
+            if ii is not None:
+                aa[jj][ii] = 1
+
+        for i, a in enumerate(aa):
+            aa[i] = np.maximum(a, smooth(a))
+
+        drawit(aa, xx, yy, theme, 0, -1, "#444444", idx > 30, colors[parent])
+
+        if idx == 30:
+            yy += 10
+
+        yy += groupspacing if idx <= 30 else 10
+
+    print svg.make(1000, 8000)
 
