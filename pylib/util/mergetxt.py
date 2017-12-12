@@ -10,6 +10,7 @@ import lib.dataparse
 import lib.xls
 from collections import defaultdict
 import textwrap
+import lib.log
 
 
 def block_fill(lines):
@@ -44,6 +45,7 @@ FIELDFORMATTERS = {
 FIELDORDER = [
     "Title",
     "Description",
+    "Date",
     "Ratings",
     "Main Characters",
     "Supporting Cast",
@@ -57,9 +59,19 @@ FIELDORDER = [
 def main():
     topics = defaultdict(dict)
     fieldorder = list(FIELDORDER)
+    allfields = False
+    banned = set()
+    forced = set()
+    found = set()
 
     for arg in sys.argv[2:]:
-        if arg.startswith("-"):
+        if arg == "--all":
+            allfields = True
+        elif arg[:1] == "-":
+            banned.add(arg[1:])
+        elif arg[:1] == "+":
+            forced.add(arg[1:])
+        if arg[:1] in "-+":
             continue
 
         target = os.path.abspath(arg)
@@ -70,6 +82,10 @@ def main():
 
         for topic, field, lines in stuff:
             field = FIELDRENAME.get(field.lower(), field)
+            if field in banned:
+                continue
+
+            found.add(field)
             formater = (
                 FIELDFORMATTERS.get(field.lower(), None) 
                 or (lambda lines: "\n".join(l.strip() for l in lines))
@@ -96,14 +112,17 @@ def main():
         lines.append("")
 
         for field in fieldorder:
-            value = topics[topic].get(field, None)
+            if field in found:
+                value = topics[topic].get(field, None)
 
-            if value is not None:
-                lines.append(":: " + field)
-                lines.append(value.strip())
-                lines.append("")
+                if allfields or field in forced or value is not None:
+                    lines.append(":: " + field)
+                    if value:
+                        lines.append(value.strip())
+                    lines.append("")
                 
         lines.append("")
 
-    print "\n".join(l.encode("utf-8") for l in lines)
+    for line in lines:
+        print line
 

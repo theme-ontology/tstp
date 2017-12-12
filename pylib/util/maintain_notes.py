@@ -1,5 +1,5 @@
 """
-Go thorugh the /notes dir and output suggestions in /auto/notes, 
+Go through the /notes dir and output suggestions in /auto/notes, 
 in a "theming" git repository clone.
 
     pyrun util.maintain_notes /path/to/theming
