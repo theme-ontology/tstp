@@ -26,8 +26,6 @@ function receivedObjInfoData(result)
     var children = [];
     var parents = [];
 
-    console.log(result);
-
     try 
     {
         children = result["children"];
