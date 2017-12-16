@@ -8,6 +8,7 @@ import os.path
 import tempfile
 import time
 import csv
+import codecs
 
 import webphp
 import webdb
@@ -72,7 +73,7 @@ def handle():
             print ret
 
         elif isinstance(ret, unicode):
-            with open(ret, fmt) as fh:
+            with codecs.open(ret, fmt, encoding="utf-8") as fh:
                 print fh.read()
         else:
             print "<pre>", type(ret), ret, "</pre>"
