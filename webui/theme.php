@@ -25,12 +25,23 @@
             loadTablesOnReady();
         });
 
+        function makeThemeLink(data, color = null)
+        {
+            urldata = encodeURIComponent(data);
+            if (color)
+            {
+                return '<A style="color:' + color + ';" href="theme.php?name=' + urldata + '">' + data + '</A>';
+            }
+            return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
+        }
+
         function loadTablesOnReady() {
             $(document).ready(function() {
                 $('#stories_datatable').DataTable( {
                     "ajax": 'json.php?type=storytheme&fields=name1,weight,motivation&f2=' + encodeURIComponent(g_objName) + '&slimit=200&rlimit=10000',
                     "pageLength" : 50,
                     "paging" : false,
+                    "searching": false,
                     "order": [
                         [ 1, "asc" ],
                         [ 0, "asc" ],
@@ -56,6 +67,33 @@
                     ]
                 } );
             } );
+
+            $(document).ready(function() {
+                $('#children_datatable').DataTable( {
+                    "pageLength" : 50,
+                    "paging" : false,
+                    "searching": false,
+                    "order": [
+                        [ 0, "asc" ],
+                    ],
+
+                    "columnDefs" : [
+                        {
+                            "render": function ( data, type, row ) {
+                                return makeThemeLink(data);
+                            },
+                            "className": "tstp-theme-cell",
+                            "targets": 0,
+                            "width": "20%",
+                        },
+                        {
+                            "className": "tstp-description-cell",
+                            "targets": 1,
+                        },
+                    ]
+                } );
+            } );
+
         }
     </script>
 
@@ -98,7 +136,7 @@
 <?php // Theme INFO //?>
                 <div id="div_infobox" style="display:none; padding: 0px 0px; margin: 0px 0px;">
                     <div id="div_parents"></div>
-                    <div id="div_children"></div>
+                    <div id="div_children" style="display:none"></div>
                 </div>
 
 	        </div>
@@ -106,11 +144,34 @@
     </div>
 
 
+<?php // Children TABLE //?>
+    <div class="row">
+
+        <div id="div_datatable" class="col-md-12">
+            <div class="basebox">
+                <H4>List of Child Themes:</H4>
+                <table id="children_datatable" class="display table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Theme</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
 <?php // Stories TABLE //?>
     <div class="row">
 
         <div id="div_datatable" class="col-md-12">
             <div class="basebox">
+                <H4>List of Stories:</H4>
                 <table id="stories_datatable" class="display table table-striped" cellspacing="0" width="100%">
                     <thead>
                         <tr>

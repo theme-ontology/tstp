@@ -66,17 +66,24 @@ def metathemes_with_usage():
 @memoize
 def get_theme_stats(theme):
     """
-    Returns { parents => [...], children => [...] }.
+    Returns { 
+        parents => [...], 
+        children => [...],
+        descriptions => { theme => description }
+    }.
     """
     parents = []
     children = []
+    descriptions = {}
 
     for th in lib.dataparse.read_themes_from_db():
         thp = [ x.strip() for x in th.parents.split(",") ]
         if th.name == theme:
             parents = filter(None, thp)
+            descriptions[th.name] = th.description
         elif theme in thp:
             children.append(th.name)
+            descriptions[th.name] = th.description
 
     parents.sort()
     children.sort()
@@ -84,6 +91,7 @@ def get_theme_stats(theme):
     return {
         "parents": parents,
         "children": children,
+        "descriptions": descriptions,
     }
 
 

@@ -26,6 +26,8 @@ function receivedObjInfoData(result)
     var children = [];
     var parents = [];
 
+    console.log(result);
+
     try 
     {
         children = result["children"];
@@ -46,6 +48,7 @@ function receivedObjInfoData(result)
             var children_links = [];
             var parents_html = "Parents: ";
             var children_html = "Children: ";
+            var childtable = [];
 
             for (ii = 0; ii < parents.length; ii++)
             {
@@ -58,6 +61,7 @@ function receivedObjInfoData(result)
                 th = children[ii];
                 html = ' <A href="theme.php?name=' + th + '">' + th + '</A>';
                 children_links.push(html);
+                childtable.push([ th, result.descriptions[th] ])
             }
             if (parents_links.length == 0)
             {
@@ -73,6 +77,12 @@ function receivedObjInfoData(result)
             $("#div_infobox").css("display", "inline");
             $("#div_parents").html(parents_html);
             $("#div_children").html(children_html);
+
+            table = $('#children_datatable').DataTable();
+            table.clear();
+            table.rows.add(childtable);
+            table.draw();
+
         }
     }
 
