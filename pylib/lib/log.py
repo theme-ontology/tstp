@@ -5,18 +5,17 @@ Created on June 5, 2016
 '''
 from datetime import datetime
 import timeit
-
-
 import sys
 import codecs
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
+bin_stdout = sys.stdout
+bin_stderr = sys.stderr
 
 LEVELS = [ 'DEBUG', 'STATUS', 'INFO', 'WARN', 'ERROR', 'SILENT' ]
 LEVEL = 0
 LOGFILE = None
 LOGTARGET = sys.stdout
+LOGTARGETMODE = "utf-8"
 
 
 def redirect(loc = "stderr"):
@@ -41,8 +40,30 @@ def set_level(level):
     LEVEL = LEVELS.index(level)
 
 
+def set_logmode(mode = "utf-8"):
+    global LOGTARGETMODE
+
+    lt = "stderr" if LOGTARGET == sys.stderr else "stdout"
+
+    if mode == "utf-8":
+        sys.stdout = codecs.getwriter('utf8')(bin_stdout)
+        sys.stderr = codecs.getwriter('utf8')(bin_stderr)
+    elif mode == "binary":
+        sys.stdout = bin_stdout
+        sys.stderr = bin_stderr
+    else:
+        raise RuntimeError, "no such mode: " + mode
+
+    LOGTARGETMODE = mode
+    redirect(lt)
+
+
 def printfunc(s):
-    LOGTARGET.write(s.encode("utf-8", "replace"))
+    if LOGTARGETMODE == "binary":
+        LOGTARGET.write(s.encode("utf-8", "replace"))
+    else:
+        LOGTARGET.write(s)
+    LOGTARGET.write("\n")
     
     
 def printmsg(msg, level = 'INFO', args = None):
@@ -98,3 +119,24 @@ class Timer( object ):
         self.elapsed = self.elapsed_secs * 1000  # millisecs
         if self.verbose:
             print 'elapsed time: %f ms' % self.elapsed
+
+
+class Mode( object ):
+    def __init__(self, mode):
+        self.mode = mode
+
+    def __enter__( self ):
+        self.old_mode = LOGTARGETMODE
+        set_logmode(self.mode)
+        return self
+
+    def __exit__( self, *args ):
+        set_logmode(self.old_mode)
+        return self
+
+
+#: set up default
+set_logmode()
+redirect("stderr")
+
+
