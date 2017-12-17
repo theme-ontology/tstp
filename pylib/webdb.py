@@ -12,6 +12,8 @@ OBJECT_COLLECTIONS = {
     r"ent\dx\d\d": "Star Trek: Enterprise",
     r"bbf\dx\d\d": "Babylon 5",
     r"pkded\dx\d\d": "Philip K. Dick's Electric Dreams",
+    r"movie: ": "Assorted Movies",
+    r"novel: ": "Assorted Novels",
 }
 
 
