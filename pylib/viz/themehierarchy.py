@@ -5,6 +5,9 @@ import urllib
 import lib.datastats
 
 
+log.set_logmode("binary")
+
+
 def make_link(theme, display = None):
     theme = theme.encode("utf-8")
     url = "http://www.themeontology.org/theme.php?name=%s" % urllib.quote_plus(theme)
