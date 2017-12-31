@@ -732,7 +732,7 @@ class TSTPEvent(TSTPObject):
                 klass.commit_updates(updates)
 
     @classmethod
-    def write_many(cls, events):
+    def write_many(cls, events, chunksize = 5000):
         """
         Write many events to db. 
         This will not affect any other objects.
@@ -753,17 +753,21 @@ class TSTPEvent(TSTPObject):
             "newvalue",
             "eventstate",
         ]
-        evvalues = []
+        n = 0
 
-        for event in events:
-            row = []
-            for field in evfields:
-                row.append(getattr(event, field))
-            evvalues.append(row)
+        while n < len(events):
+            evvalues = []
+            
+            for event in events[n:n+chunksize]:
+                row = []
+                for field in evfields:
+                    row.append(getattr(event, field))
+                evvalues.append(row)
 
-        fstr = ", ".join('`%s`' % s for s in evfields)
-        vstr = ", ".join("%s" for s in evfields)
-        do("REPLACE INTO `web_events` (%s) values (%s)" % (fstr, vstr), evvalues)
+            fstr = ", ".join('`%s`' % s for s in evfields)
+            vstr = ", ".join("%s" for s in evfields)
+            do("REPLACE INTO `web_events` (%s) values (%s)" % (fstr, vstr), evvalues)
+            n += chunksize
 
 
 ############## HELPERS ###############
