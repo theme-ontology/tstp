@@ -32,7 +32,7 @@ def basic_convert(method, target):
     objs = list(func() if m2 == "db" else func(target))
     txt = webdb.get_defenitions_text_for_objects(objs)
 
-    print txt.encode("utf-8")
+    print txt
 
 
 def compact_sheet_full_convert(target):

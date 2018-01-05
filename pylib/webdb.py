@@ -14,6 +14,8 @@ OBJECT_COLLECTIONS = {
     r"pkded\dx\d\d": "Philip K. Dick's Electric Dreams",
     r"movie: ": "Assorted Movies",
     r"novel: ": "Assorted Novels",
+    r"ic1976e\d\d?": "I Claudius (1976)",
+    r"tvseries: GoT\dx\d\d": "Game of Thrones (2011)",
 }
 
 
