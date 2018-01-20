@@ -62,6 +62,10 @@ def cached_special_query(act_type, req_type, obj_name):
         from webdb import get_metatheme_data
         return json.dumps(get_metatheme_data())
 
+    if act_type == "themesimilarity":
+        from lib.datastats import get_themes_similarity_v1
+        return json.dumps(get_themes_similarity_v1())
+        
     if act_type == "stats" and req_type == "theme":
         from lib.datastats import get_theme_stats
         return json.dumps(get_theme_stats(obj_name))
@@ -99,6 +103,7 @@ def list_special_queries():
     queries = [
         ("themelist", None, None),
         ("metathemedata", None, None),
+        ("themesimilarity", None, None),
     ] + [
         (a, None, None) for a in webdb.SUPPORTED_OBJECTS
     ]

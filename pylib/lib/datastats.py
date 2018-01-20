@@ -172,3 +172,91 @@ def get_metathemes_by_level():
 
     return result
 
+
+
+def walk_children(theme, children, path):
+    """
+    Yields [t1, t2, ...] paths to all children in DF order.
+    """
+    path.append(theme)
+    yield path
+
+    for child in children[theme]:
+        if child not in path:
+            for p2 in walk_children(child, children, path):
+                yield p2
+
+    path.pop()
+
+
+def all_pairs_shortest_path_to_common_parent(root, children, order, result):
+    """
+    Calculate all pairs' shortest path to a common parent.
+        Exclude (t, t) = 1 by definition for all themes t.
+        Exclude (t1, t2) iff t2 is listed before t1.
+    """
+    def _update_score(p1, p2, order, result):
+        t1 = p1[-1]
+        t2 = p2[-1]
+        d1 = len(p1)
+        d2 = len(p2)
+
+        for tt in p1:
+            if tt in p2:
+                d1 = min(d1, len(p1) - p1.index(tt) - 1)
+                d2 = min(d2, len(p2) - p2.index(tt) - 1)
+
+        o1 = order[t1]
+        o2 = order[t2]
+
+        if o1 > o2:
+            t1, t2 = t2, t1
+            o1, o2 = o2, o1
+            d1, d2 = d2, d1
+        if (o1, o2) in result:
+            dd1, dd2 = result[(o1, o2)]
+            d1 = min(d1, dd1)
+            d2 = min(d2, dd2)
+
+        result[(o1, o2)] = (d1, d2)
+
+    def _subtree_apspcp(c1, c2, children, order, result):
+        for p1 in walk_children(c1, children, []):
+            for p2 in walk_children(c2, children, []):
+                _update_score(p1, p2, order, result)
+
+    if root not in order:
+        order[root] = len(order)
+
+    for child in children[root]:
+        all_pairs_shortest_path_to_common_parent(child, children, order, result)
+
+    # score pairs whereof one is a direct descendant (one score is always 0)
+    for pp in walk_children(root, children, []):
+        _update_score([root], pp, order, result)
+
+    # score pairs that are in different sub-trees
+    for c1 in children[root]:
+        for c2 in children[root]:
+            if order[c1] > order[c2]:
+                _subtree_apspcp(c1, c2, children, order, result)
+
+
+@memoize
+def get_themes_similarity_v1():
+    """
+    Return all pairs theme similarity measures.
+    """
+    (parents, children, lforder) = get_theme_tree()
+    order = {}
+    result = {}
+
+    for theme, pl in parents.iteritems():
+        if not pl:
+            all_pairs_shortest_path_to_common_parent(theme, children, order, result)
+
+    order = [ k for (k, v) in sorted(order.iteritems(), key = lambda x: x[-1]) ]
+    scores = [ (k1, k2, v1, v2) for (k1, k2), (v1, v2) in result.iteritems() ]
+    return order, scores
+
+
