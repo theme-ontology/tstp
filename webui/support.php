@@ -76,6 +76,11 @@
                 Ethereum and Bitcoin Cash have the lowest transaction fees and are thus recommended. 
             </P>
 
+            <P>
+                In any event, don't hesitate to contact us:
+                <font color="#337ab7">&#x63;&#x6F;&#x6E;&#x74;&#x61;&#x63;&#x74;&#x40;&#x74;&#x68;&#x65;&#x6D;&#x65;&#x6F;&#x6E;&#x74;&#x6F;&#x6C;&#x6F;&#x67;&#x79;&#x2E;&#x6F;&#x72;&#x67;</font>.
+            </P>
+
         </div>
     </div>
 </div>
