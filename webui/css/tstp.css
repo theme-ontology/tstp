@@ -183,3 +183,11 @@ overflow-y: auto;
   font-size: 14px;
 }
 
+.borderless td, .borderless th, .borderless tr {
+    border: none !important;
+}
+
+.vcenter > tbody > tr > td {
+     vertical-align: middle;
+}
+

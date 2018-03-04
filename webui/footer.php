@@ -18,6 +18,7 @@
 <?php } else { ?>
 			 | <A href="http://www.themeontology.org:8080/tstp/webui/">uat</A>
 <?php } ?>
+			 | <A href="support">donate</A>
 
 		</p>
 	</div>
