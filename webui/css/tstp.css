@@ -183,6 +183,11 @@ overflow-y: auto;
   font-size: 14px;
 }
 
+.shrink-to-fit {
+  white-space: nowrap; 
+  width: 1%;
+}
+
 .borderless td, .borderless th, .borderless tr {
     border: none !important;
 }
@@ -191,3 +196,7 @@ overflow-y: auto;
      vertical-align: middle;
 }
 
+.space-large {
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
