@@ -15,7 +15,7 @@
         <div class="col-sm-12 col-md-8 col-lg-6">
 			<div class="panel panel-default">
 				<div class="panel-body">
-	              	<H3 class="px-3">Download Data</H3>
+	              	<H3 class="px-3">Download Latest Data</H3>
 	            	<TABLE class="table table-striped">
 		            	<tbody>
 			            	<tr>
@@ -32,6 +32,27 @@
 			            	</tr>
 			            	</tbody>
 	            	</TABLE>
+
+	              	<H3 class="px-3">Frozen Versions</H3>
+	              	<P>These .tsv files are described in the manual for 
+	              		<A href="https://cran.r-project.org/web/packages/stoRy/index.html">the R package stoRy</A>.</P>
+	            	<TABLE class="table table-striped">
+		            	<tbody>
+			            	<tr>
+				            	<td><A href = "data/TO_v0.1.0.tsv">TO_v0.1.0.tsv</A></td>
+			            		<td>Earlier version of the ontology.</td>
+				            </tr>
+			            	<tr>
+				            	<td><A href = "data/TO_v0.1.1.tsv">TO_v0.1.1.tsv</A></td>
+			            		<td>Earlier version of the ontology.</td>
+				            </tr>
+			            	<tr>
+				            	<td><A href = "data/TO_v0.1.2.tsv">TO_v0.1.2.tsv</A></td>
+			            		<td>Earlier version of the ontology.</td>
+				            </tr>
+			            	</tbody>
+	            	</TABLE>
+
             	</div>
             </div>
         </div>
