@@ -9,14 +9,14 @@
 			"themeontology.org" => "index",
             "Stories" => "stories",
             "Themes" => "themes",
-            "Pictures" => "pictures",
+            "Resources" => "resources",
 
             "index.php" => "themeontology.org",
             "stories.php" => "Stories",
             "story.php" => "Stories",
             "themes.php" => "Themes",
             "theme.php" => "Themes",
-            "pictures.php" => "Pictures",
+            "resources.php" => "Resources",
 		);
 
 		$cls = ($known[$ME] == $name) ? "active" : "";
@@ -141,7 +141,7 @@
 <?php
 	make_link("Stories");
     make_link("Themes");
-    make_link("Pictures");
+    make_link("Resources");
 ?>
       </ul>
 
