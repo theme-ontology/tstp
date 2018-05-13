@@ -9,35 +9,26 @@
 Any publicly known narrative that can be referenced and analyzed may be a "story" in this project.
 
 
-### Theme
+## What is a Theme?
 
-A theme is any topic that is discussed in a story, however briefly.
-To do something useful, however, we need to identify and name themes. 
-A *named theme* in this project is required to meet a modicum of conditions.
-It should be:
+A theme is any topic that is featured in a story.
+A central theme is a theme that is topical throughout most of the story, either because it is featured explicitly or because it is revealed as the "moral of the story" towards the end.
+A peripheral theme is any theme of interest that is featured briefly.
+In the notes, peripheral themes are called "minor". 
+Central themes are called "major" or "choice".
+Choice themes are whatever seems to be at the essence of the story.
 
-**Well defined and coherent**: 
-Ideally the name itself should make it clear. 
-This is sometimes possible with common themes.
-Either way, every theme should have a rigorous definition written for it.
+There are no strict rules for what makes a good theme to include.
+There are a few rules of thumb.
+Look mostly for major/choice themes.
+Prefer to use themes that are already defined.
+Don't waste time including uninteresting minor themes but feel free to include what interests you.
+Good themes are topics that are featured significantly in various different stories.
+Don't introduce themes that are specific to a particular fictional universe; generalize them instead.
+Look for themes that are obvious and seem uncontroversial.
+Look for themes that expose our human nature through the stories we tell.
 
-**Context independent**:
-Neither the name nor the definition of a theme should contain story-specific jargon.
-Alternate reality type themes should be self-contained ideas that don't necessitate a particular fictional universe.
-
-**Useful**:
-There is no point in including themes that are so specific that it is hard to imagine another story containing the same theme.
-They make the task of *themeing* harder as they make it difficult to search for suitable themes.
-An overly specific theme may be better expressed as the juxtaposition of more generalized themes.
-
-**Interesting**:
-A great many trivial observations can be found in any story.
-Tables are flat, stairs are exhausting to scale, and things fall down.
-These are not generally interesting.
-Should the flatness of tables ever be the central topic of a story, the appropriate themes are probably something to do with philosophy and perception.
-
-In short a named theme should be clearly defined independent of specific stories, and be something that one can 
-plausibly find in several different stories but do not expect to find in every other story.
+"The desire for vengeance", "the horrors of war", "faith vs. reason", "what if I had magical powers", are examples of good themes that we find in many different stories.
 
 
 ### Generalized Theme
@@ -57,14 +48,18 @@ We often consider four distinct subsets of this DAG that are trees rooted in hig
 In these subsets, each theme apart from the root has exactly one parent.
 
 
-### Choice Theme, Major Theme, and Minor Theme
+### Choice Theme, Major Theme (central themes), and Minor Theme (peripheral theme)
 
 If there is a named theme that meets the requirements above, it may be used as a minor theme (or higher) whenever it is unambiguously featured.
 If it is difficult to reach reasonable consensus on whether it was featured or not, use a suitable generalization or omit it.
-The rest is highly subjective but the rules of thumb are:
+The rest is by necessity somewhat subjective but the rules of thumb are:
 
-- If a theme is featured throughout most or at least a major part of the story, or if it is purposely part of the conclusion, then it is a major theme.
-- Choice themes are whatever we think is really the point of the story, e.g., *the moral of the story* for themes that express moral sentiments.
+- If a theme is relevant throughout most or at least a major part of the story then it is a major theme. 
+- It can be indirectly relevant to a majority of the story if the story leads up to a conclusion that features the theme, and thus a major theme.
+- An otherwise major theme may be elevated to a choice theme if we think it explains the story particularly well.
+
+Choice themes are a useful expedient whilst themeing but may be of less value in a statistical analysis.
+We may use the expression "Central Themes" to refer to the union set of choice themes and major themes, and "Peripheral Themes" to the set of minor themes for a story.
 
 
 
