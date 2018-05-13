@@ -121,6 +121,9 @@
 <div class="container main-body">
     <div class="row">
 
+        <P><small>See:
+        <A href="https://github.com/odinlake/theming">https://github.com/odinlake/theming</A></small></P>
+
         <div style="padding: 1em 4em;">
             <form autocomplete="off" onkeypress="return event.keyCode != 13;">
                 <fieldset class="form-group">
