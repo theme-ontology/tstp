@@ -1,5 +1,6 @@
 import re
 import codecs
+from collections import defaultdict
 
 import webobject
 import lib.xls
@@ -58,11 +59,16 @@ def parse_themes(txt):
         yield kw, comment
 
 
+def simple_line_collection(lines):
+    return [ t.strip() for line in lines for t in line.split(", ") ]
+
+
 SUBJECTS = {
-    "Ratings": lambda lines: [ t.strip() for line in lines for t in line.split(", ") ],
+    "Ratings": simple_line_collection,
     "Choice Themes": parse_themes,
     "Major Themes": parse_themes,
     "Minor Themes": parse_themes,
+    "References": simple_line_collection,
 }
 
 
@@ -202,9 +208,15 @@ def read_themes_from_txt(filename, verbose = True):
     """
     themestuff, notices = parse(filename)
     out_themes = {}
+    out_composites = defaultdict(lambda: defaultdict(str))
     field_map = {
-        "description": "description",
         "parents": "parents",
+        "description": "description",
+    }
+    composite_fields = {
+        "description": "description",
+        "example": "example",
+        "references": "references",
     }
 
     for notice in notices:
@@ -217,9 +229,13 @@ def read_themes_from_txt(filename, verbose = True):
             )
 
         themeobj = out_themes[theme]
-        attr = field_map.get(field.lower(), None)
+        lfield = field.strip().lower()
+        attr = field_map.get(lfield, "")
 
-        if attr and attr in themeobj.fields:
+        if lfield in composite_fields:
+            out_composites[theme][lfield] = data[0]
+
+        if attr in themeobj.fields:
             setattr(themeobj, attr, data[0])
         else:
             if verbose:
@@ -227,6 +243,22 @@ def read_themes_from_txt(filename, verbose = True):
 
     for key in sorted(out_themes):
         themeobj = out_themes[key]
+
+        description = themeobj.description
+        example = out_composites[key]["example"].strip()
+        references = out_composites[key]["references"].strip()
+
+        if example:
+            description += "\n\nExample:\n" + example
+        if references:
+            description += "\n\nReferences:\n"
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    description += line + "\n"
+
+        themeobj.description = description
+
         try:
             themeobj.test_fields()
             yield themeobj

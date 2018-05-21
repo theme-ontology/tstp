@@ -108,44 +108,22 @@
     </div>
 
 
-<?php // MAIN FORM //?>
-    <div id="hidden_form" class="row" style="visibility:hidden;">
-
-        <div id="div_obj_basics1" class="col-md-8 col-sm-12">
-        	<div class="basebox">
-        		<form>
-        			<fieldset class="form-group">
-        				<label for="fieldName">Theme</label>
-        				<input id="fieldName" type="text" class="form-control">
-        			</fieldset>
-
-        			<fieldset class="form-group">
-        				<label for="fieldDescription">Description</label>
-        				<textarea id="fieldDescription" rows=10 class="form-control"></textarea>
-        			</fieldset>
-        		</form>
-			</div>
-		</div>
-
-        <div id="div_obj_submit" class="col-md-4 col-sm-12">
-        	<div class="sidebox">
-    			<fieldset class="form-group">
-    				<button onClick="submitData()" class="btn btn-primary btn-block">Submit Changes</button>
-    			</fieldset>
-
-<?php // Theme INFO //?>
-                <div id="div_infobox" style="display:none; padding: 0px 0px; margin: 0px 0px;">
-                    <div id="div_parents"></div>
-                    <div id="div_children" style="display:none"></div>
-                </div>
-
-	        </div>
-        </div>
-    </div>
-
-
 <?php // Children TABLE //?>
     <div class="row">
+        <div class="col-md-8">
+            <div class="basebox">
+                <H1><?php echo $THEME; ?></H1>
+            </div>
+        </div>
+
+        <div id="div_maininfo" class="basebox">
+            <div class="col-md-12">
+                <div id="div_description"></div>
+            </div>
+            <div class="col-md-12">
+                <div id="div_parents"></div>
+            </div>
+        </div>
 
         <div id="div_datatable" class="col-md-12">
             <div class="basebox">
@@ -160,8 +138,6 @@
                 </table>
             </div>
         </div>
-
-
     </div>
 
 

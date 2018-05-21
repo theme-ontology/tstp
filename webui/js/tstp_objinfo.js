@@ -20,16 +20,72 @@ function loadObjInfoDataOnReady()
 }
 
 
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
+
+function formatBlobForHTML(txt)
+{
+    var blockre = /\n\n+/;
+
+    paragraphs = txt.split(blockre);
+    html = "";
+
+    console.log(txt);
+    console.log(paragraphs);
+
+    for (ii = 0; ii < paragraphs.length; ii++)
+    {
+        var pp = escapeHtml(paragraphs[ii]);
+
+        if (pp.startsWith("Example:"))
+            pp = "<b>Example:</b> " + pp.slice(9);
+        if (pp.startsWith("References:"))
+        {
+            var lines = pp.slice(12).split("\n");
+            pp = "<b>References:</b> ";
+            for (jj = 0; jj < lines.length; jj++)
+            {
+                var line = lines[jj];
+                if (line.startsWith("http://") || line.startsWith("https://"))
+                {
+                    pp += ' <A href="' + line + '">' + line + "</A>\n";
+                }
+            }
+        }
+
+        html += "<P>" + pp + "</P>";
+    }
+
+    return html;
+}
+
+
 function receivedObjInfoData(result)
 {
     var ok = false;
     var children = [];
     var parents = [];
 
+    console.info(result);
+
     try 
     {
         children = result["children"];
         parents = result["parents"];
+        description = "";
+
+        for (var k in result["descriptions"]) {
+            description = result["descriptions"][k];
+            break;
+        }
+
 	    g_objStats = result;
         ok = true;
     }
@@ -44,8 +100,8 @@ function receivedObjInfoData(result)
         {
             var parents_links = [];
             var children_links = [];
-            var parents_html = "Parents: ";
-            var children_html = "Children: ";
+            var parents_html = "<b>Parents:</b> ";
+            var children_html = "<b>Children:</b> ";
             var childtable = [];
 
             for (ii = 0; ii < parents.length; ii++)
@@ -69,12 +125,14 @@ function receivedObjInfoData(result)
             {
                 children_links.push("&lt;none&gt;");
             }
-            parents_html += parents_links.join(", ") + ".";
-            children_html += children_links.join(", ") + ".";
+            parents_html += parents_links.join(", ");
+            children_html += children_links.join(", ");
+            description_html = formatBlobForHTML(description);
 
             $("#div_infobox").css("display", "inline");
             $("#div_parents").html(parents_html);
             $("#div_children").html(children_html);
+            $("#div_description").html(description_html);
 
             table = $('#children_datatable').DataTable();
             table.clear();
