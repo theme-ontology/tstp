@@ -233,7 +233,7 @@ def read_themes_from_txt(filename, verbose = True):
         attr = field_map.get(lfield, "")
 
         if lfield in composite_fields:
-            out_composites[theme][lfield] = data[0]
+            out_composites[theme][lfield] = '\n'.join(data)
 
         if attr in themeobj.fields:
             setattr(themeobj, attr, data[0])
@@ -256,6 +256,8 @@ def read_themes_from_txt(filename, verbose = True):
                 line = line.strip()
                 if line:
                     description += line + "\n"
+
+
 
         themeobj.description = description
 
