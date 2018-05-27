@@ -367,7 +367,7 @@ def read_stories_from_xls(filename):
             title = title,
             date = rdate,
             description = description,
-        )        
+        )
 
 
 def read_storythemes_from_xls_compact(filename):

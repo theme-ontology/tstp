@@ -110,24 +110,25 @@
 
 <?php // Children TABLE //?>
     <div class="row">
-        <div class="col-md-8">
-            <div class="basebox">
-                <H1><?php echo $THEME; ?></H1>
-            </div>
-        </div>
 
         <div id="div_maininfo" class="basebox">
+
             <div class="col-md-12">
-                <div id="div_description"></div>
+                <div class="panel panel-default">
+                    <div class="panel-heading"><H4><?php echo $THEME; ?></H4></div>
+                    <div class="panel-body"><div id="div_description"></div></div>
+                </div>
             </div>
+
             <div class="col-md-12">
+                <H4>List of Parent Themes</H4>
                 <div id="div_parents"></div>
             </div>
         </div>
 
         <div id="div_datatable" class="col-md-12">
             <div class="basebox">
-                <H4>List of Child Themes:</H4>
+                <H4>List of Child Themes</H4>
                 <table id="children_datatable" class="display table table-striped" cellspacing="0" width="100%">
                     <thead>
                         <tr>
@@ -147,7 +148,7 @@
 
         <div id="div_datatable" class="col-md-12">
             <div class="basebox">
-                <H4>List of Stories:</H4>
+                <H4>List of Stories</H4>
                 <table id="stories_datatable" class="display table table-striped" cellspacing="0" width="100%">
                     <thead>
                         <tr>

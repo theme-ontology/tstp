@@ -30,15 +30,12 @@ function escapeHtml(unsafe) {
  }
 
 
+// format a theme entry nicely for html
 function formatBlobForHTML(txt)
 {
     var blockre = /\n\n+/;
-
-    paragraphs = txt.split(blockre);
-    html = "";
-
-    console.log(txt);
-    console.log(paragraphs);
+    var paragraphs = txt.split(blockre);
+    var html = "";
 
     for (ii = 0; ii < paragraphs.length; ii++)
     {
@@ -67,25 +64,26 @@ function formatBlobForHTML(txt)
 }
 
 
+// return only the first paragraph as unformatted text
+function firstParagraphText(txt)
+{
+    var blockre = /\n\n+/;
+    var paragraphs = txt.split(blockre);
+    return escapeHtml(paragraphs[0]);
+}
+
+
+// handle result of ajax query from loadObjInfoDataOnReady
 function receivedObjInfoData(result)
 {
     var ok = false;
     var children = [];
     var parents = [];
 
-    console.info(result);
-
     try 
     {
         children = result["children"];
         parents = result["parents"];
-        description = "";
-
-        for (var k in result["descriptions"]) {
-            description = result["descriptions"][k];
-            break;
-        }
-
 	    g_objStats = result;
         ok = true;
     }
@@ -100,9 +98,10 @@ function receivedObjInfoData(result)
         {
             var parents_links = [];
             var children_links = [];
-            var parents_html = "<b>Parents:</b> ";
-            var children_html = "<b>Children:</b> ";
+            var parents_html = "";
+            var children_html = "";
             var childtable = [];
+            var description_html = formatBlobForHTML(result.descriptions[g_objName]);
 
             for (ii = 0; ii < parents.length; ii++)
             {
@@ -115,7 +114,7 @@ function receivedObjInfoData(result)
                 th = children[ii];
                 html = ' <A href="theme.php?name=' + th + '">' + th + '</A>';
                 children_links.push(html);
-                childtable.push([ th, result.descriptions[th] ])
+                childtable.push([ th, firstParagraphText(result.descriptions[th]) ])
             }
             if (parents_links.length == 0)
             {
@@ -127,7 +126,6 @@ function receivedObjInfoData(result)
             }
             parents_html += parents_links.join(", ");
             children_html += children_links.join(", ");
-            description_html = formatBlobForHTML(description);
 
             $("#div_infobox").css("display", "inline");
             $("#div_parents").html(parents_html);
