@@ -17,7 +17,6 @@
         var g_objInfoBoxes = [ "parents", "children" ];
     	var g_objData;
     </script>
-    <script type="text/javascript" src="js/tstp_webform.js"></script>
     <script type="text/javascript" src="js/tstp_objinfo.js"></script>
 
     <script>
@@ -103,16 +102,15 @@
 <?php include "navbar.php"; ?>
 
 <div class="container main-body">
-    <div id="loading_message" class="row">
-    	<div class="basebox">loading...</div>
+    <div class="row">
+        <div class="col-md-12">
+            <H3>Theme</H3>
+        </div>
     </div>
 
-
-<?php // Children TABLE //?>
+<?php // Basic information //?>
     <div class="row">
-
         <div id="div_maininfo" class="basebox">
-
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading"><H4><?php echo $THEME; ?></H4></div>
@@ -125,7 +123,10 @@
                 <div id="div_parents"></div>
             </div>
         </div>
+    </div>
 
+<?php // Children TABLE //?>
+    <div class="row">
         <div id="div_datatable" class="col-md-12">
             <div class="basebox">
                 <H4>List of Child Themes</H4>
@@ -141,11 +142,8 @@
         </div>
     </div>
 
-
-
 <?php // Stories TABLE //?>
     <div class="row">
-
         <div id="div_datatable" class="col-md-12">
             <div class="basebox">
                 <H4>List of Stories</H4>
@@ -160,10 +158,11 @@
                 </table>
             </div>
         </div>
-
-
     </div>
 
+    <div id="loading_message" class="row">
+        <div class="basebox">loading...</div>
+    </div>
 
 </div>
 

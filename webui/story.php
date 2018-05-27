@@ -29,7 +29,8 @@
         };
 
     </script>
-    <script type="text/javascript" src="js/tstp_webform.js"></script>
+
+    <script type="text/javascript" src="js/tstp_objinfo.js"></script>
 
     <script>
         $(document).ready(function () {
@@ -95,100 +96,35 @@
 <?php include "navbar.php"; ?>
 
 <div class="container main-body">
-    <div id="loading_message" class="row">
-    	<div class="basebox">loading...</div>
-    </div>
-
-
-<?php // MAIN FORM //?>
-    <div id="hidden_form" class="row" style="visibility:hidden;">
-
-        <div id="div_story_basics" class="col-md-8 col-sm-12">
-        	<div class="basebox">
-        		<form>
-        			<fieldset class="form-group">
-        				<label for="fieldTitle">Title</label>
-        				<input id="fieldTitle" type="text" class="form-control">
-        			</fieldset>
-
-        			<fieldset class="form-group">
-        				<label for="fieldDescription">Description</label>
-        				<textarea id="fieldDescription" rows=10 class="form-control"></textarea>
-        			</fieldset>
-        		</form>
-			</div>
-		</div>
-
-        <div id="div_story_basics2" class="col-md-4 col-sm-12">
-        	<div class="sidebox">
-        		<form>
-        			<fieldset class="form-group">
-        				<label for="fieldName">ID</label>
-        				<input id="fieldName" type="text" class="form-control">
-        			</fieldset>
-        		</form>
-        		<form>
-        			<fieldset class="form-group">
-        				<label for="fieldDate">Date</label>
-        				<input id="fieldDate" type="text" class="form-control">
-        			</fieldset>
-        		</form>
-	        </div>
-        </div>
-
-        <div id="div_story_submit" class="col-md-4 col-sm-12">
-            <div class="basebox">
-    			<fieldset class="form-group">
-    				<button onClick="submitData()" class="btn btn-primary btn-block">Submit Changes</button>
-    			</fieldset>
-	        </div>
-        </div>
-    </div>
-
     <div class="row">
-        <div class="basebox">
-			<div class="form-group col-sm-12">
-	    		<h4>Add/Change Theme</h4>
-	    	</div>
-
-			<div class="form-group col-md-3 col-sm-12">
-				<select class="form-control" id="sel1">
-					<option>minor</option>
-					<option>major</option>
-					<option>choice</option>
-					<option>absent</option>
-				</select>
-			</div>
-
-			<div class="form-group col-md-9 col-sm-12">
-                <fieldset class="form-group">
-                    <input id="fieldTheme" class="form-control typeahead" type="text" placeholder="enter a theme">
-                </fieldset>
-            </div>
-
-			<div class="form-group col-sm-8">
-    			<fieldset class="form-group">
-    				<label for="fieldMotivate">Motivate this entry</label>
-    				<textarea id="fieldMotivate" rows=2 class="form-control"></textarea>
-    			</fieldset>
-            </div>
-
-	        <div id="div_storytheme_submit" class="col-sm-4">
-    			<fieldset class="form-group">
-    				<button onClick="submitData()" class="btn btn-primary btn-block">Submit Changes</button>
-    			</fieldset>
-	        </div>
-
+        <div class="col-md-12">
+            <H3>Story</H3>
         </div>
     </div>
 
+<?php // Basic information //?>
+    <div class="row">
+        <div id="div_maininfo" class="basebox">
+
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading"><?php echo $SID; ?></div>
+                    <div class="panel-body">
+                        <dl>
+                            <dt>Title:</dt> <dd><span id="obj_title"></span></dd>
+                            <dt>Date:</dt> <dd><span id="obj_date"></span></dd>
+                        </dl>
+                        <P>
+                            <div id="div_description"></div>
+                        </P>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <?php // THEMES TABLE //?>
     <div class="row">
-		<div class="form-group col-sm-12">
-    		<h4>&nbsp;</h4>
-    	</div>
-
         <div id="div_datatable" class="col-md-12">
         	<div class="basebox">
 	            <table id="themes_datatable" class="display table table-striped" cellspacing="0" width="100%">
@@ -202,10 +138,11 @@
 			    </table>
 			</div>
 		</div>
-
-
     </div>
 
+    <div id="loading_message" class="row">
+        <div class="basebox">loading...</div>
+    </div>
 
 </div>
 

@@ -13,10 +13,21 @@ function loadObjInfoDataOnReady()
 
 	$('#fieldName').prop('disabled', true); 
 
-	$.getJSON(
-		"json.php?type=" + g_objType + "&action=stats&name=" + name,
-		receivedObjInfoData
-	);
+    if (g_objType == "theme")
+    {
+    	$.getJSON(
+    		"json.php?type=" + g_objType + "&action=stats&name=" + name,
+    		receivedThemeInfoData
+    	);
+    } 
+    else if (g_objType == "story")
+    {
+        $.getJSON(
+            "json.php?type=" + g_objType + "&filter=" + name + "&fields=" + 
+                fields + "&slimit=20000&rlimit=1",
+            receivedStoryInfoData
+        );
+    }
 }
 
 
@@ -42,7 +53,7 @@ function formatBlobForHTML(txt)
         var pp = escapeHtml(paragraphs[ii]);
 
         if (pp.startsWith("Example:"))
-            pp = "<b>Example:</b> " + pp.slice(9);
+            pp = "<b>Example:</b><BR>" + pp.slice(9);
         if (pp.startsWith("References:"))
         {
             var lines = pp.slice(12).split("\n");
@@ -52,7 +63,7 @@ function formatBlobForHTML(txt)
                 var line = lines[jj];
                 if (line.startsWith("http://") || line.startsWith("https://"))
                 {
-                    pp += ' <A href="' + line + '">' + line + "</A>\n";
+                    pp += '<BR><A href="' + line + '">' + line + "</A>\n";
                 }
             }
         }
@@ -74,7 +85,7 @@ function firstParagraphText(txt)
 
 
 // handle result of ajax query from loadObjInfoDataOnReady
-function receivedObjInfoData(result)
+function receivedThemeInfoData(result)
 {
     var ok = false;
     var children = [];
@@ -131,14 +142,47 @@ function receivedObjInfoData(result)
             $("#div_parents").html(parents_html);
             $("#div_children").html(children_html);
             $("#div_description").html(description_html);
+            $('#loading_message').css('display','none');
 
             table = $('#children_datatable').DataTable();
             table.clear();
             table.rows.add(childtable);
             table.draw();
-
+    
         }
     }
 
 }
 
+
+// handle result of ajax query from loadObjInfoDataOnReady
+function receivedStoryInfoData(result)
+{
+    var ok = false;
+    var info = result.data[0];
+
+    try 
+    {
+        g_objStats = info;
+        ok = true;
+    }
+    catch (err) 
+    {
+        jalert(result, "Error!");
+    }
+
+    if (ok) 
+    {
+        if (g_objType == "story")
+        {
+            var title_html = info[1];
+            var date_html = info[2];
+            var description_html = formatBlobForHTML(info[3]);
+
+            $("#obj_title").html(title_html);
+            $("#obj_date").html(date_html);
+            $("#div_description").html(description_html);
+        }
+    }
+
+}
