@@ -68,7 +68,7 @@ function formatBlobForHTML(txt)
             }
         }
 
-        html += "<P>" + pp + "</P>";
+        html += "<P class=\"obj-description\">" + pp + "</P>";
     }
 
     return html;

@@ -201,3 +201,15 @@ overflow-y: auto;
   margin-bottom: 1em;
 }
 
+.dl-horizontal dt, .dl-horizontal dd { 
+  text-align: left;
+  margin-left: 0px;
+  margin-right: 10px;
+  width: auto;
+}
+
+
+.obj-description {
+  font-weight: normal;
+  font-family: Arial;
+}

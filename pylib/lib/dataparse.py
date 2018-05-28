@@ -243,7 +243,6 @@ def read_themes_from_txt(filename, verbose = True):
 
     for key in sorted(out_themes):
         themeobj = out_themes[key]
-
         description = themeobj.description
         example = out_composites[key]["example"].strip()
         references = out_composites[key]["references"].strip()
@@ -256,8 +255,6 @@ def read_themes_from_txt(filename, verbose = True):
                 line = line.strip()
                 if line:
                     description += line + "\n"
-
-
 
         themeobj.description = description
 
@@ -275,11 +272,16 @@ def read_stories_from_txt(filename, verbose = True):
     """
     stuff, notices = parse(filename)
     out = {}
+    out_composites = defaultdict(lambda: defaultdict(str))
     field_map = {
         "title": "title",
         "release date": "date",
         "description": "description",
         "date": "date",
+    }
+    composite_fields = {
+        "description": "description",
+        "references": "references",
     }
 
     for notice in notices:
@@ -292,7 +294,11 @@ def read_stories_from_txt(filename, verbose = True):
             )
 
         obj = out[item]
-        attr = field_map.get(field.lower(), None)
+        lfield = field.strip().lower()
+        attr = field_map.get(lfield, "")
+
+        if lfield in composite_fields:
+            out_composites[item][lfield] = '\n'.join(data)
 
         if attr and attr in obj.fields:
             setattr(obj, attr, data[0])
@@ -302,6 +308,18 @@ def read_stories_from_txt(filename, verbose = True):
 
     for key in sorted(out):
         obj = out[key]
+        description = getattr(obj, "description", "")
+        references = out_composites[key]["references"].strip()
+
+        if references:
+            description += "\n\nReferences:\n"
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    description += line + "\n"
+
+        obj.description = description
+
         try:
             obj.test_fields()
             yield obj

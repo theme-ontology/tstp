@@ -110,7 +110,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading"><?php echo $SID; ?></div>
                     <div class="panel-body">
-                        <dl>
+                        <dl class="dl-horizontal text-left">
                             <dt>Title:</dt> <dd><span id="obj_title"></span></dd>
                             <dt>Date:</dt> <dd><span id="obj_date"></span></dd>
                         </dl>
