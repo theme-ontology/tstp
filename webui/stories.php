@@ -69,10 +69,6 @@
 
 <div class="container main-body">
     <div class="row">
-
-        <P><small>See:
-        <A href="https://github.com/odinlake/theming">https://github.com/odinlake/theming</A></small></P>
-
         <div id="div_stories_datatable" class="col-md-12">
         	<div class="basebox">
 	            <table id="stories_datatable" class="display table table-striped" cellspacing="0" width="100%">
