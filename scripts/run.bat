@@ -1,8 +1,9 @@
 @echo off
 
+setlocal
 set DIR=%~dp0
 set PATH=%PATH%;%DIR%
-set PYTHONPATH=%PYTHONPATH%;%DIR%/../pylib
+set PYTHONPATH=%PYTHONPATH%;%DIR%\..\pylib
 
 IF "%1"=="" (
     start cmd

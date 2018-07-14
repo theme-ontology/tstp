@@ -3,27 +3,29 @@ import webobject
 import textwrap
 
 
-OBJECT_COLLECTIONS = {
-    r"tos\dx\d\d": "Star Trek: The Original Series",
-    r"tas\dx\d\d": "Star Trek: The Animated Series",
-    r"tng\dx\d\d": "Star Trek: The Next Generation",
-    r"ds9\dx\d\d": "Star Trek: Deep Space 9",
-    r"voy\dx\d\d": "Star Trek: Voyager",
-    r"ent\dx\d\d": "Star Trek: Enterprise",
-    r"bbf\dx\d\d": "Babylon 5",
-    r"pkded\dx\d\d": "Philip K. Dick's Electric Dreams",
-    r"movie: ": "Assorted Movies",
-    r"novel: ": "Assorted Novels",
-    r"ic1976e\d\d?": "I Claudius (1976)",
-    r"tvseries: GoT\dx\d\d": "Game of Thrones (2011)",
-}
-
-
 SUPPORTED_OBJECTS = {
     "storydefinitions": webobject.Story,
     "themedefinitions": webobject.Theme,
     "storythemes": webobject.StoryTheme,
 }
+
+
+def get_collections():
+    """
+    Returns
+    -------
+    { collection_name => [ sid1, sid2, ...] }
+    """
+    colls = defaultdict(set)
+
+    for story in webobject.Story.load():
+        sid = story.name
+        for coll in story.collections.split("\n"):
+            if coll:
+                colls[coll].add(sid)
+
+    return colls
+
 
 
 def get_metatheme_data():

@@ -69,6 +69,7 @@ SUBJECTS = {
     "Major Themes": parse_themes,
     "Minor Themes": parse_themes,
     "References": simple_line_collection,
+    "Collections": simple_line_collection,
 }
 
 
@@ -278,16 +279,25 @@ def read_stories_from_txt(filename, verbose = True):
         "release date": "date",
         "description": "description",
         "date": "date",
+        "collections": "collections",
     }
     composite_fields = {
         "description": "description",
         "references": "references",
+        "collections": "collections",
     }
+    global_collections = []
 
     for notice in notices:
         lib.log.warn("%s: %s", filename, notice)
 
     for item, field, data in stuff:
+        # is this is a "collection" for all stories in this file?
+        if field.lower() == "collections" and item in data:
+            for d in data:
+                if d not in global_collections:
+                    global_collections.append(d)
+
         if item not in out:
             out[item] = webobject.Story(
                 name = item,
@@ -310,6 +320,7 @@ def read_stories_from_txt(filename, verbose = True):
         obj = out[key]
         description = getattr(obj, "description", "")
         references = out_composites[key]["references"].strip()
+        collections = out_composites[key]["collections"].strip()
 
         if references:
             description += "\n\nReferences:\n"
@@ -318,7 +329,14 @@ def read_stories_from_txt(filename, verbose = True):
                 if line:
                     description += line + "\n"
 
+        clist = list(global_collections)
+        for c in collections.split("\n"):
+            if c and c not in clist:
+                clist.append(c)
+        clist = [ c.strip() for c in clist if c.strip() ]
+
         obj.description = description
+        obj.collections = "\n".join(clist)
 
         try:
             obj.test_fields()

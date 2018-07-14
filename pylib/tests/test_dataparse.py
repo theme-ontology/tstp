@@ -10,6 +10,18 @@ logging.basicConfig(level = logging.DEBUG)
 lib.log.printfunc = logging.debug
 
 
+class TestCollection(unittest.TestCase):
+    def setUp(self):
+        self.voyager_path = os.path.join(os.environ['TSTPPATH'], "resources", "voyager-stories.st.txt")
+
+    def test_voyager(self):
+        stories = list(lib.dataparse.read_stories_from_txt(self.voyager_path))
+
+        for story in stories:
+            print "::", story
+            print story.collections
+
+
 class TestThemes(unittest.TestCase):
 
     def setUp(self):
@@ -240,6 +252,5 @@ t4, t5 [another, comment]
 
 
 def main():
-    #suite = unittest.TestLoader().loadTestsFromTestCase(TestStoryThemes)
-    #unittest.TextTestRunner(verbosity = 2).run(suite)
-    unittest.main(verbosity = 2)
+    unittest.main(verbosity=2)
+

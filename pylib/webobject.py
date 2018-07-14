@@ -521,12 +521,14 @@ class TSTPConnection(TSTPObject):
 ##################################################################
 class Story(TSTPObject):
     category = "story"
+    collections = ""
     fields = (
         "name",
         "category",
         "title",
         "date",
         "description",
+        "collections",
     )
     preforder = {
         "tos" : 1,

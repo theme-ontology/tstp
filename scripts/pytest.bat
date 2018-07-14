@@ -1,15 +1,13 @@
 @echo off
+setlocal
 
 set DIR=%~dp0
 set PATH=%PATH%;%DIR%
 set PYTHONPATH=%PYTHONPATH%;%DIR%\..\pylib
 set TSTPPATH=%DIR%..
 
+for /f "tokens=1,* delims= " %%a in ("%*") do set ALL_BUT_FIRST=%%b
 
-IF "%1"=="" (
-    start python
-) ELSE (
-    python -c "import %1; r=%1.main();" %*
-)
+python -m unittest %*
 
 

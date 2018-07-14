@@ -9,6 +9,7 @@
 
     <script>
         var BASE_URL = "json.php?type=story&fields=name,title,date,description&slimit=200&rlimit=10000";
+        var IN_COLLECTION = false;
 
         $(document).ready(function () {
             loadDataOnReady();
@@ -26,9 +27,11 @@
 			        "columnDefs" : [
 			        	{
 						    "render": function ( data, type, row ) {
-                                if (data.startsWith("collection:")) {
-                                    var csid = data.substring(12);
-                                    return "<A style='cursor:pointer;' onclick='loadCollectionData(\"" + csid + "\")'>" + data + "</A>";
+                                if (!IN_COLLECTION) {
+                                    if (data.startsWith("collection:") || data.startsWith("Collection:")) {
+                                        var csid = data;
+                                        return "<A style='cursor:pointer;' onclick='loadCollectionData(\"" + csid + "\")'>" + data + "</A>";
+                                    }
                                 }
 
 					            var urldata = encodeURIComponent(data);
@@ -60,6 +63,7 @@
             var url = BASE_URL + "&collectionfilter=" + urldata;
             table.clear().draw();
             table.ajax.url(url).load();
+            IN_COLLECTION = true;
         }
     </script>
 

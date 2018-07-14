@@ -76,29 +76,42 @@ def cached_special_query(act_type, req_type, obj_name):
     return None
 
 
+def cache_special_query(act_type, req_type, obj_name):
+    path = get_cache_path(act_type, req_type, obj_name)
+
+    if os.path.isfile(path):
+        log.debug("deleting for %s, %s: %s", act_type, req_type, path)
+        os.unlink(path)
+
+    data = cached_special_query(act_type, req_type, obj_name)
+    log.debug("caching for %s, %s: %s", act_type, req_type, path)
+
+    with open(path, "wb") as fh:
+        pickle.dump(data, fh, protocol=pickle.HIGHEST_PROTOCOL)
+
+    log.debug("..pickle size: %.2f Mb", os.stat(path).st_size / (1024.0 ** 2))
+
+    if (req_type, obj_name) == (None, None):
+        base_path = get_data_path("webjson")
+        path = os.path.join(base_path, act_type + ".json")
+        data = json.dumps(json.loads(data), indent=4, sort_keys=True)
+        with open(path, "wb+") as fh:
+            fh.write(data)
+
+    log.debug("..json size: %.2f Mb", os.stat(path).st_size / (1024.0 ** 2))
+
+
 def cache_special_queries():
     """
     Generate known special queries and cache them for quick lookup.
     """
     for act_type, req_type, obj_name in list_special_queries():
-        path = get_cache_path(act_type, req_type, obj_name)
-
-        if os.path.isfile(path):
-            log.debug("deleting for %s, %s: %s", act_type, req_type, path)
-            os.unlink(path)
-
-        data = cached_special_query(act_type, req_type, obj_name)
-        log.debug("caching for %s, %s: %s", act_type, req_type, path)
-
-        with open(path, "wb") as fh:
-            pickle.dump(data, fh, protocol = pickle.HIGHEST_PROTOCOL)
-
-        log.debug("..size: %.2f Mb", os.stat(path).st_size / (1024.0 ** 2))
+        cache_special_query(act_type, req_type, obj_name)
 
 
 def list_special_queries():
     """
-    List known special queries (so they may b epre-cached).
+    List known special queries (so they may be pre-cached).
     """
     queries = [
         ("themelist", None, None),
