@@ -63,7 +63,7 @@
                             "className": "description-cell",
                             "targets": 2,
                         },
-                    ]
+                    ],
                     "initComplete": function(settings, json) {
                         $('#loading_message').css('display','none');
                     }
