@@ -213,3 +213,21 @@ overflow-y: auto;
   font-weight: normal;
   font-family: Arial;
 }
+
+
+table.dataTable {
+  margin: 0px 0px 10px 0px;
+}
+
+
+span.label-theme {
+  opacity: 0.5;
+  background: #ffccee;
+  color: #774466;
+}
+
+span.label-story {
+  opacity: 0.5;
+  background: #6677aa;
+  color: #ddeeff;
+}

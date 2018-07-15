@@ -62,6 +62,7 @@
 			        "ajax": 'json.php?type=storytheme&fields=name2,weight,motivation&f1=' + g_objName + '&slimit=200&rlimit=10000',
 			        "pageLength" : 50,
 			        "paging" : false,
+                    "searching": false,
 					"order": [
 						[ 1, "asc" ],
 						[ 0, "asc" ],
@@ -99,19 +100,16 @@
 <?php include "navbar.php"; ?>
 
 <div class="container main-body">
-    <div class="row">
-        <div class="col-md-12">
-            <H3>Story</H3>
-        </div>
-    </div>
-
 <?php // Basic information //?>
     <div class="row">
         <div id="div_maininfo" class="basebox">
 
             <div class="col-md-12">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><?php echo $SID; ?></div>
+                    <div class="panel-heading">
+                        <div style="float:right;"><H4><span class="label label-story">story</span></H4></div>
+                        <H4><?php echo $SID; ?></H4>
+                    </div>
                     <div class="panel-body">
                         <dl class="dl-horizontal text-left">
                             <dt>Title:</dt> <dd><span id="obj_title"></span></dd>

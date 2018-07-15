@@ -24,6 +24,15 @@
                     "lengthMenu": [ 10, 100, 1000, 10000 ],
                     "order": [],
 
+                    "order": [
+                        [ 2, "desc" ],
+                        [ 1, "asc" ],
+                    ],
+                    "dom": '<"top">rt<"bottom"flip><"clear">',
+                    "language": {
+                        "search": "filter:"
+                    },
+
 			        "columnDefs" : [
 			        	{
 						    "render": function ( data, type, row ) {

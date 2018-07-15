@@ -105,18 +105,17 @@
 <?php include "navbar.php"; ?>
 
 <div class="container main-body">
-    <div class="row">
-        <div class="col-md-12">
-            <H3>Theme</H3>
-        </div>
-    </div>
 
 <?php // Basic information //?>
     <div class="row">
         <div id="div_maininfo" class="basebox">
+
             <div class="col-md-12">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><H4><?php echo $THEME; ?></H4></div>
+                    <div class="panel-heading">
+                        <div style="float:right;"><H4><span class="label label-theme">theme</span></H4></div>
+                        <H4><?php echo $THEME; ?></H4>
+                    </div>
                     <div class="panel-body"><div id="div_description"></div></div>
                 </div>
             </div>

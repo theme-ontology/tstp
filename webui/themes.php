@@ -38,7 +38,7 @@
 						[ 2, "asc" ],
 						[ 1, "asc" ],
 					],
-
+                    "dom": '<"top">rt<"bottom"flip><"clear">',
                     "language": {
                         "search": "filter:"
                     },
@@ -120,7 +120,7 @@
 
 <div class="container main-body">
     <div class="row">
-        <div style="padding: 1em 4em;">
+        <div style="padding: 0em 4em;">
             <form autocomplete="off" onkeypress="return event.keyCode != 13;">
                 <fieldset class="form-group">
                     <label for="fieldFind">Fuzzy Search:</label>
