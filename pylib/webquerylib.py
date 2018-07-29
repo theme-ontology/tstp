@@ -98,7 +98,6 @@ def cache_special_query(act_type, req_type, obj_name):
     if (req_type, obj_name) == (None, None):
         base_path = get_data_path(TARGET + "json")
         path = os.path.join(base_path, act_type + ".json")
-        data = json.dumps(json.loads(data), indent=4, sort_keys=True)
         with open(path, "wb+") as fh:
             fh.write(data)
 
