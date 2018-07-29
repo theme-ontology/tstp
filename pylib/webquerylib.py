@@ -7,13 +7,17 @@ import log
 import tempfile
 from db import do
 import json
+import re
 
 
-def get_data_path(name):
+TARGET = "web"
+
+
+def get_data_path(name, *args):
     """
     Get temp path for this data and make sure it exists.
     """
-    path = os.path.join(tempfile.gettempdir(), name)
+    path = os.path.join(tempfile.gettempdir(), name, *args)
     if not os.path.exists(path):
         os.makedirs(path)
     return path
@@ -32,7 +36,7 @@ def get_cache_path(act_type, req_type, obj_name):
     for part in key:
         m.update(str(part))
 
-    base_path = get_data_path("webquery")
+    base_path = get_data_path(TARGET + "query")
     path = os.path.join(base_path, m.hexdigest() + ".pickle")
 
     return path
@@ -92,7 +96,7 @@ def cache_special_query(act_type, req_type, obj_name):
     log.debug("..pickle size: %.2f Mb", os.stat(path).st_size / (1024.0 ** 2))
 
     if (req_type, obj_name) == (None, None):
-        base_path = get_data_path("webjson")
+        base_path = get_data_path(TARGET + "json")
         path = os.path.join(base_path, act_type + ".json")
         data = json.dumps(json.loads(data), indent=4, sort_keys=True)
         with open(path, "wb+") as fh:
@@ -123,4 +127,39 @@ def list_special_queries():
     return queries
 
 
+def get_valid_filename(s):
+    """
+    Turn string into something that makes a decent filename.
+    :param s: string
+    :return: better string
+    """
+    s = str(s).strip().replace(' ', '_')
+    return re.sub(r'(?u)[^-\w.]', '', s)
+
+
+def cache_objects():
+    """
+    Save themes and stories as json files.
+    """
+    for objt in webdb.SUPPORTED_OBJECTS:
+        size = 0
+        header = []
+        base_path = get_data_path(TARGET + "json", objt)
+        log.info("writing to: %s", base_path)
+
+        for ii, row in enumerate(webdb.get_defenitions(objt)):
+            if "storytheme" in objt:
+                continue
+            if ii == 0:
+                header = row
+            else:
+                fn = get_valid_filename(row[0].decode("utf-8").encode("ascii", "ignore"))
+                path = os.path.join(base_path, fn + ".json")
+                data = {k: v for k, v in zip(header, row)}
+                data['type'] = objt
+                with open(path, "wb+") as fh:
+                    json.dump(data, fh)
+                size += os.stat(path).st_size / (1024.0 ** 2)
+
+        log.debug("..total json size: %.2f Mb", size)
 

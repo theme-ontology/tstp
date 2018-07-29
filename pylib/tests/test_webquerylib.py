@@ -5,8 +5,12 @@ import lib.log
 
 
 class TestCache(unittest.TestCase):
-    def test_special(self):
-        print webquerylib.list_special_queries()
-        #webquerylib.cache_special_queries()
+    def setUp(self):
+        webquerylib.TARGET = "test"
 
+    def test_special(self):
+        webquerylib.cache_special_queries()
+
+    def test_cache_object(self):
+        webquerylib.cache_objects()
 
