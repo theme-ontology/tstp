@@ -8,6 +8,7 @@ import tempfile
 from db import do
 import json
 import re
+import datetime
 
 
 TARGET = "web"
@@ -136,6 +137,40 @@ def get_valid_filename(s):
     return re.sub(r'(?u)[^-\w.]', '', s)
 
 
+def interpret_daterange(txt):
+    """
+    Return two datetimes as strings, defaulting to 01-01-01 when
+    format is incomplete or faulty.
+    """
+    dates = [[]]
+
+    for token in txt.split("-"):
+        token = token.strip()
+        try:
+            int(token)
+        except ValueError:
+            token = '01'
+        if (len(token) > 2 and dates[-1]) or len(dates[-1]) == 3:
+            dates.append([])
+        dates[-1].append(token)
+
+    for date in dates:
+        while len(date) < 3:
+            date.append('01')
+        if not 1 <= int(date[1]) <= 12:
+            date[1] = '01'
+        for ii in xrange(1, 4):
+            try:
+                d = datetime.date(*(int(x) for x in date))
+            except ValueError:
+                d[-ii] = '01'
+            else:
+                break
+
+    d1, d2 = dates[0], dates[-1]
+    return '-'.join(d1), '-'.join(d2)
+
+
 def cache_objects():
     """
     Save themes and stories as json files.
@@ -156,6 +191,13 @@ def cache_objects():
                 path = os.path.join(base_path, fn + ".json")
                 data = {k: v for k, v in zip(header, row)}
                 data['type'] = objt
+
+                if 'date' in data:
+                    print data['date']
+                    d1, d2 = interpret_daterange(data['date'])
+                    data['date'] = d1
+                    data['date2'] = d2
+
                 with open(path, "wb+") as fh:
                     json.dump(data, fh)
                 size += os.stat(path).st_size / (1024.0 ** 2)
