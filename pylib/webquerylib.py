@@ -193,7 +193,6 @@ def cache_objects():
                 data['type'] = objt
 
                 if 'date' in data:
-                    print data['date']
                     d1, d2 = interpret_daterange(data['date'])
                     data['date'] = d1
                     data['date2'] = d2
