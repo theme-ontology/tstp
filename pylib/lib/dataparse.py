@@ -96,6 +96,8 @@ def themejoin(lines):
             f += " <%s>" % capacity
         outlines.append(f)
 
+    if not outlines:
+        return ""
     return ",\n".join(outlines) + ","
 
 
