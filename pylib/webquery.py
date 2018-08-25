@@ -62,6 +62,7 @@ def handle_response(obj_type, variant = None):
     collapsecollections = get('collapsecollections', None)
     regexpnamefilter = get('regexpnamefilter', None)
     collectionfilter = get('collectionfilter', None)
+    version = get('version', "latest")
 
     if variant == "proposedevents":
         # a list of events session user has proposed for insertion,
@@ -99,36 +100,48 @@ def handle_response(obj_type, variant = None):
         )
 
     ## order items according to a search string and "fuzzy" string matching heuristics
-    if fuzzysearch is not None:
-        from difflib import SequenceMatcher as SM
-        import shlex
-
+    if isinstance(fuzzysearch, basestring) and fuzzysearch.strip():
         extra_fields = ("score",)
 
-        for obj in objs:
-            sscore = 0.0
-            scount = 0.0
-            needles = shlex.split(fuzzysearch.replace("'", "\\'"))
+        if version == "latest":
+            import lib.search
+            scores = {w: s for s, w in lib.search.find("theme", fuzzysearch)}
+            nobjs = []
+            for obj in objs:
+                obj.score = scores.get(obj.name, 0.0)
+                obj.extra_fields = extra_fields
+                if obj.score > 0.0:
+                    nobjs.append(obj)
+            objs = nobjs
 
-            for needle in needles:
-                if needle:
-                    needle = needle.replace("\\", "")
-                    scores = []
-                    haystacks = [ obj.name ] + [ getattr(obj, f) for f in fields if f not in ("name", "score") ]
+        else:
+            from difflib import SequenceMatcher as SM
+            import shlex
 
-                    for idx, haystack in enumerate(haystacks):
-                        sm = SM(None, haystack, needle)
-                        blocks = list(sm.get_matching_blocks())
-                        if blocks:
-                            score = max(n for i, j, n in blocks) / float(len(needle))
-                            score /= 1 + idx / 10.0
-                            scores.append(score)
-                    if scores:
-                        sscore += max(scores)
-                        scount += 1
+            for obj in objs:
+                sscore = 0.0
+                scount = 0.0
+                needles = shlex.split(fuzzysearch.replace("'", "\\'"))
 
-            obj.score = sscore / scount if scount else 0.0
-            obj.extra_fields = extra_fields
+                for needle in needles:
+                    if needle:
+                        needle = needle.replace("\\", "")
+                        scores = []
+                        haystacks = [ obj.name ] + [ getattr(obj, f) for f in fields if f not in ("name", "score") ]
+
+                        for idx, haystack in enumerate(haystacks):
+                            sm = SM(None, haystack, needle)
+                            blocks = list(sm.get_matching_blocks())
+                            if blocks:
+                                score = max(n for i, j, n in blocks) / float(len(needle))
+                                score /= 1 + idx / 10.0
+                                scores.append(score)
+                        if scores:
+                            sscore += max(scores)
+                            scount += 1
+
+                obj.score = sscore / scount if scount else 0.0
+                obj.extra_fields = extra_fields
 
         objs.sort(key = lambda o: o.score, reverse = False)
 

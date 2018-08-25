@@ -76,12 +76,14 @@
 			} );
         }
 
-        function reloadData()
+        function reloadData(force=false)
         {
             var fuzzy = $('#fieldFind').val();
-            reloads -= 1;
 
-            if (reloads == 0 && fuzzy != prevsearch)
+            if (!force)
+                reloads -= 1;
+
+            if ((reloads == 0 && fuzzy != prevsearch) || force)
             {
                 table = $('#themes_datatable').DataTable();
                 var url = 'json.php?type=theme&fields=score,name,parents,description&slimit=200&rlimit=10000&fuzzysearch=' + fuzzy;
@@ -110,6 +112,13 @@
             reloads += 1;
             setTimeout(reloadData, 500);
         }
+
+        $(document).keyup(function(e) {
+            if (e.keyCode == 27) {
+                $('#fieldFind').val("");
+                reloadData(true);
+            }
+        });
 
     </script>
 
