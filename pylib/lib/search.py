@@ -2,7 +2,6 @@ import urllib
 import urllib2
 import json
 from collections import defaultdict
-from pprint import pprint as pp
 import lib.log
 import itertools
 
@@ -62,7 +61,6 @@ def find(core, q):
     for ii, kw in enumerate(variations):
         if ii%2 == 0:
             for spec in variations[ii+1]['suggestion']:
-                print "  ", spec
                 word = spec['word']
                 weight = spec['freq']
                 spec['kw'] = kw
@@ -92,7 +90,6 @@ def find(core, q):
         replacements.append(rl)
 
     for replace_list in itertools.product(*replacements):
-        print "  ", replace_list
         basescore = 1.0
         for kw, word in replace_list:
             if kw == word:
