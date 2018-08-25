@@ -105,7 +105,7 @@ def warn(msg, *args):
 
 
 class Timer( object ):
-    def __init__( self, verbose = False ):
+    def __init__(self, verbose=False):
         self.verbose = verbose
         self.timer = timeit.default_timer
 
@@ -118,7 +118,8 @@ class Timer( object ):
         self.elapsed_secs = end - self.start
         self.elapsed = self.elapsed_secs * 1000  # millisecs
         if self.verbose:
-            print 'elapsed time: %f ms' % self.elapsed
+            title = self.verbose if isinstance(self.verbose, basestring) else ""
+            debug(title + ' ..elapsed time: %f ms' % self.elapsed)
 
 
 class Mode( object ):

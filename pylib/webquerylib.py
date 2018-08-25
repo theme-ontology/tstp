@@ -191,7 +191,6 @@ def cache_objects():
                 path = os.path.join(base_path, fn + ".json")
                 data = {k: v for k, v in zip(header, row)}
                 data['type'] = objt
-                data['_text_'] = '\n\n'.join(row)
                 data['id'] = objt + "_" + fn
 
                 if 'date' in data:
