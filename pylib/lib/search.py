@@ -62,6 +62,7 @@ def find(core, q):
     for ii, kw in enumerate(variations):
         if ii%2 == 0:
             for spec in variations[ii+1]['suggestion']:
+                print "  ", spec
                 word = spec['word']
                 weight = spec['freq']
                 spec['kw'] = kw
@@ -91,6 +92,7 @@ def find(core, q):
         replacements.append(rl)
 
     for replace_list in itertools.product(*replacements):
+        print "  ", replace_list
         basescore = 1.0
         for kw, word in replace_list:
             if kw == word:
@@ -98,8 +100,8 @@ def find(core, q):
             else:
                 basescore += weights[(kw, word)] * 0.5
         basescore /= float(len(replace_list)) + 1
-        rlu = {kw: word for kw, word in replace_list}
-        nq = " ".join(rlu.get(w, w) for w in qlist)
+        rlu = {kw.lower(): word for kw, word in replace_list}
+        nq = " ".join(rlu.get(w.lower(), w) for w in qlist)
         result = query(core, "select", nq.encode('utf8'))['response']['docs']
         for spec in result:
             score = (basescore * spec['score']) / 10.0
