@@ -43,8 +43,12 @@ def query(core, qtype, q):
         pass
 
     url = URL_BASE + core + "/" + qtype + "?" + urllib.urlencode(params)
-    with lib.log.Timer(url if DEBUG else None):
-        return json.load(urllib2.urlopen(url))
+
+    try:
+        with lib.log.Timer(url if DEBUG else None):
+            return json.load(urllib2.urlopen(url))
+    except urllib2.HTTPError:
+        return {}
 
 
 def find(core, q):
@@ -67,7 +71,10 @@ def find(core, q):
 
     # find spelling variations
     spellresult = query(core, "spell", q)
-    variations = spellresult['spellcheck']['suggestions']
+    try:
+        variations = spellresult['spellcheck']['suggestions']
+    except KeyError:
+        variations = []
     bykw = {kw:set() for ii, kw in enumerate(variations) if ii%2==0}
     for ii, kw in enumerate(variations):
         # ignores spelling suggestions for words with asterisks and gunk
