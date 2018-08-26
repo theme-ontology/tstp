@@ -906,9 +906,9 @@
       <!-- the spellcheck distance measure used, the default is the internal levenshtein -->
       <str name="distanceMeasure">internal</str>
       <!-- minimum accuracy needed to be considered a valid spellcheck suggestion -->
-      <float name="accuracy">0.5</float>
+      <float name="accuracy">0.4</float>
       <!-- the maximum #edits we consider when enumerating terms: can be 1 or 2 -->
-      <int name="maxEdits">3</int>
+      <int name="maxEdits">2</int>
       <!-- the minimum shared prefix when enumerating terms -->
       <int name="minPrefix">1</int>
       <!-- maximum number of inspections per result. -->
