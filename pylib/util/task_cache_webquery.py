@@ -4,6 +4,7 @@ import subprocess
 import os
 import glob
 import json
+import urllib2
 
 
 def solr_commit():
@@ -31,12 +32,17 @@ def solr_commit():
                 objs.append(obj)
         solr.add(objs)
 
+    # rebuild dictionaries
+    urllib2.urlopen('http://localhost:8983/solr/tstptheme/suggest?suggest.build=true&suggest.dictionary=completer')
+    urllib2.urlopen('http://localhost:8983/solr/tstptheme/spell?spellcheck.build=true')
+    urllib2.urlopen('http://localhost:8983/solr/tstpstory/spell?spellcheck.build=true')
+
 
 def main():
     log.debug("START cache_special_queries")
-    #webquerylib.cache_special_queries()
+    webquerylib.cache_special_queries()
     log.debug("START cache_objects")
-    #webquerylib.cache_objects()
+    webquerylib.cache_objects()
     log.debug("START solr commit")
     solr_commit()
 
