@@ -231,3 +231,16 @@ span.label-story {
   background: #6677aa;
   color: #ddeeff;
 }
+
+input.search-theme {
+  background: #fff2e0;
+  color: #6f6660;
+}
+
+input.search-story {
+  background: #fff2e0;
+  color: #6f6660;
+}
+
+
+

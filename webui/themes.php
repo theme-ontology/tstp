@@ -133,7 +133,7 @@
             <form autocomplete="off" onkeypress="return event.keyCode != 13;">
                 <fieldset class="form-group">
                     <label for="fieldFind">Fuzzy Search:</label>
-                    <input id="fieldFind" type="text" class="form-control" style="background:#fff2e0;" autofocus 
+                    <input id="fieldFind" type="text" class="form-control search-theme" autofocus 
                         onchange="scheduleReload()" oninput="scheduleReload()">
                 </fieldset>
             </form>
