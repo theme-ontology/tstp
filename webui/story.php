@@ -126,7 +126,7 @@
 
 <?php // THEMES TABLE //?>
     <div class="row">
-        <div id="div_datatable" class="col-md-12">
+        <div id="div_datatable" class="col-md-12 hpad0">
         	<div class="basebox">
 	            <table id="themes_datatable" class="display table table-striped" cellspacing="0" width="100%">
 			        <thead>

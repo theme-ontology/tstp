@@ -12,7 +12,7 @@ body {
 
 
 .basebox {
-    padding: 15px;
+    padding: 15px 0px;
     min-height: 100px;
     margin-bottom: 10px;
     border-radius: 3px;
@@ -61,6 +61,7 @@ td.tstp-description-cell {
 
 .container .text-muted {
   margin: 20px 0;
+  padding-left: 0px;
 }
 
 
@@ -242,5 +243,10 @@ input.search-story {
   color: #6f6660;
 }
 
+
+.hpad0 {
+  padding-left: 0px;
+  padding-right: 0px;
+}
 
 

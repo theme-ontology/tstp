@@ -154,8 +154,9 @@
             </form>
         </div>
 
-        <div id="div_stories_datatable" class="col-md-12">
+        <div id="div_stories_datatable" class="col-md-12 hpad0">
         	<div class="basebox">
+                fjdhsabkjh
 	            <table id="stories_datatable" class="display table table-striped" cellspacing="0" width="100%">
 			        <thead>
 			            <tr>

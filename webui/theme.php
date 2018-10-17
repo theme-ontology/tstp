@@ -129,7 +129,7 @@
 
 <?php // Children TABLE //?>
     <div class="row">
-        <div id="div_datatable" class="col-md-12">
+        <div id="div_datatable" class="col-md-12 hpad0">
             <div class="basebox">
                 <H4>List of Child Themes</H4>
                 <table id="children_datatable" class="display table table-striped" cellspacing="0" width="100%">
@@ -146,7 +146,7 @@
 
 <?php // Stories TABLE //?>
     <div class="row">
-        <div id="div_datatable" class="col-md-12">
+        <div id="div_datatable" class="col-md-12 hpad0">
             <div class="basebox">
                 <H4>List of Stories</H4>
                 <table id="stories_datatable" class="display table table-striped" cellspacing="0" width="100%">
