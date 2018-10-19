@@ -131,7 +131,7 @@
                         <label for="fieldOutput">Story Definition</label>
                         <textarea id="fieldOutput" name="storyentry" class="form-control" style="font-family:monospace;" rows=25></textarea>
                     </fieldset>
-                    <button id="commitbutton" type="submit" name="submit" value="commit" class="btn btn-primary">
+                    <button id="commitbutton" type="submit" name="submit" value="commit" class="btn btn-primary" style="display:none;" disabled>
                         commit story to /auto/pending
                     </button>
                 </form>

@@ -12,6 +12,7 @@ import os
 import subprocess
 
 
+
 def handle_query():
     """
     Handle any and all web submits.
@@ -34,18 +35,22 @@ def handle_query():
                 break
 
         if sid:
-            fn = safe_filename(sid)
+            fn = safe_filename(sid) + ".st.txt"
             basepath = os.path.join(GIT_THEMING_PATH, "auto", "pending")
             if not os.path.exists(basepath):
                 os.makedirs(basepath)
             os.chdir(basepath)
             results.append(subprocess.check_output("git pull".split(), stderr=subprocess.STDOUT))
-            path = os.path.join(basepath, fn + ".st.txt")
+            if not os.path.exists(basepath):
+                os.makedirs(basepath)
+            path = os.path.join(basepath, fn)
             overwrite = os.path.isfile(path)
             with open(path, "wb+") as fh:
                 fh.write(data)
                 fh.write("\n")
-            cmd = 'git commit -m'.split() + [ "auto: prototype storyentry from web: %s" % fn ]
+            cmd = [ 'git', 'add', fn ]
+            results.append(subprocess.check_output(cmd, stderr=subprocess.STDOUT))
+            cmd = [ 'git', 'commit', '-m', "auto: prototype storyentry from web: %s" % fn ]
             results.append(subprocess.check_output(cmd, stderr=subprocess.STDOUT))
             results.append(subprocess.check_output("git push".split(), stderr=subprocess.STDOUT))
         else:
