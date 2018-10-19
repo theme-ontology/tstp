@@ -36,11 +36,10 @@ def handle_query():
         if sid:
             fn = safe_filename(sid)
             basepath = os.path.join(GIT_THEMING_PATH, "auto", "pending")
-            os.chdir(basepath)
-            #os.system("git pull")
-            results.append(subprocess.check_output("git pull".split(), stderr=subprocess.STDOUT))
             if not os.path.exists(basepath):
                 os.makedirs(basepath)
+            os.chdir(basepath)
+            results.append(subprocess.check_output("git pull".split(), stderr=subprocess.STDOUT))
             path = os.path.join(basepath, fn + ".st.txt")
             overwrite = os.path.isfile(path)
             with open(path, "wb+") as fh:
