@@ -56,6 +56,10 @@ def cached_special_query(act_type, req_type, obj_name):
     else:
         log.warn("missing cache: %s", path)
 
+    if act_type == "urlimport":
+        from webimport import json_story_from_url_webquery
+        return json_story_from_url_webquery()
+
     if act_type == "themelist":
         themes = list( x[0] for x in do("""
             SELECT DISTINCT name from `web_attributes`

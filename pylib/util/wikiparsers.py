@@ -1,11 +1,7 @@
 import urllib2
 import re
-import datetime
 from dateutil import parser
-
 from bs4 import BeautifulSoup
-
-import webdb
 import webobject
 
 

@@ -174,7 +174,7 @@ def handle_query():
     log.debug("responding to: %s, %s, %s", act_type, req_type, obj_name)
 
     res = cached_special_query(act_type, req_type, obj_name)
-    if res:
+    if res is not None:
         return res
 
     ## queries for each object type available
