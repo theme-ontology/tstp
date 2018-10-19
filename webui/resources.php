@@ -11,10 +11,20 @@
 
 <div class="container">
     <div class="row">
-
+        <div class="panel-body">
+            <H3 class="px-3">Helpful Tools</H3>
+            <TABLE class="table table-striped">
+                <tbody>
+                    <tr>
+                        <td><A href="newstory">import story entries</A></td>
+                        <td>Import story entries from Wikipedia and other supported sources.</td>
+                    </tr>
+                </tbody>
+            </TABLE>
+        </div>
 
 		<div class="panel-body">
-          	<H3 class="px-3">Download Latest Data</H3>
+          	<H3 class="px-3">Download Latest Data as Text</H3>
         	<TABLE class="table table-striped">
             	<tbody>
 	            	<tr>
@@ -57,7 +67,7 @@
     	</div>
 
 		<div class="panel-body">
-          	<H3 class="px-3">API</H3>
+          	<H3 class="px-3">JSON API</H3>
         	<TABLE class="table table-striped">
             	<tbody>
 	            	<tr>

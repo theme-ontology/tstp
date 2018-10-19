@@ -6,4 +6,8 @@
 session_cache_limiter( false );
 session_start();
 
+if ($_SESSION["captchaBalance"] >= 3)
+{
+    $_SESSION["isHuman"] = true;
+}
 ?>

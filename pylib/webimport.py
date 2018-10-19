@@ -3,6 +3,12 @@ from bs4 import BeautifulSoup
 import re
 from dateutil.parser import parse
 import json
+import traceback
+
+
+SUPPORTED_URLS = [
+    r"https{0,1}://\w+\.wikipedia\.org/[^?]*$",
+]
 
 
 def title_fix(title):
@@ -20,15 +26,34 @@ def title_fix(title):
     return title
 
 
-
 def json_story_from_url_webquery():
-    from webphp import php_get as get
-    url = get("url")
-    return json_story_from_url(url)
+    try:
+        from webphp import php_get as get
+        url = get("url")
+        res = json_story_from_url(url)
+    except BaseException as e:
+        res = json.dumps({
+            "error": traceback.format_exc(),
+        })
+    return res
 
 
 def json_story_from_url(url=None):
-    data = urllib2.urlopen(url).read()
+    for patt in SUPPORTED_URLS:
+        if re.match(patt, url):
+            break
+    else:
+        return json.dumps({
+            "error": "Unsupported URL: " + url,
+        })
+
+    try:
+        data = urllib2.urlopen(url).read()
+    except urllib2.HTTPError:
+        return json.dumps({
+            "error": "Fetching URL Failed: " + url,
+        })
+
     soup = BeautifulSoup(data, "html.parser")
     infobox = soup.find("table", class_ = "infobox")
     title = infobox.find(["td", "th"]).get_text().strip()
@@ -62,8 +87,6 @@ def json_story_from_url(url=None):
         data['description'] = desc
 
     if infobox:
-        #print infobox.prettify()
-
         for tr in infobox.find_all("tr"):
             if tr.find(["th", "td"]).get_text().lower() in ("released", "release date"):
                 idate = tr.find_all("td")[-1]
