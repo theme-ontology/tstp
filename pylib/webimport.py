@@ -2,7 +2,7 @@ import urllib2
 from bs4 import BeautifulSoup
 import re
 from dateutil.parser import parse
-
+import json
 
 
 def title_fix(title):
@@ -78,7 +78,7 @@ def json_story_from_url(url=None):
                 pdate = parse(date)
                 data['year'] = str(pdate.year)
 
-    return data
+    return json.dumps(data)
 
 
 
