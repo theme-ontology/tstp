@@ -11,6 +11,7 @@ def update_repo():
 
 
 def main():
+    path = os.path.join(GIT_THEMING_PATH, "notes")
     update_repo()
     os.system("pyrun util.db clear nowarn")
     os.system("pyrun util.db import %s" % path)
