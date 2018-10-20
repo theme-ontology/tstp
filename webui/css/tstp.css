@@ -104,13 +104,26 @@ td.lightcell {
 }
 
 .navbar-default {
-    background-color: rgba(255, 255, 255, 0.75);;
+    background-color: rgba(255, 255, 255, 0.75);
     border-color: #FFFFFF;
 }
 .navbar-default .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:hover,
 .navbar-default .navbar-nav > .active > a:focus {
     background-color: #ffffff;
+}
+
+#navbar.collapse {
+    background-color: rgba(254, 254, 254, 0.9);
+}
+
+.collapsing {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  -webkit-transition: height .05s ease;
+       -o-transition: height .05s ease;
+          transition: height .05s ease;
 }
 
 /* typeahead */
@@ -248,3 +261,7 @@ input.search-story {
   padding-right: 0px;
 }
 
+.hpad1 {
+  padding-left: 2px;
+  padding-right: 2px;
+}

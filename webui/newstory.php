@@ -161,7 +161,7 @@
 
 <?php // Basic information //?>
     <div class="row">
-        <div class="col-md-12 hpad0">
+        <div class="col-md-12 hpad1">
             <fieldset class="form-group">
                 <label for="importurl">Import from URL (copy&amp;paste Wikipedia link)</label>
                 <input id="importurl" type="text" class="form-control" autofocus 
