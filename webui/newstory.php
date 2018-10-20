@@ -90,6 +90,7 @@
                 ["title", metadata["title"]],
                 ["description", metadata["description"]],
                 ["date", metadata["date"]],
+                ["references", metadata["references"]],
             ];
 
             if ($("#fieldRatings").prop('checked'))
@@ -162,29 +163,42 @@
 <?php // Basic information //?>
     <div class="row">
         <div class="col-md-12 hpad1">
-            <fieldset class="form-group">
-                <label for="importurl">Import from URL (copy&amp;paste Wikipedia link)</label>
-                <input id="importurl" type="text" class="form-control" autofocus 
-                    onchange="scheduleReload()" oninput="scheduleReload()">
-            </fieldset>
+            <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#sourceImport">From URL</a></li>
+              <li><a data-toggle="tab" href="#sourceLoad">From Saved</a></li>
+            </ul>
 
-            <fieldset class="form-group">
-                <label for="savedstories">Or choose saved</label>
-                <select id="savedstories" type="text" class="form-control"
-                    onchange="loadOutput()" oninput="loadOutput()"></select>
-            </fieldset>
+            <div class="tab-content">
+                    <BR>
+                <div id="sourceImport" class="tab-pane fade in active">
+                    <fieldset class="form-group">
+                        <label for="importurl">Import from URL (copy&amp;paste Wikipedia link)</label>
+                        <input id="importurl" type="text" class="form-control" autofocus 
+                            onchange="scheduleReload()" oninput="scheduleReload()">
+                    </fieldset>
 
-            <fieldset class="form-group">
-                <label for="fieldSID">Story ID</label>
-                <input id="fieldSID" type="text" class="form-control" OnChange="updateOutput()">
-            </fieldset>
+                    <fieldset class="form-group">
+                        <label for="fieldSID">Edit Story ID</label>
+                        <input id="fieldSID" type="text" class="form-control" OnChange="updateOutput()">
+                    </fieldset>
 
-            <fieldset class="form-group form-inline">
-                <label for="fieldGenre" class="checkbox-inline">Genre</label>
-                <input id="fieldGenre" type="checkbox" OnChange="updateOutput()">
-                <label for="fieldRatings" class="checkbox-inline">Ratings</label>
-                <input id="fieldRatings" type="checkbox" OnChange="updateOutput()">
-            </fieldset>
+                    <fieldset class="form-group form-inline">
+                        <label for="fieldSID">Include Fields: </label>
+                        <label for="fieldGenre" class="checkbox-inline">Genre</label>
+                        <input id="fieldGenre" type="checkbox" OnChange="updateOutput()">
+                        <label for="fieldRatings" class="checkbox-inline">Ratings</label>
+                        <input id="fieldRatings" type="checkbox" OnChange="updateOutput()">
+                    </fieldset>
+                </div>
+
+                <div id="sourceLoad" class="tab-pane fade">
+                    <fieldset class="form-group">
+                        <label for="savedstories">Choose saved draft</label>
+                        <select id="savedstories" type="text" class="form-control"
+                            onchange="loadOutput()" oninput="loadOutput()"></select>
+                    </fieldset>
+                </div>
+            </div>
 
             <fieldset id="errorFieldSet" class="form-group" style="display:none;">
                 <label for="fieldError" style="color: #ff0000;">Errors</label>
@@ -192,7 +206,7 @@
             </fieldset>
 
             <fieldset class="form-group">
-                <label for="fieldOutput">Story Definition</label>
+                <label for="fieldOutput">Prototype Story Definition</label>
                 <textarea id="fieldOutput" name="storyentry" class="form-control" style="font-family:monospace;" rows=25 OnChange="outputChanged()" OnKeyUp="outputChanged()"></textarea>
             </fieldset>
             <button id="commitbutton" OnClick="saveOutput();" class="btn btn-primary">
