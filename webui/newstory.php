@@ -134,6 +134,7 @@
                     $("#message").css('display', 'block');
                     $("#error").css('display', 'none');
                 }
+                getSaved();
             });
         }
 
