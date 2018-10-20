@@ -110,11 +110,18 @@ td.lightcell {
 .navbar-default .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:hover,
 .navbar-default .navbar-nav > .active > a:focus {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.85);
+    text-decoration: underline;
 }
 
-#navbar.collapse {
-    background-color: rgba(254, 254, 254, 0.9);
+.navbar-default .navbar-nav > li > a,
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+#navbar.in {
+    background-color: rgba(255, 255, 255, 0.9);
 }
 
 .collapsing {
