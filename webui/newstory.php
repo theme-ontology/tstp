@@ -103,7 +103,7 @@
 
             for(var i=0; i<fields.length; i++)
             {
-                var fn = fields[i][0].replace(/^\w/, function (chr) {
+                var fn = fields[i][0].replace(/^\w| \w/g, function (chr) {
                     return chr.toUpperCase();
                 });
                 out += ":: " + fn + "\n";
