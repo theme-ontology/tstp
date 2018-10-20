@@ -28,6 +28,7 @@ def handle_query():
         path = None
         results = []
         retval = {}
+        overwrite = False
 
         for idx, row in enumerate(rows):
             if row.startswith("===") and idx > 0:
@@ -43,7 +44,7 @@ def handle_query():
             path = os.path.join(basepath, fn)
             overwrite = os.path.isfile(path)
             with open(path, "wb+") as fh:
-                fh.write(data)
+                fh.write(data.encode("utf-8"))
                 fh.write("\n")
         else:
             retval.update({
