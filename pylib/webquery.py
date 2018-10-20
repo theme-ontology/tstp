@@ -4,16 +4,8 @@ log.set_level('SILENT')
 log.set_templog("web.log")
 
 import webobject
-import traceback
-import cgi
 import json
-import re
-import urllib
-from collections import defaultdict
-
 from webphp import php_get as get
-import webdb
-
 from webquerylib import (
     cached_special_query,
 )

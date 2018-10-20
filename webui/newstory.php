@@ -9,6 +9,24 @@
         var scheduled = 0;
         var lastRequest = null;
         var metadata = null;
+        var saved = {};
+
+        function getSaved()
+        {
+            $.getJSON("json.php?action=protostory_saved", function(response) {
+                console.log(response);
+                var $el = $("#savedstories");
+                $el.empty();
+                $el.append($("<option></option>").attr("value", "").text(""));
+                saved = {};
+                for (var i=0; i<response.length; i++)
+                {
+                    var key = response[i][0];
+                    saved[key] = response[i][1];
+                    $el.append($("<option></option>").attr("value", key).text(key));
+                }
+            });
+        }
 
         function scheduleReload()
         {
@@ -24,33 +42,42 @@
             {
                 var target_url = $("#importurl").val();
                 var url = "json.php?action=urlimport&url=" + encodeURIComponent(target_url);
-                if (lastRequest != target_url)
+                if (lastRequest != target_url && target_url != "")
                 {
                     lastRequest = target_url;
-                    $.getJSON(url, handleResponse);
+                    $.getJSON(url, function(response) {
+                        console.info(response);
+                        $("#savedstories").val("");
+
+                        if ("title" in response && "year" in response)
+                        {
+                            metadata = response;
+                            var sid = response["type"] + ": " + response['title'] + " (" + response["year"] + ")"
+                            sid = sid.replace(/[^\w: ()]/g, ''); // no commas and percents in sid (are there other bad characters?)
+                            $("#fieldSID").val(sid);
+                            updateOutput();
+                            $("#errorFieldSet").css('display', 'none');
+                            $("#outputFieldSet").css('display', 'block');
+                        }
+
+                        if ("error" in response)
+                        {
+                            $("#errorFieldSet").css('display', 'block');
+                            $("#outputFieldSet").css('display', 'none');
+                            $("#fieldError").val(response["error"]);
+                        }
+                    });
                 }
             }
         }
 
-        function handleResponse(response)
+        function loadOutput()
         {
-            console.info(response);
-
-            if ("title" in response && "year" in response)
+            var sel = $("#savedstories").val();
+            if (sel in saved)
             {
-                metadata = response;
-                var sid = response["type"] + ": " + response['title'] + " (" + response["year"] + ")"
-                $("#fieldSID").val(sid);
-                updateOutput();
-                $("#errorFieldSet").css('display', 'none');
-                $("#outputFieldSet").css('display', 'block');
-            }
-
-            if ("error" in response)
-            {
-                $("#errorFieldSet").css('display', 'block');
-                $("#outputFieldSet").css('display', 'none');
-                $("#fieldError").val(response["error"]);
+                $("#importurl").val("");
+                $("#fieldOutput").val(saved[sel]);
             }
         }
 
@@ -89,6 +116,32 @@
             $("#fieldOutput").val(out);
         }
 
+        function saveOutput()
+        {
+            var payload = {
+                "action": "protostory",
+                "storyentry": $("#fieldOutput").val(),
+            };
+            $.post( "submit", payload).done(function(data) {
+                msg = Object.entries(data).map(x=>x.join(":")).join("\r\n");
+                $("#message").text("Saved! Response: " + msg);
+                $("#message").css('display', 'block');
+            });
+        }
+
+        function outputChanged()
+        {
+            if ($("#fieldOutput").val())
+            {
+                $("#message").text("(unsaved progress)");
+                $("#message").css('display', 'block');
+            } else {
+                $("#message").css('display', 'none');
+                $("#message").text("");
+            }
+        }
+
+        getSaved();
     </script>
 </head>
 
@@ -100,41 +153,49 @@
 <?php // Basic information //?>
     <div class="row">
         <div class="col-md-12 hpad0">
-                <form method="post" enctype="multipart/form-data">
-                    <fieldset class="form-group">
-                        <label for="importurl">Import from URL (copy&amp;paste Wikipedia link)</label>
-                        <input id="importurl" type="text" class="form-control" autofocus 
-                            onchange="scheduleReload()" oninput="scheduleReload()">
-                    </fieldset>
+            <fieldset class="form-group">
+                <label for="importurl">Import from URL (copy&amp;paste Wikipedia link)</label>
+                <input id="importurl" type="text" class="form-control" autofocus 
+                    onchange="scheduleReload()" oninput="scheduleReload()">
+            </fieldset>
 
-                    <fieldset class="form-group">
-                        <label for="fieldSID">Story ID</label>
-                        <input id="fieldSID" type="text" class="form-control" OnChange="updateOutput()">
-                    </fieldset>
+            <fieldset class="form-group">
+                <label for="savedstories">Or choose saved</label>
+                <select id="savedstories" type="text" class="form-control"
+                    onchange="loadOutput()" oninput="loadOutput()"></select>
+            </fieldset>
 
-                    <fieldset class="form-group form-inline">
-                        <label for="fieldGenre" class="checkbox-inline">Genre</label>
-                        <input id="fieldGenre" type="checkbox" OnChange="updateOutput()">
-                        <label for="fieldRatings" class="checkbox-inline">Ratings</label>
-                        <input id="fieldRatings" type="checkbox" OnChange="updateOutput()">
-                    </fieldset>
+            <fieldset class="form-group">
+                <label for="fieldSID">Story ID</label>
+                <input id="fieldSID" type="text" class="form-control" OnChange="updateOutput()">
+            </fieldset>
 
-                    <fieldset id="errorFieldSet" class="form-group" style="display:none;">
-                        <label for="fieldError" style="color: #ff0000;">Errors</label>
-                        <textarea id="fieldError" class="form-control" style="font-family:monospace; background:#ffe8e0;" rows=25></textarea>
-                    </fieldset>
-                </form>
+            <fieldset class="form-group form-inline">
+                <label for="fieldGenre" class="checkbox-inline">Genre</label>
+                <input id="fieldGenre" type="checkbox" OnChange="updateOutput()">
+                <label for="fieldRatings" class="checkbox-inline">Ratings</label>
+                <input id="fieldRatings" type="checkbox" OnChange="updateOutput()">
+            </fieldset>
 
-                <form id="outputFieldSet" action="submit" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="protostory">
-                    <fieldset class="form-group">
-                        <label for="fieldOutput">Story Definition</label>
-                        <textarea id="fieldOutput" name="storyentry" class="form-control" style="font-family:monospace;" rows=25></textarea>
-                    </fieldset>
-                    <button id="commitbutton" type="submit" name="submit" value="commit" class="btn btn-primary" style="display:none;" disabled>
-                        commit story to /auto/pending
-                    </button>
-                </form>
+            <fieldset id="errorFieldSet" class="form-group" style="display:none;">
+                <label for="fieldError" style="color: #ff0000;">Errors</label>
+                <textarea id="fieldError" class="form-control" style="font-family:monospace; background:#ffe8e0;" rows=25></textarea>
+            </fieldset>
+
+            <fieldset class="form-group">
+                <label for="fieldOutput">Story Definition</label>
+                <textarea id="fieldOutput" name="storyentry" class="form-control" style="font-family:monospace;" rows=25 OnChange="outputChanged()" OnKeyUp="outputChanged()"></textarea>
+            </fieldset>
+            <button id="commitbutton" OnClick="saveOutput();" class="btn btn-primary">
+                save progress
+            </button>
+            <BR>
+            &nbsp;
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 hpad0">
+            <div id="message" class="alert alert-info" style="display:none;"></div>
         </div>
     </div>
 </div>

@@ -82,6 +82,18 @@ def cached_special_query(act_type, req_type, obj_name):
     if act_type in webdb.SUPPORTED_OBJECTS:
         return json.dumps(webdb.get_defenitions(act_type))
 
+    if act_type == "protostory_saved":
+        rets = []
+        basepath = os.path.join(tempfile.gettempdir(), "tstp", "protostory")
+        if not os.path.exists(basepath):
+            os.makedirs(basepath)
+        for fn in os.listdir(basepath):
+            if fn.endswith("st.txt"):
+                path = os.path.join(basepath, fn)
+                with open(path, "r+") as fh:
+                    rets.append([fn, fh.read()])
+        return json.dumps(rets)
+
     return None
 
 
