@@ -122,10 +122,18 @@
                 "action": "protostory",
                 "storyentry": $("#fieldOutput").val(),
             };
-            $.post( "submit", payload).done(function(data) {
-                msg = Object.entries(data).map(x=>x.join(":")).join("\r\n");
-                $("#message").text("Saved! Response: " + msg);
-                $("#message").css('display', 'block');
+            $.post( "submit", payload).done(function(response) {
+                msg = Object.entries(response).map(x=>x.join(":")).join("\r\n");
+                if ("error" in response)
+                {
+                    $("#message").css('display', 'none');
+                    $("#error").text("Error: " + msg);
+                    $("#error").css('display', 'block');
+                } else {
+                    $("#message").text("Saved! Response: " + msg);
+                    $("#message").css('display', 'block');
+                    $("#error").css('display', 'none');
+                }
             });
         }
 
@@ -196,6 +204,9 @@
     <div class="row">
         <div class="col-md-12 hpad0">
             <div id="message" class="alert alert-info" style="display:none;"></div>
+        </div>
+        <div class="col-md-12 hpad0">
+            <div id="error" class="alert alert-error" style="display:none;"></div>
         </div>
     </div>
 </div>
