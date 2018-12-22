@@ -120,17 +120,21 @@ class TSTPObject(object):
         Write multiple attribute updates for this class into the database
         without further ado. Dangerous.
         """
+        chunksize = 10000
         attrfields = [
             "category",
             "name",
             "attr",
             "value",
         ]
-        objs = [ x[:2] for x in updates ]
-        fstr = ", ".join('`%s`' % s for s in attrfields)
-        vstr = ", ".join("%s" for s in attrfields)
-        do("REPLACE INTO `web_attributes` (%s) values (%s)" % (fstr, vstr), updates)
-        do("REPLACE INTO `web_objects` (`category`, `name`) values (%s, %s)", objs)
+
+        for i in range(0, len(updates), chunksize):
+            updatechunk = updates[i:i + chunksize]
+            objs = [ x[:2] for x in updatechunk ]
+            fstr = ", ".join('`%s`' % s for s in attrfields)
+            vstr = ", ".join("%s" for s in attrfields)
+            do("REPLACE INTO `web_attributes` (%s) values (%s)" % (fstr, vstr), updatechunk)
+            do("REPLACE INTO `web_objects` (`category`, `name`) values (%s, %s)", objs)
 
     @classmethod
     def sql_filter_list(cls, itemstr):
