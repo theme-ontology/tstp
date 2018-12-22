@@ -405,6 +405,7 @@ class TSTPConnection(TSTPObject):
         Write multiple attribute updates for this class into the database
         without further ado. Dangerous.
         """
+        chunksize = 10000
         attrfields = [
             "category",
             "category1",
@@ -416,7 +417,9 @@ class TSTPConnection(TSTPObject):
         ]
         fstr = ", ".join('`%s`' % s for s in attrfields)
         vstr = ", ".join("%s" for s in attrfields)
-        do("REPLACE INTO `web_connections` (%s) values (%s)" % (fstr, vstr), updates)
+
+        for i in range(0, len(updates), chunksize):
+            do("REPLACE INTO `web_connections` (%s) values (%s)" % (fstr, vstr), updates[i:i + chunksize])
         
     @classmethod
     def commit_edit_object(cls, events, updates):
