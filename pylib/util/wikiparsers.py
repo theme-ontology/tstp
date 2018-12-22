@@ -3,15 +3,30 @@ import re
 from dateutil import parser
 from bs4 import BeautifulSoup
 import webobject
+import json
 
 
-def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", cols = (1, 3, 4, 6)):
+def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", cols = (1, 3, 4, 6), isterse = False):
+    """
+
+    :param url:
+    :param season_offsset:
+    :param prefix:
+    :param tableclass:
+    :param cols:
+    :param isterse:
+        By default we expect every other row in the list to contain a description that go along with the preceding
+        row's information. If the description row is not present, set this flag.
+    :return:
+    """
     data = urllib2.urlopen(url).read()
     soup = BeautifulSoup(data, "html.parser")
+    resturl = "https://en.wikipedia.org/api/rest_v1/page/summary/"
 
     for idx, table in enumerate(soup.find_all("table", class_ = tableclass)):
         sids = []
-        
+        description = None
+
         for row in table.find_all("tr"):
             tdfields = row.find_all("td")
 
@@ -21,10 +36,17 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
                 authorfield = tdfields[cols[2]]
                 datefield = tdfields[cols[3]]
 
+                title_link = titlefield.find("a")
                 title = titlefield.get_text().strip(" \"")
-                date1 = re.search("(\d{4}-\d{2}-\d{2})", datefield.get_text().strip()).group(0)
-                date = parser.parse(date1).strftime("%Y-%m-%d")
-                assert date == date1
+
+                try:
+                    date1 = re.search("(\d{4}-\d{2}-\d{2})", datefield.get_text().strip()).group(0)
+                    date = parser.parse(date1).strftime("%Y-%m-%d")
+                    assert date == date1
+                except AttributeError: # no regex match
+                    date1 = re.search(r"(\w+ \d{1,2}, \d{4})", datefield.get_text().strip()).group(0)
+                    date = parser.parse(date1).strftime("%Y-%m-%d")
+
                 epfield = row.find("td").get_text()
                 author = authorfield.get_text()
                 director = "Directed by: " + directorfield.get_text()
@@ -38,19 +60,30 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
                     sid = prefix + "%sx%02d" % (idx + season_offsset, int(match))
                     sids.append(sid)
 
+                if isterse and title_link:
+                    suffix = title_link.get("href").split("/")[-1].strip()
+                    descurl = resturl + suffix
+                    jsondata = urllib2.urlopen(descurl).read()
+                    info = json.loads(jsondata)
+                    description = info['extract']
+
             else:
-                description = row.find("td", class_ = "description")
-
-                if description and sids:
+                try:
+                    description = row.find("td", class_ = "description")
                     description = description.get_text().strip()
-                    description = description + "\n\n" + director.strip(".") + ". " + author.strip(".") + ".\n"
+                except AttributeError:
+                    pass # found no description
 
-                    for sid in sids:
-                        yield webobject.Story(
-                            name = sid,
-                            title = title,
-                            description = description,
-                            date = date,
-                        )
-                    sids = []
+            if description and sids:
+                description = description + "\n\n" + director.strip(".") + ". " + author.strip(".") + ".\n"
 
+                for sid in sids:
+                    yield webobject.Story(
+                        name = sid,
+                        title = title,
+                        description = description,
+                        date = date,
+                    )
+
+                sids = []
+                description = ''
