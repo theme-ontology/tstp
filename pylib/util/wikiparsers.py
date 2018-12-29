@@ -6,6 +6,21 @@ import webobject
 import json
 
 
+def get_date(datefield, regex, patt):
+    """
+
+    :param regex:
+    :param patt:
+    :return:
+    """
+
+    try:
+        date1 = re.search("(\d{4}-\d{2}-\d{2})", datefield).group(0)
+        return parser.parse(date1).strftime("%Y-%m-%d")
+    except AttributeError:
+        return None
+
+
 def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", cols = (1, 3, 4, 6), isterse = False):
     """
 
@@ -38,14 +53,20 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
 
                 title_link = titlefield.find("a")
                 title = titlefield.get_text().strip(" \"")
+                datetext = datefield.get_text().strip()
+                date = None
 
-                try:
-                    date1 = re.search("(\d{4}-\d{2}-\d{2})", datefield.get_text().strip()).group(0)
-                    date = parser.parse(date1).strftime("%Y-%m-%d")
-                    assert date == date1
-                except AttributeError: # no regex match
-                    date1 = re.search(r"(\w+ \d{1,2}, \d{4})", datefield.get_text().strip()).group(0)
-                    date = parser.parse(date1).strftime("%Y-%m-%d")
+                for regex in [
+                    r"(\d{4}-\d{2}-\d{2})", #yyyy-mm-dd
+                    r"(\w+ \d{1,2}, \d{4})", #MM dd, yyyy
+                    r"(\d{1,2} \w+ \d{4})", #dd MM yyyy
+                ]:
+                    try:
+                        date1 = re.search(regex, datetext).group(0)
+                        date = parser.parse(date1).strftime("%Y-%m-%d")
+                        break
+                    except AttributeError:  # no regex match
+                        pass
 
                 epfield = row.find("td").get_text()
                 author = authorfield.get_text()
