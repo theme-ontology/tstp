@@ -1,6 +1,7 @@
 from collections import defaultdict
 import webobject
 import textwrap
+import log
 
 
 SUPPORTED_OBJECTS = {
@@ -65,6 +66,7 @@ def get_metatheme_data():
         item = (st.name1, st.weight)
         leaf_data[theme].add(item)
         first = True
+        visited = {}
 
         while theme_stack:
             theme = theme_stack.pop()
@@ -75,7 +77,14 @@ def get_metatheme_data():
             first = False
 
             if theme in parent_lu:
-                theme_stack.extend(parent_lu[theme])
+                parents = parent_lu[theme]
+                for parent in parents:
+                    if parent in visited:
+                        log.error('Circular theme definition! Parent "%s" => "%s" has already been visited.' % (parent, theme))
+                    else:
+                        theme_stack.append(parent)
+                        visited.add(parent)
+
 
     for key, items in meta_data.iteritems():
         ret_meta_data[key] = sorted(items)
