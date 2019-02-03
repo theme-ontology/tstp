@@ -81,8 +81,8 @@ def get_metatheme_data():
                 for parent in parents:
                     if parent in visited:
                         log.error('Circular theme definition! Parent "%s" => "%s" has already been visited.' % (parent, theme))
-                        log.error('     ...visited:' % (visited))
-                        log.error('     ...pending:' % (theme_stack))
+                        log.error('     ...visited: ' + str(visited))
+                        log.error('     ...pending: ' + str(theme_stack))
                     else:
                         theme_stack.append(parent)
                         visited.add(parent)
