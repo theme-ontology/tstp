@@ -66,7 +66,7 @@ def get_metatheme_data():
         item = (st.name1, st.weight)
         leaf_data[theme].add(item)
         first = True
-        visited = {}
+        visited = set()
 
         while theme_stack:
             theme = theme_stack.pop()
