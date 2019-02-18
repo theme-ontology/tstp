@@ -1,6 +1,7 @@
 # TSTP
 
-> The Theme Ontology Project: http://www.themeontology.com.
+http://www.themeontology.com/
+
 
 ## Overview
 
