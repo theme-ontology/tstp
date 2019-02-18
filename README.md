@@ -1,8 +1,8 @@
 # TSTP
 
-The Theme Ontology Project: http://www.themeontology.com.
+> The Theme Ontology Project: http://www.themeontology.com.
 
-Theme Data and Definitions: https://github.com/odinlake/theming.
+> Theme Data and Definitions: https://github.com/odinlake/theming.
 
 ## Overview
 
