@@ -4,13 +4,5 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} /[^\./]*$
-
-# Stories by SID (name)
-RewriteRule ^story/(\w+)/?$ story.php?name=$1
-
-# Theme by name
-RewriteRule ^theme/(\w+)/?$ theme.php?name=$1
-
-# Any PHP?
 RewriteRule (.*) $1.php [L]
 
