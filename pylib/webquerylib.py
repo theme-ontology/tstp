@@ -9,6 +9,7 @@ from db import do
 import json
 import re
 import datetime
+import importlib
 
 
 TARGET = "web"
@@ -41,6 +42,22 @@ def get_cache_path(act_type, req_type, obj_name):
     path = os.path.join(base_path, m.hexdigest() + ".pickle")
 
     return path
+
+
+def cache_visualizations():
+    """
+    Create static images for defined visualizations.
+    """
+    base = get_data_path("tstpviz")
+    names = [
+        "stories_by_year",
+    ]
+    for name in names:
+        log.debug("Creating visualization: %s", name)
+        mod = importlib.import_module("viz." + name)
+        path = os.path.join(base, name + ".svg")
+        svg, width, height = mod.make_viz()
+        svg.write(path, width, height)
 
 
 def cached_special_query(act_type, req_type, obj_name):

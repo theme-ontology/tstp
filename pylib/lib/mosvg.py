@@ -1,33 +1,80 @@
+# -*- coding: utf-8 -*-
 '''
 Created on Sep 9, 2013
+@author: Mikael Onsjö
 
-@author: Mikael
+MIT License
+
+Copyright (c) 2019 odinlake
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 '''
 import math
 from collections import OrderedDict, defaultdict
 from contextlib import contextmanager
 
 
-
 class SVG(object):
-    def __init__(self, prescript=None, unit="px", style=None):
+    def __init__(self, style=None, unit="px"):
+        """
+        Represents an SVG image that is built up piece by piece. Provides
+        a variety of convenience API.
+
+        Example
+        -------
+        svg = SVG({'circle': {'fill': 'red'}})
+        svg.circle(100, 100, 50).write("foo.svg", 200, 200)
+        """
         self._meta = SVGHelper(self)
+        self.layers = OrderedDict()
+        self.style = defaultdict(dict)
         self.stock = SVGStockObjects
         self.unit = unit
-        self.layers = OrderedDict()
         self.defs = []
         self.elements = []
-        self.style = defaultdict(dict)
         self.masks = {}
-        if style:
-            self.style.update(style)
-        if prescript:
-            self.custom(prescript)
+        self.add_style(style or {})
 
     def __getitem__(self, key):
         if key not in self.layers:
             self.layers[key] = SVG()
         return self.layers[key]
+
+    def add_style(self, style, keepdefault=False):
+        """
+        Add styles to this svg definition.
+        
+        Parameters
+        ----------
+        style: {str=>{str=>str}} 
+            A dictionary of dictionaries that defines css styles.
+        keepdefault: bool
+            If True, do not overwrite any keys already present.
+        """
+        for key, styledict in style.items():
+            target = self.style[key]
+            for k, v in styledict.items():
+                if keepdefault:
+                    target.setdefault(k, v)
+                else:
+                    target[k] = v
+        return self
 
     @contextmanager
     def group(self, transform=None, cls=None, style=None, attrs=None):
@@ -57,11 +104,12 @@ class SVG(object):
         with svg[layer].clip("clipid"):
             svg[layer].circle(150, 150, 100)
         """
-        idx = 1
-        while name is None or name in self.masks:
-            name = "clip%d" % idx
-            idx += 1
-        self.masks[name] = SVG()
+        if name is None:
+            while name is None or name in self.masks:
+                name = "__auto__clip%d" % idx
+                idx += 1
+        if name not in self.masks:
+            self.masks[name] = SVG()
         with self.group(style={"clip-path": "url(#%s)" % name}, attrs=attrs):
             yield self.masks[name]
 
@@ -99,8 +147,8 @@ class SVG(object):
         ))
         kwargs.setdefault("markerUnits", "strokeWidth")
         kwargs.setdefault("orient", "auto")
-        payload = " ".join('%s="%s"' % (k, v) for k, v in kwargs.iteritems())
-        body = '\n'.join(svg._body_lines())
+        payload = " ".join('%s="%s"' % (k, v) for k, v in kwargs.items())
+        body = '\n'.join(svg.meta.body_lines())
         code = """<marker id="%s" %s>\n%s\n</marker>""" % (m_id, payload, body)
         self.defs.append(code)
         return self
@@ -303,7 +351,7 @@ class SVG(object):
         x, y = self._meta.units(x, y)
         cls_str = 'class="%s" ' % cls if cls else ''
         style_str = 'style="%s" ' % self._meta.make_style(style) if style else ''
-        tag_str = (' '.join('%s="%s"' % (k, v) for k, v in tags.iteritems()) + ' ') if tags else ''
+        tag_str = (' '.join('%s="%s"' % (k, v) for k, v in tags.items()) + ' ') if tags else ''
         self.elements.append("""
             <text x="%s" y="%s" %s%s%s>%s</text>
         """.strip() % (
@@ -313,10 +361,11 @@ class SVG(object):
 
     def xychart(self, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax):
         """
-        Crerate a simple plot area with x/y axes.
+        Create a simple plot area with x/y axes.
 
-        :return:
-        An SVGPlot object on which data can be more easily plotted.
+        Returns
+        -------
+        An SVGPlot component object on which data can be more easily plotted.
         """
         plot = SVGPlot(self, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax)
         self.elements.append(plot)
@@ -324,70 +373,169 @@ class SVG(object):
 
     def make(self, width=1500.0, height=1000.0):
         """
-        Return SVG code as a string.
-
-        :param width:
-        :param height:
-        :return:
+        Return SVG code as a utf-8 encoded string/binary.
         """
-        return self._meta.template1(width, height)
+        return self._meta.template1(width, height).encode('utf-8')
 
     def write(self, file_name, width=1500.0, height=1000.0):
         """
         Write SVG code to a text file.
-
-        :param file_name:
-        :param width:
-        :param height:
-        :return:
         """
-        with open(file_name, 'w+') as fh:
+        with open(file_name, 'wb+') as fh:
             fh.write(self.make(width, height))
 
     def finalize(self):
         """
         Used by subclasses that need to do something final before rendering.
-        :return:
         """
         return self
 
 
 class SVGPlot(SVG):
-    def __init__(self, parent, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax):
+    iid = 0
+
+    def __init__(self, parent, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax, name="plot"):
         dx = x2 - x1
         dy = y2 - y1
         dxv = float(xvmax - xvmin)
         dyv = float(yvmax - yvmin)
+        self.name = name
         self.geom = (x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax)
         self.v2x = lambda v: x1 + (v - xvmin) / dxv * dx
         self.v2y = lambda v: y2 - (v - yvmin) / dyv * dy
         self.plotcmds = []
         self._plotstack = None
         self._finalized = False
-        super(SVGPlot, self).__init__(unit=parent.unit)
+        super(SVGPlot, self).__init__(unit=parent.unit, style=self.default_style())
+        self._config = dict(self.default_config())
+        self._iid = SVGPlot.iid
+        SVGPlot.iid += 1
+
+    def config(self, cfg):
+        """
+        Update the general plot configuration.
+        """
+        self._config.update(cfg)
+        return self
+
+    def getcfg(self, key, default=None):
+        """
+        Get a config parameter.
+        """
+        return self._config.get(key, default)
+
+    def default_config(self):
+        """
+        A simple default plot configuration.
+        """
+        return {
+            "xtype": "scalar",
+            "ytype": "scalar",
+            "xtick-delta": 50, 
+            "ytick-delta": 20, 
+            "xtick-format": '{:g}', 
+            "ytick-format": '{:g}',
+        }
+
+    def default_style(self):
+        """
+        A simple default plot style.
+        """
+        dd = {
+            '': {
+            },
+            "text": {
+                "font": "10px sans-serif",
+            },            
+            "rect.plotarea": {
+                "shape-rendering": "crispEdges",
+                "fill": "none",
+                "stroke": "black",
+            },
+            "line.axis": {
+                "shape-rendering": "crispEdges",
+                "stroke": "black"
+            },
+            "line.tick": {
+                "shape-rendering": "crispEdges",
+                "stroke": "black"
+            },
+            "text.axis": {
+                "fill": "black",
+            },
+            "text.xtick": {
+                "text-anchor": "middle",
+                "alignment-baseline": "text-before-edge",
+                "dominant-baseline": "text-before-edge",
+            },
+            "text.ytick": {
+                "text-anchor": "end",
+                "alignment-baseline": "central",
+                "dominant-baseline": "central",
+            },
+            "line.grid": {
+                "shape-rendering": "crispEdges",
+                "stroke": "gray",
+                "stroke-dasharray": "1 1",
+            },
+            ".dataline": {
+                "fill": "none",
+            },
+            ".datapoint": {
+                "stroke": "#ffffff",
+            },
+        }
+        n = "." + self.name
+        p = n + " "
+        return { (p + k if k else n) : v for k, v in dd.items() }
 
     def finalize(self):
         """
         Used by subclasses that need to do something final before rendering.
-        :return:
         """
         if not self._finalized:
             self._do_plot()
+            super(SVGPlot, self).finalize()
             self._finalized = True
         return self
 
-    def plotarea(self, xtick_delta=50, ytick_delta=20, xtick_fmt='{:g}', ytick_fmt='{:g}'):
+    def get_ticks(self, dim="x"):
+        """
+        """
+        (x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax) = self.geom
+        axis_type = self.getcfg(dim + "type", "scalar")
+        delta = self.getcfg(dim + "tick-delta", 50)
+        if dim.startswith("x"):
+            vmin, vmax = xvmin, xvmax
+            dv = float(xvmax - xvmin)
+            nn = max(2, int((x2 - x1) / delta))
+        else:
+            vmin, vmax = yvmin, yvmax
+            dv = float(yvmax - yvmin)
+            nn = max(2, int((y2 - y1) / delta))
+        if axis_type == 'scalar':
+            ticksv = self._meta.float_tick_locations(vmin, vmax, dv / nn)
+        elif axis_type == 'enum':
+            c, f = math.ceil, math.floor
+            ticksv = range(int(c(vmin)), int(f(vmax)) + 1, int(c(dv / nn)))
+
+        return ticksv
+
+    def plotarea(self):
+        """
+        Draw the grid/axes and ticks.
+        """
         (x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax) = self.geom
         dxv = float(xvmax - xvmin)
         dyv = float(yvmax - yvmin)
-        xn = max(2, int((x2 - x1) / xtick_delta))
-        yn = max(2, int((y2 - y1) / ytick_delta))
-        xticksv = self._meta.float_tick_locations(xvmin, xvmax, dxv / xn)
-        yticksv = self._meta.float_tick_locations(yvmin, yvmax, dyv / yn)
         v2x = self.v2x
         v2y = self.v2y
+        xticksv = self.get_ticks("x")
+        yticksv = self.get_ticks("y")
+        xtick_fmt = self.getcfg("xtick-format")
+        ytick_fmt = self.getcfg("ytick-format")
 
-        with self.group(cls="plot"):
+        with self.group(cls=self.name):
             self.rect2(x1, y1, x2, y2, cls='plotarea')
             self.line(x1, y2, x2, y2, cls='axis xaxis')
             self.line(x1, y1, x1, y2, cls='axis yaxis')
@@ -411,7 +559,7 @@ class SVGPlot(SVG):
     @contextmanager
     def stack(self):
         self._plotstack = []
-        yield
+        yield self
         stack, self._plotstack = self._plotstack, None
         basedata = None
         for args, kwargs in stack:
@@ -436,38 +584,46 @@ class SVGPlot(SVG):
             self.plotcmds.append((args, kwargs))
 
     def _do_plot(self):
-        for args, kwargs in self.plotcmds:
-            data = args[0]
-            baseyv = kwargs['baseyv']
-            basedata = kwargs['basedata']
-            shape = kwargs['shape']
-            cls = kwargs['cls']
-            style = kwargs['style']
-            v2x = self.v2x
-            v2y = self.v2y
-            (x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax) = self.geom
-            pre = (xvmin, baseyv, baseyv)
-            post = (xvmax, baseyv, baseyv)
-            xs, ys = data[:2]
-            baseys = [ basedata[i] if basedata else baseyv for i in range(len(xs)) ]
-            linepts = []
+        v2x = self.v2x
+        v2y = self.v2y
+        (x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax) = self.geom
+        clipid = "plotdata{}".format(self._iid)
 
-            for d0, d1, d2 in self._meta.iter_segments([xs, ys, baseys], pre, post):
-                xx, yy, yb = v2x(d1[0]), v2y(d1[1]), v2y(d1[2])
-                px, nx = v2x(d0[0]), v2x(d2[0])
-                yb = max(min(yb, y2), y1)
-                lx = (xx + px) / 2
-                rx = (xx + nx) / 2
-                linepts.append((xx, yy))
+        with self.clip(clipid) as mask:
+            mask.rect2(x1 + 1, y1 + 1, x2, y2)
 
-                if shape == "bar":
-                    self.rect2(lx, yy, rx, yb, cls=cls, style=style)
+        with self.group(cls=self.name):
+            for args, kwargs in self.plotcmds:
+                data = args[0]
+                baseyv = kwargs['baseyv']
+                basedata = kwargs['basedata']
+                shape = kwargs['shape']
+                cls = kwargs['cls']
+                style = kwargs['style']
+                pre = (xvmin, baseyv, baseyv)
+                post = (xvmax, baseyv, baseyv)
+                xs, ys = data[:2]
+                baseys = [ basedata[i] if basedata else baseyv for i in range(len(xs)) ]
+                linepts = []
+                ptiter = self._meta.iter_segments([xs, ys, baseys], pre, post)
 
-            if shape in ("line", "area"):
-                self.polyline(linepts, cls=cls, style=style)
-            if shape in ("line", "area", "scatter"):
-                for x, y in linepts:
-                    self.circle(x, y, 5, cls=cls, style=style)
+                with self.clip(clipid):
+                    for idx, (d0, d1, d2) in enumerate(ptiter):
+                        xx, yy, yb = v2x(d1[0]), v2y(d1[1]), v2y(d1[2])
+                        px, nx = v2x(d0[0]), v2x(d2[0])
+                        yb = max(min(yb, y2), y1)
+                        lx = (xx + px) / 2 if idx > 0 else px
+                        rx = (xx + nx) / 2 if idx < len(xs) - 1 else nx
+                        linepts.append((xx, yy))
+
+                        if shape == "bar":
+                            self.rect2(lx, yy, rx, yb, cls="databar "+cls, style=style)
+
+                    if shape in ("line", "area"):
+                        self.polyline(linepts, cls="dataline "+cls, style=style)
+                    if shape in ("line", "area", "scatter"):
+                        for x, y in linepts:
+                            self.circle(x, y, 4, cls="datapoint "+cls, style=style)
 
 
 class SVGStockObjects(object):
@@ -489,6 +645,13 @@ class SVGHelper(object):
         self.parent = parent
 
     def iter_segments(self, data, pre=None, post=None):
+        """
+        Plot helper to iterate over the 3-point segments of a curve.
+        To plot points, for example, simply "draw" the second item in
+        each tuple yielded. To draw line you might "draw" the first-
+        -to-second item whenever they are not None, etc. To draw a "bar"
+        you might want all three items.
+        """
         pre = pre or [None for _ in data]
         post = post or [None for _ in data]
         prev = None
@@ -502,6 +665,9 @@ class SVGHelper(object):
             yield prev + (post,)
 
     def float_tick_locations(self, vmin, vmax, vdelta):
+        """
+        Plot helper to choose "nice" locations for ticks.
+        """
         locations = []
         vrange = vmax - vmin
         delta = 10 ** math.floor(math.log10(vdelta))
@@ -526,87 +692,113 @@ class SVGHelper(object):
         return [vmin, vmax]
 
     def units(self, *args):
+        """
+        Helper to add svg units to coordinate given as any python type.
+        """
         u = self.parent.unit
         return tuple('%s%s' % (a, u) for a in args)
 
     def make_style(self, mixed):
+        """
+        Create an svg style (attribute-value) string from a python dict.
+        """
         if isinstance(mixed, dict):
-            return ' '.join('%s: %s;' % (k, v) for k, v in mixed.iteritems())
+            return ' '.join('%s: %s;' % (k, v) for k, v in mixed.items())
         return str(mixed)
 
     def make_attrs(self, mixed):
+        """
+        Create an svg attributes string from a python dict.
+        """
         if isinstance(mixed, dict):
-            return ''.join('%s="%s" ' % (k, v) for k, v in mixed.iteritems())
+            return ''.join('%s="%s" ' % (k, v) for k, v in mixed.items())
         return str(mixed)
 
     def make_payload(self, cls, style, attrs):
+        """
+        Create a string of the attributes for an svg element.
+        """
         cls_str = 'class="%s" ' % cls if cls else ''
         style_str = 'style="%s" ' % self.make_style(style) if style else ''
         attr_str = self.make_attrs(attrs) if attrs else ''
         payload = ''.join([attr_str, cls_str, style_str])
         return payload
 
+    def iter_svgs(self):
+        """
+        Iterate through the various svg component objects.
+        """
+        for name in self.parent.layers:
+            yield name, self.parent.layers[name]
+        for elem in self.parent.elements:
+            if isinstance(elem, SVG):
+                yield None, elem
+
     def style_lines(self):
+        """
+        Iterate through the svg css style lines defined by this object.
+        """
         self.parent.finalize()
+        for name, svg in self.iter_svgs(): # recurse here
+            for line in svg._meta.style_lines():
+                yield line
         if isinstance(self.parent.style, str):
             yield self.parent.style
-
         else:
             for cls in self.parent.style:
                 yield "%s {" % str(cls)
-
-                for key, value in self.parent.style[cls].iteritems():
+                for key, value in self.parent.style[cls].items():
                     yield "    %s: %s;" % (key, value)
-
                 yield "}"
 
     def defs_lines(self):
+        """
+        Iterate through the additional svg defs section lines defined by this object.
+        """
         self.parent.finalize()
-        for name in self.parent.layers:
-            for line in self.parent.layers[name]._defs_lines():
+        for name, svg in self.iter_svgs(): # recurse here
+            for line in svg._meta.defs_lines():
                 yield line
-
         for line in self.parent.defs:
             yield line
-
-        for name, svg in self.parent.masks.iteritems():
+        for name, svg in self.parent.masks.items():
             yield """<clipPath id="%s">""" % name
-            for line in svg._body_lines():
+            for line in svg._meta.body_lines():
                 yield line
             yield """</clipPath>"""
 
     def body_lines(self):
+        """
+        Iterate through the svg body lines defined by this object.
+        """
         self.parent.finalize()
-        for name in self.parent.layers:
-            yield '<g id="%s">' % name
-            for elem in self.parent.layers[name]._meta.body_lines():
-                yield '    %s' % elem
-            yield "</g>"
-
+        for name, svg in self.iter_svgs(): # recurse here
+            if name:
+                yield '<g id="%s">' % name
+            for line in svg._meta.body_lines():
+                yield line
+            if name:
+                yield "</g>"
         for elem in self.parent.elements:
             if isinstance(elem, SVG):
-                for line in elem._meta.body_lines():
-                    yield line
-            elif isinstance(elem, basestring):
+                pass
+            else:
                 yield "%s" % elem
 
     def template1(self, width, height):
-        '''
+        """
         A standard template for svg images.
-        '''
-        style = '\n'.join(self.style_lines()).encode('utf-8')
-        defs = '\n'.join(self.defs_lines()).encode('utf-8')
-        body = '\n'.join(self.body_lines()).encode('utf-8')
-
+        """
+        style = '\n'.join(self.style_lines())
+        defs = '\n'.join(self.defs_lines())
+        body = '\n'.join(self.body_lines())
         defs_block = '' if not (style or defs) else '''<defs>
     <style type="text/css"><![CDATA[
 %s\n    ]]></style>\n%s\n</defs>''' % (style, defs)
-
-        return '''<?xml version="1.0" standalone="no"?>
+        txt = '''<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">
 %s\n%s\n</svg>\n''' % (width, height, defs_block, body)
-
-
+        return txt
 

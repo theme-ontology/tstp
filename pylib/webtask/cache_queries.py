@@ -43,6 +43,8 @@ def main():
     webquerylib.cache_special_queries()
     log.debug("START cache_objects")
     webquerylib.cache_objects()
+    log.debug("START cache_visualizations")
+    webquerylib.cache_visualizations()
     log.debug("START solr commit")
     solr_commit()
 

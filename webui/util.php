@@ -33,7 +33,7 @@
         {
             $out = tstp_pyrun('webtask.importgit 2>&1');
             echo "<pre>" . htmlentities($out) . "</pre>\n";
-            $out = tstp_pyrun('util.task_cache_webquery 2>&1');
+            $out = tstp_pyrun('webtask.cache_queries 2>&1');
             echo "<pre>" . htmlentities($out) . "</pre>\n";
         }
         echo "<p>Task " . $action . " completed.</p>";
