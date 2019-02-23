@@ -448,16 +448,13 @@ class SVGPlot(SVG):
                 "font": "10px sans-serif",
             },            
             "rect.plotarea": {
-                "shape-rendering": "crispEdges",
                 "fill": "none",
                 "stroke": "black",
             },
             "line.axis": {
-                "shape-rendering": "crispEdges",
                 "stroke": "black"
             },
             "line.tick": {
-                "shape-rendering": "crispEdges",
                 "stroke": "black"
             },
             "text.axis": {
@@ -474,8 +471,8 @@ class SVGPlot(SVG):
                 "dominant-baseline": "central",
             },
             "line.grid": {
-                "shape-rendering": "crispEdges",
-                "stroke": "gray",
+                "stroke": "#888888",
+                "stroke-opacity": 0.5,
                 "stroke-dasharray": "1 1",
             },
             ".dataline": {
@@ -542,14 +539,14 @@ class SVGPlot(SVG):
             for xtv in xticksv:
                 xr = (xtv - xvmin) / dxv
                 xx = x1 + (x2 - x1) * xr
-                xx = v2x(xtv)
+                xx = round(v2x(xtv))
                 self.line(xx, y2, xx, y2 + 3, cls='tick xtick')
                 self.line(xx, y1, xx, y2, cls='grid xgrid')
                 self.text(xx, y2 + 3, xtick_fmt.format(xtv), cls='tick xtick')
             for ytv in yticksv:
                 yr = (ytv - yvmin) / dyv
                 yy = y1 + (y2 - y1) * yr
-                yy = v2y(ytv)
+                yy = round(v2y(ytv))
                 self.line(x1, yy, x1 - 3, yy, cls='tick ytick')
                 self.line(x1, yy, x2, yy, cls='grid ygrid')
                 self.text(x1 - 5, yy, ytick_fmt.format(ytv), cls='tick ytick')

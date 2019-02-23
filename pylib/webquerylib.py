@@ -10,9 +10,20 @@ import json
 import re
 import datetime
 import importlib
+import credentials
 
 
 TARGET = "web"
+
+
+def get_public_path(name, *args):
+    """
+    Get public path for this data and make sure it exists.
+    """
+    path = os.path.join(credentials.PUBLIC_DIR, name, *args)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
 
 
 def get_data_path(name, *args):
@@ -48,7 +59,7 @@ def cache_visualizations():
     """
     Create static images for defined visualizations.
     """
-    base = get_data_path("tstpviz")
+    base = get_public_path("tstpviz")
     names = [
         "stories_by_year",
     ]
