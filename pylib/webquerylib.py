@@ -9,9 +9,21 @@ from db import do
 import json
 import re
 import datetime
+import importlib
+import credentials
 
 
 TARGET = "web"
+
+
+def get_public_path(name, *args):
+    """
+    Get public path for this data and make sure it exists.
+    """
+    path = os.path.join(credentials.PUBLIC_DIR, name, *args)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
 
 
 def get_data_path(name, *args):
@@ -41,6 +53,22 @@ def get_cache_path(act_type, req_type, obj_name):
     path = os.path.join(base_path, m.hexdigest() + ".pickle")
 
     return path
+
+
+def cache_visualizations():
+    """
+    Create static images for defined visualizations.
+    """
+    base = get_public_path("tstpviz")
+    names = [
+        "stories_by_year",
+    ]
+    for name in names:
+        log.debug("Creating visualization: %s", name)
+        mod = importlib.import_module("viz." + name)
+        path = os.path.join(base, name + ".svg")
+        svg, width, height = mod.make_viz()
+        svg.write(path, width, height)
 
 
 def cached_special_query(act_type, req_type, obj_name):

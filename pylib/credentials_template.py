@@ -1,4 +1,4 @@
-#: define (my)sql dbs here
+#: define (my)sql dbs and local paths here
 #: this file should be copied to credentials.py and edited
 
 DBS = {
@@ -27,4 +27,8 @@ SERVER_URL = "http://127.0.0.1/tstp/webui/"
 
 #: where is the theming git repository located?
 GIT_THEMING_PATH = "f:\\theming"
+
+#: public directory
+PUBLIC_DIR = "f:\\www\\pub"
+
 
