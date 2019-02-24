@@ -4,7 +4,7 @@ from collections import defaultdict, deque
 
 
 ROOTS = [
-    "alternate reality",
+    "speculative fiction theme",
     "society",
     "the human condition",
     "the pursuit of knowledge",

@@ -21,7 +21,9 @@ def get_public_path(name, *args):
     Get public path for this data and make sure it exists.
     """
     path = os.path.join(credentials.PUBLIC_DIR, name, *args)
+    log.debug("Testing: %s", path)
     if not os.path.exists(path):
+        log.debug("Creating: %s", path)
         os.makedirs(path)
     return path
 
@@ -59,16 +61,21 @@ def cache_visualizations():
     """
     Create static images for defined visualizations.
     """
-    base = get_public_path("tstpviz")
-    names = [
-        "stories_by_year",
-    ]
-    for name in names:
-        log.debug("Creating visualization: %s", name)
+    names = {
+        "stories_by_year": ("all_stories_by_year.svg",),
+        "themeusage_timelines": ("startrek", "metathemes_by_episode.svg"),
+    }
+    for name, fname in names.items():
         mod = importlib.import_module("viz." + name)
-        path = os.path.join(base, name + ".svg")
+        base = get_public_path("tstpviz", *fname[:-1])
+        path = os.path.join(base, fname[-1])
+        log.debug("Creating visualization: %s => %s", name, path)
         svg, width, height = mod.make_viz()
         svg.write(path, width, height)
+
+    base = get_public_path("tstpviz", "themegraphs")
+    from viz.theme_graphs import write_to_path
+    write_to_path(base)
 
 
 def cached_special_query(act_type, req_type, obj_name):

@@ -4,13 +4,16 @@ from lib.mathnp import savitzky_golay
 from collections import defaultdict, deque
 import numpy as np
 import lib.svg
+import sys
 
 
 lib.log.redirect()
 
 
 def main():
-    make_viz()
+    path = sys.argv[-1] if len(sys.argv) > 2 else 'test.svg'
+    svg, width, height = make_viz()
+    svg.write(path, width, height)
 
 
 def smooth(a):
@@ -39,13 +42,13 @@ def make_viz():
         "the human condition",
         "society",
         "the pursuit of knowledge",
-        "alternate reality",
+        "speculative fiction theme",
     ]
     colors = {
         "the human condition": "#6F0F0F",
         "society": "#176F0F",
         "the pursuit of knowledge": "#0F0F6F",
-        "alternate reality": "#6F5F0F",
+        "speculative fiction theme": "#6F5F0F",
     }
     prefixes = {
         'tos': 0,
@@ -228,5 +231,5 @@ def make_viz():
 
         yy += groupspacing if idx <= 30 else 10
 
-    print svg.make(1000, 8000)
+    return svg, 1000, 8000
 
