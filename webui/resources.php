@@ -12,6 +12,45 @@
 <div class="container">
     <div class="row">
         <div class="panel-body">
+
+            <H3 class="px-3">Data Exploration and Visualization</H3>
+            <TABLE class="table table-striped">
+                <tbody>
+                    <tr>
+                        <td><A href = "/pub/tstpviz/">Assorted Auto-generated Charts</A></td>
+                        <td>
+                            Various views of the data.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><A href = "viz/dist-themeusage.html">Themes distribution</A></td>
+                        <td>
+                            How many minor/major/choice themes are assigned to each story? 
+                            What are the most frequently used themes?
+                        </td>
+                    </tr>
+                    <!--tr>
+                        <td><A href = ":3838/shiny/">Story Simularity</A></td>
+                        <td>Pick a story and see other stories that are thematically similar.</td>
+                    </tr-->
+                    <tr>
+                        <td><A href = "viz/themecube.html">Star Trek tos/tas/tng Theme Domain Distribution</A></td>
+                        <td>
+                            A case study of how themes are distributed between the three early Star Trek TV Series. 
+                            This delineates, to an extent, how the show changed over the years.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><A href = "viz/themehierarchy.php">Theme Hierarchy Reference Sheet</A></td>
+                        <td>
+                            Overview of all themes in the current hierarchy.
+                        </td>
+                    </tr>
+                </tbody>
+            </TABLE>
+        </div>
+
+        <div class="panel-body">
             <H3 class="px-3">Helpful Tools</H3>
             <TABLE class="table table-striped">
                 <tbody>
@@ -24,21 +63,52 @@
         </div>
 
 		<div class="panel-body">
-          	<H3 class="px-3">Download Latest Data as Text</H3>
+          	<H3 class="px-3">Download Latest Data</H3>
         	<TABLE class="table table-striped">
             	<tbody>
 	            	<tr>
-		            	<td><A href = "download.php?what=storydefinitions&fmt=txt">Story Definitions</A></td>
+		            	<td><A href = "download.php?what=storydefinitions&fmt=txt">Story Definitions (txt)</A></td>
 	            		<td>For each story, a description of what it is and other relevant data.</td>
 		            </tr>
 	            	<tr>
-		            	<td><A href = "download.php?what=themedefinitions&fmt=txt">Theme Definitions</A></td>
+		            	<td><A href = "download.php?what=themedefinitions&fmt=txt">Theme Definitions (txt)</A></td>
 	            		<td>For each theme, the definition of the theme and other relevant data.</td>
 		            </tr>
 		            <tr>
-	            		<td><A href = "download.php?what=storythemes&fmt=txt">Themes in Stories</A></td>
+	            		<td><A href = "download.php?what=storythemes&fmt=txt">Themes in Stories (txt)</A></td>
 	            		<td>For each story, all themes that have been assigned to it along with notes and comments.</td>
 	            	</tr>
+                    <tr>
+                        <td><A href = "json.php?action=metathemedata">Full Theme/Metatheme usage and hierarchy data (json)</A></td>
+                        <td>
+                            Five items will be returned:
+                            <ol>
+                            <li>A mapping from leaf_theme to list of [sid, weight] tuples, indicating when a theme was directly used.</li>
+                            <li>A mapping from meta_theme to list of [sid, weight] tuples, indicating when a theme was indirectly used.</li>
+                            <li>A mapping from child_theme to parent_theme, indicating the hierarchy.</li>
+                            <li>A mapping from parent_theme to child_theme, indicating the hierarchy.</li>
+                            <li>A list of "top" level themes, i.e., those that have no parents.</li>
+                            </ol>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><A href = "json.php?action=storydefinitions">Full list of stories (json)</A></td>
+                        <td>
+                            First row will contain headers. 
+                            The data will contain story id, title, date, and description. 
+                            Other columns may be added.
+                            We will try not to remove or rename columns.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><A href = "json.php?action=themedefinitions">Full list of themes (json)</A></td>
+                        <td>
+                            First row will contain headers. 
+                            The data will contain theme name, description and parents. 
+                            Other columns may be added.
+                            We will try not to remove or rename columns.
+                        </td>
+                    </tr>
 	            	</tbody>
         	</TABLE>
         </div>
@@ -65,79 +135,6 @@
         	</TABLE>
 
     	</div>
-
-		<div class="panel-body">
-          	<H3 class="px-3">JSON API</H3>
-        	<TABLE class="table table-striped">
-            	<tbody>
-	            	<tr>
-		            	<td><A href = "json.php?action=metathemedata">Full Theme/Metatheme usage and hierarchy data</A></td>
-	            		<td>
-	            			Five items will be returned:
-	            			<ol>
-	            			<li>A mapping from leaf_theme to list of [sid, weight] tuples, indicating when a theme was directly used.</li>
-	            			<li>A mapping from meta_theme to list of [sid, weight] tuples, indicating when a theme was indirectly used.</li>
-	            			<li>A mapping from child_theme to parent_theme, indicating the hierarchy.</li>
-	            			<li>A mapping from parent_theme to child_theme, indicating the hierarchy.</li>
-	            			<li>A list of "top" level themes, i.e., those that have no parents.</li>
-	            			</ol>
-	            		</td>
-		            </tr>
-	            	<tr>
-		            	<td><A href = "json.php?action=storydefinitions">Full list of stories</A></td>
-	            		<td>
-	            			First row will contain headers. 
-	            			The data will contain story id, title, date, and description. 
-	            			Other columns may be added.
-	            			We will try not to remove or rename columns.
-	            		</td>
-		            </tr>
-	            	<tr>
-		            	<td><A href = "json.php?action=themedefinitions">Full list of themes</A></td>
-	            		<td>
-	            			First row will contain headers. 
-	            			The data will contain theme name, description and parents. 
-	            			Other columns may be added.
-	            			We will try not to remove or rename columns.
-	            		</td>
-		            </tr>
-	            	</tbody>
-        	</TABLE>
-    	</div>
-
-
-		<div class="panel-body">
-          	<H3 class="px-3">Data Exploration and Visualization</H3>
-        	<TABLE class="table table-striped">
-            	<tbody>
-                    <tr>
-                        <td><A href = "viz/dist-themeusage.html">Themes distribution</A></td>
-                        <td>
-                            How many minor/major/choice themes are assigned to each story? 
-                            What are the most frequently used themes?
-                        </td>
-                    </tr>
-                    <!--tr>
-                        <td><A href = ":3838/shiny/">Story Simularity</A></td>
-                        <td>Pick a story and see other stories that are thematically similar.</td>
-                    </tr-->
-                    <tr>
-                        <td><A href = "viz/themecube.html">Star Trek tos/tas/tng Theme Domain Distribution</A></td>
-                        <td>
-                            A case study of how themes are distributed between the three early Star Trek TV Series. 
-                            This delineates, to an extent, how the show changed over the years.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><A href = "viz/themehierarchy.php">Theme Hierarchy Reference Sheet</A></td>
-                        <td>
-                            Overview of all themes in the current hierarchy.
-                        </td>
-                    </tr>
-                </tbody>
-        	</TABLE>
-        </div>
-
 
         <div class="panel-body">
             <H3 class="px-3">Guides</H3>
