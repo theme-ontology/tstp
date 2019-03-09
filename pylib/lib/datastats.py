@@ -1,6 +1,7 @@
 import lib.dataparse
 from lib.func import memoize
 from collections import defaultdict, deque
+from lib.graph import KWGraph
 
 
 ROOTS = [
@@ -9,6 +10,20 @@ ROOTS = [
     "the human condition",
     "the pursuit of knowledge",
 ]
+
+
+@memoize
+def get_theme_graph():
+    graph = KWGraph()
+    for theme in lib.dataparse.read_themes_from_db():
+        child = theme.name
+        parents = [t.strip() for t in theme.parents.split(",")]
+        for parent in parents:
+            if parent:
+                graph.makeEdge(parent, child)
+    graph.trimShortcuts()
+    return graph
+
 
 
 @memoize

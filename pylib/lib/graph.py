@@ -131,6 +131,33 @@ class KWGraph(object):
 
         return leafclusters
 
+    def parents_of(self, kw):
+        """
+        Find all parents for a node.
+        """
+        nn = self.getNode(kw)
+        return [e.n1.kw for e in nn.edgein]
+
+    def ancestry_of(self, kw):
+        """
+        Find all roots for a node.
+        """
+        pending = [kw]
+        ancestry = []
+        while pending:
+            kkw = pending.pop()
+            parents = self.parents_of(kkw)
+            if kkw not in parents:
+                ancestry.append(kkw)
+            pending.extend(parents)
+        return ancestry
+
+    def roots_of(self, kw):
+        """
+        Find all roots for a node.
+        """
+        return [kkw for kkw in self.ancestry_of(kw) if not self.getNode(kkw).edgein]
+
     def format_node(self, kw):
         """
         Format a node label for output.

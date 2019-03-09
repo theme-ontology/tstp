@@ -5,7 +5,6 @@ import re
 from collections import defaultdict
 import numpy as np
 import sys
-from lib.graph import KWGraph
 import tempfile
 import os.path
 
@@ -20,7 +19,7 @@ def main():
 
 
 def write_to_path(path):
-    graph = get_data()
+    graph = lib.datastats.get_theme_graph()
     roots = graph.findRoots()
     l2 = []
 
@@ -36,18 +35,6 @@ def write_to_path(path):
         CMD_DOT = r'""%s"" -Tpdf -o%%s %%s' % DOT_CMD
         os.system(CMD_DOT % (pdffile, dotfile))
         lib.log.info(CMD_DOT % (pdffile, dotfile))
-
-
-def get_data():
-    graph = KWGraph()
-    for theme in lib.dataparse.read_themes_from_db():
-        child = theme.name
-        parents = [t.strip() for t in theme.parents.split(",")]
-        for parent in parents:
-            if parent:
-                graph.makeEdge(parent, child)
-    graph.trimShortcuts()
-    return graph
 
 
 def iter_colors():
