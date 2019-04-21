@@ -9,19 +9,7 @@ import webdb
 import lib.dataparse
 import lib.xls
 from collections import defaultdict
-import textwrap
 import lib.log
-
-
-def block_fill(lines):
-    paragraphs = lib.dataparse.blockjoin(lines)
-    lines = []
-
-    for txt in paragraphs.split("\n\n"):
-        lines.append(textwrap.fill(txt, 78))
-        lines.append("")
-
-    return "\n".join(lines)
 
 
 FIELDRENAME = {
@@ -35,7 +23,7 @@ FIELDRENAME = {
 
 FIELDFORMATTERS = {
     "*": lambda lines: " ".join(x.strip() for x in lines),
-    "description": block_fill,
+    "description": lib.dataparse.block_fill,
     "choice themes": lib.dataparse.themejoin,
     "major themes": lib.dataparse.themejoin,
     "minor themes": lib.dataparse.themejoin,
@@ -90,7 +78,6 @@ def main():
                 FIELDFORMATTERS.get(field.lower(), None) 
                 or (lambda lines: "\n".join(l.strip() for l in lines))
             )
-
             try:
                 value = formater(lines)
             except AssertionError as exc:

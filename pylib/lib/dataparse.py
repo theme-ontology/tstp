@@ -5,6 +5,7 @@ from collections import defaultdict
 import webobject
 import lib.xls
 import lib.log
+import textwrap
 
 
 def expload_field( field ):
@@ -63,33 +64,30 @@ def simple_line_collection(lines):
     return [ t.strip() for line in lines for t in line.split(", ") ]
 
 
-SUBJECTS = {
-    "Ratings": simple_line_collection,
-    "Choice Themes": parse_themes,
-    "Major Themes": parse_themes,
-    "Minor Themes": parse_themes,
-    "References": simple_line_collection,
-    "Collections": simple_line_collection,
-}
+def block_fill(lines):
+    paragraphs = blockjoin(lines)
+    lines = []
+
+    for txt in paragraphs.split("\n\n"):
+        lines.append(textwrap.fill(txt, 78))
+        lines.append("")
+
+    return "\n".join(lines)
 
 
-def themejoin(lines):
+def make_themes(fieldinfo, empty_comments=True):
     """
-    Format lines of theme specification into a standard format.
+    Take a list of tuples as yielded by expload_field and format into themes block.
     """
     outlines = []
-
-    if isinstance(lines, basestring):
-        field = lines
-    else:
-        field = " ".join(x.strip() for x in lines).strip(' ,')
-
-    fieldinfo = list(expload_field(field))
-
     for kw, comment, implication, capacity in fieldinfo:
         implication = implication.strip()
         capacity = capacity.strip()
-        f = kw.strip() + " [%s]" % comment.strip()
+        comment = comment.strip()
+        if comment or empty_comments:
+            f = kw.strip() + " [%s]" % comment.strip()
+        else:
+            f = kw.strip()
         if implication:
             f += " {%s}" % implication
         if capacity:
@@ -99,6 +97,18 @@ def themejoin(lines):
     if not outlines:
         return ""
     return ",\n".join(outlines) + ","
+
+
+def themejoin(lines, empty_comments=True):
+    """
+    Format lines of theme specification into a standard format.
+    """
+    if isinstance(lines, basestring):
+        field = lines
+    else:
+        field = " ".join(x.strip() for x in lines).strip(' ,')
+    fielditer = expload_field(field)
+    return make_themes(fielditer, empty_comments=empty_comments)
 
 
 def blockjoin(lines):
@@ -124,7 +134,31 @@ def blockjoin(lines):
     return "\n\n".join(acc)
 
 
-def parse(file, subjects = None):
+def simple_blockfill(lines):
+    return [ block_fill(lines) ]
+
+
+def simple_themejoin(lines):
+    return [ themejoin(lines) ]
+
+
+def simple_keywordjoin(lines):
+    return [ themejoin(lines) ]
+
+
+SUBJECTS = {
+    "Ratings": simple_line_collection,
+    "Choice Themes": simple_themejoin, #parse_themes,
+    "Major Themes": simple_themejoin,
+    "Minor Themes": simple_themejoin,
+    "Other Keywords": simple_themejoin,
+    "References": simple_line_collection,
+    "Collections": simple_line_collection,
+    "Description": simple_blockfill,
+}
+
+
+def parse(file, subjects=None, default_parser=None):
     """
     Parse a file of themes and related info.
     """
@@ -135,6 +169,10 @@ def parse(file, subjects = None):
 
     if subjects is None:
         subjects = SUBJECTS
+    if default_parser is None:
+        default_parser = lambda lines: [ blockjoin(lines) ]
+    if default_parser == 'NOOP':
+        default_parser = lambda lines: lines
 
     # sections are delimeted by identifier underlined with ===
     with codecs.open(file, "r", encoding='utf-8') as fh:
@@ -160,11 +198,7 @@ def parse(file, subjects = None):
             # parse previous subject when subject changes
             if line.startswith(":: "):
                 if subject:
-                    if subject in subjects:
-                        parser = subjects[subject]
-                    else:
-                        parser = lambda lines: [ blockjoin(lines) ]
-
+                    parser = subjects.get(subject, default_parser)
                     try:
                         stuff.append((identifier, subject, list(parser(lineacc))))
                     except Exception:
