@@ -146,9 +146,20 @@ def simple_keywordjoin(lines):
     return [ themejoin(lines) ]
 
 
+
+SUBJECTS_PARSE_THEMES = {
+    "Ratings": simple_line_collection,
+    "Choice Themes": parse_themes,
+    "Major Themes": parse_themes,
+    "Minor Themes": parse_themes,
+    "References": simple_line_collection,
+    "Collections": simple_line_collection,
+}
+
+
 SUBJECTS = {
     "Ratings": simple_line_collection,
-    "Choice Themes": simple_themejoin, #parse_themes,
+    "Choice Themes": simple_themejoin,
     "Major Themes": simple_themejoin,
     "Minor Themes": simple_themejoin,
     "Other Keywords": simple_themejoin,
@@ -303,7 +314,7 @@ def read_themes_from_txt(filename, verbose = True):
                 lib.log.warn("%s: %s.%s - %s", filename, theme, field, str(e))
 
 
-def read_stories_from_txt(filename, verbose = True):
+def read_stories_from_txt(filename, verbose = True, addextras=False):
     """
     Stories in our special text file format.
     """
@@ -348,6 +359,9 @@ def read_stories_from_txt(filename, verbose = True):
 
         if attr and attr in obj.fields:
             setattr(obj, attr, data[0])
+        elif addextras:
+            exattr = lfield.replace(" ", "")
+            setattr(obj, exattr, data)
         else:
             if verbose:
                 lib.log.warn("%s: %s.%s - don't grok", filename, item, field)
@@ -386,13 +400,14 @@ def read_storythemes_from_txt(filename, verbose = True):
     """
     Themes-in-stories in our special text file format.
     """
-    stuff, notices = parse(filename)
+    stuff, notices = parse(filename, subjects=SUBJECTS_PARSE_THEMES)
     out = {}
 
     for notice in notices:
         lib.log.warn("%s: %s", filename, notice)
 
     for sid, field, data in stuff:
+        #data = list(parse_themes(data))
         if field.lower().endswith("themes"):
             weight = field.split(" ")[0].lower()
             if weight in ("absent", "minor", "major", "choice"):
