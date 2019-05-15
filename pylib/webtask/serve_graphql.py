@@ -120,7 +120,7 @@ def create_app():
 
 # can't use pyrun command because of Flask's messed up "reloader"
 if __name__ == "__main__":
-    create_app().run(host="localhost", port=8182, debug=True)
+    create_app().run(host="0.0.0.0", port=8182, debug=False)
 
 
 
