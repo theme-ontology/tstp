@@ -139,7 +139,7 @@ def get_defenitions_text(target):
     return get_defenitions_text_for_objects(objs)
 
 
-def get_defenitions_text_for_objects(objs, empty_storythemes_headers = False, skip_fields = ()):
+def get_defenitions_text_for_objects(objs, empty_storythemes_headers = False, skip_fields = (), add_fields = ()):
     if not objs:
         return ""
 
@@ -165,6 +165,9 @@ def get_defenitions_text_for_objects(objs, empty_storythemes_headers = False, sk
                     for txt in getattr(obj, field).split("\n\n"):
                         lines.append(textwrap.fill(txt, 78))
                         lines.append("")
+                for field in add_fields:
+                    lines.append(":: " + field.capitalize())
+                    lines.append("")
 
         if target == "storythemes" or empty_storythemes_headers:
             for field in [ "choice", "major", "minor" ]:

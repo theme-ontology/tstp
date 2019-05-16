@@ -44,7 +44,6 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
 
         for row in table.find_all("tr"):
             tdfields = row.find_all("td")
-
             if len(tdfields) > max(cols):
                 titlefield = tdfields[cols[0]]
                 directorfield = tdfields[cols[1]]
@@ -77,8 +76,9 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
                 else:
                     author = "Story by: " + author
 
-                for match in re.findall("\d+", epfield):
-                    sid = prefix + "%sx%02d" % (idx + season_offsset, int(match))
+                for match in re.findall("(\d+)([a-z]*)", epfield):
+                    nepid, sepid = int(match[0]), match[1]
+                    sid = prefix + "%sx%02d%s" % (idx + season_offsset, nepid, sepid)
                     sids.append(sid)
 
                 if isterse and title_link:
