@@ -57,6 +57,10 @@
 
 
         function loadTablesOnReady() {
+            var BASE_URL = "json.php?type=story&fields=score,name,title,date,description&slimit=200&rlimit=10000";
+            var sidurldata = encodeURIComponent(g_objName);
+            var sidurl = BASE_URL + "&collectionfilter=" + sidurldata;
+
             $(document).ready(function() {
 			    var table = $('#themes_datatable').DataTable( {
 			        "ajax": 'json.php?type=storytheme&fields=name2,weight,motivation&f1=' + g_objName + '&slimit=200&rlimit=10000',
@@ -89,6 +93,50 @@
                         $('#loading_message').css('display','none');
                     }
 			    } );
+
+                if (g_objName.startsWith("collection:") || g_objName.startsWith("Collection:"))
+                {
+                    $('#member_stories').css('display','inline');
+
+                    var table2 = $('#stories_datatable').DataTable( {
+                        "ajax": sidurl,
+                        "paging" : false,
+                        "searching": false,
+                        "order": [
+                            [ 3, "desc" ],
+                            [ 2, "asc" ],
+                        ],
+                        "columnDefs" : [
+                            {
+                                "visible": false,
+                                "targets": 0,
+                            },
+                            {
+                                "render": function ( data, type, row ) {
+                                    var urldata = encodeURIComponent(data);
+                                    return "<A href=\"story.php?name=" + urldata + "\">" + data + "</A>";
+                                },
+                                "className": "tstp-sid-cell",
+                                "targets": 1,
+                            },
+                            {
+                                "width": "30%",
+                                "targets": 2,
+                            },
+                            {
+                                "className": "tstp-date-cell",
+                                "targets": 3,
+                            },
+                            {
+                                "className": "tstp-description-cell",
+                                "targets": 4,
+                            },
+                        ],
+                        "initComplete": function(settings, json) {
+                            $('#stories_loading_message').css('display','none');
+                        }
+                    } );
+                }
 			} );
 
         }
@@ -124,10 +172,39 @@
         </div>
     </div>
 
+
+<?php // COLLECTION MEMBER STORIES //?>
+    <div id="member_stories" style="display:none">
+        <div class="row">
+            <div id="div_stories_datatable" class="col-md-12 hpad0">
+                <div class="basebox">
+                    <H4>List of Member Stories</H4>
+                    <table id="stories_datatable" class="display table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Score</th>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="stories_loading_message" class="row">
+            <div class="basebox">loading...</div>
+        </div>
+    </div>
+
+
 <?php // THEMES TABLE //?>
     <div class="row">
         <div id="div_datatable" class="col-md-12 hpad0">
         	<div class="basebox">
+                <H4>List of Themes</H4>
 	            <table id="themes_datatable" class="display table table-striped" cellspacing="0" width="100%">
 			        <thead>
 			            <tr>
