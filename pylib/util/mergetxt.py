@@ -44,6 +44,8 @@ FIELDORDER = [
 ]
 
 
+
+
 def main():
     topics = defaultdict(dict)
     fieldorder = list(FIELDORDER)
@@ -63,7 +65,7 @@ def main():
             continue
 
         target = os.path.abspath(arg)
-        stuff, notices = lib.dataparse.parse(target, {})
+        stuff, notices = lib.dataparse.parse(target, subjects={}, default_parser=lib.dataparse.sanitize)
 
         for notice in notices:
             lib.log.error("%s: %s", target, notice)

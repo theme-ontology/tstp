@@ -64,6 +64,25 @@ def simple_line_collection(lines):
     return [ t.strip() for line in lines for t in line.split(", ") ]
 
 
+def sanitize(lines):
+    """
+    Strip whitespace around each lines and remove blank lines at beginning
+    and end of blob (but not in between text).
+    """
+    i = 0
+    lines = [ x.strip() for x in lines ]
+    while lines and not lines[-1]:
+        lines.pop()
+    for i, l in enumerate(lines):
+        if l:
+            break
+    if i > 0:
+        lines = lines[i:]
+    if not lines:
+        lines = [""]
+    return lines
+
+
 def block_fill(lines):
     paragraphs = blockjoin(lines)
     lines = []
