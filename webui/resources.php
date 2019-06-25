@@ -120,17 +120,21 @@
         	<TABLE class="table table-striped">
             	<tbody>
 	            	<tr>
-		            	<td><A href = "data/TO_v0.1.0.tsv">TO_v0.1.0.tsv</A></td>
+		            	<td><A href = "data/lto-v0.1.0.tsv">lto-0.1.0.tsv</A></td>
 	            		<td>Earlier version of the ontology.</td>
 		            </tr>
 	            	<tr>
-		            	<td><A href = "data/TO_v0.1.1.tsv">TO_v0.1.1.tsv</A></td>
+		            	<td><A href = "data/lto-v0.1.1.tsv">lto-0.1.1.tsv</A></td>
 	            		<td>Earlier version of the ontology.</td>
 		            </tr>
-	            	<tr>
-		            	<td><A href = "data/TO_v0.1.2.tsv">TO_v0.1.2.tsv</A></td>
-	            		<td>Earlier version of the ontology.</td>
-		            </tr>
+                    <tr>
+                        <td><A href = "data/lto-v0.1.2.tsv">lto-0.1.2.tsv</A></td>
+                        <td>Earlier version of the ontology.</td>
+                    </tr>
+                    <tr>
+                        <td><A href = "data/lto-v0.2.0.tsv">lto-0.2.0.tsv</A></td>
+                        <td>Earlier version of the ontology.</td>
+                    </tr>
 	            	</tbody>
         	</TABLE>
 
