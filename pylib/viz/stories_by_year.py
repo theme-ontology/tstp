@@ -60,6 +60,17 @@ def make_viz():
     x1, x2 = xs[0] - 0.5, xs[-1] + 0.5
     y1, y2 = 0, round(np.max(maxarray)+5, -1)
 
+    cutoff = 19
+    protected = [ x for x in data if x[1] in ['play', 'novel', 'movie', 'nonfiction'] ]
+    data = [ x for x in data if x[1] not in ['play', 'novel', 'movie', 'nonfiction'] ]
+    remains = data[cutoff-len(protected):]
+    data = data[:cutoff-len(protected)] + protected
+    data.sort(reverse=True)
+
+    if remains:
+        ys = sum(x[2] for x in remains)
+        data.append((0, 'miscellaneousmiscellaneousmiscellaneous', ys))
+
     svg = lib.mosvg.SVG(style = {
         "text": {
             "font-family": "Helvetica",
@@ -93,10 +104,13 @@ def make_viz():
 
     with plot.stack():
         for _, key, ys in data:
+            skey = key
+            if len(key) > 13:
+                skey = key[:7] + ".." + key[-4:]
             color = next(colorscale)
             plot.plot([xs, ys], shape="bar", cls='', style={"fill":color})
             svg['annotation'].rect(lx, ly, 8, 8, style={"fill":color})
-            svg['annotation'].text(lx + 12, ly+10, key)
+            svg['annotation'].text(lx + 12, ly+10, skey)
             lx += ldx
             if lx > lmaxx:
                 lx = lx0
@@ -104,4 +118,8 @@ def make_viz():
 
     plot.plotarea()
     return svg, nx2 + nx1, ny2 + ny1
+
+
+
+
 
