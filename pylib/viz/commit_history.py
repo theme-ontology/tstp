@@ -38,7 +38,8 @@ def get_datapoint(basepath):
 
 
 def get_data():
-    basepath = os.path.join(GIT_THEMING_PATH_HIST, "notes")
+    basepath = GIT_THEMING_PATH_HIST
+    notespath = os.path.join(basepath, "notes")
     os.chdir(basepath)
 
     subprocess.check_output('git checkout HEAD'.split()).decode("utf-8")
@@ -85,14 +86,17 @@ def get_data():
         # date must be the last viable date less than atdt
         print(date.isoformat(), commit)
         print("Evaluating for: {}...".format(atdt.isoformat()))
+	res = None
 
         try:
-            res = subprocess.check_output(['git', 'checkout', commit], stderr=open(os.devnull, 'wb')).decode("utf-8")
-        except:
-            print("GIT ERROR")
+            #res = subprocess.check_output(['git', 'checkout', commit], stderr=open(os.devnull, 'wb')).decode("utf-8")
+            res = subprocess.check_output(['git', 'checkout', '-f', commit]).decode("utf-8")
+        except Exception as e:
+            print("GIT ERROR", e)
+            print(res, "...")
             continue
         try:
-            datapoint = get_datapoint(basepath)
+            datapoint = get_datapoint(notespath)
             nthemes = datapoint["themes"]
         except:
             print("PARSE ERROR")
@@ -277,6 +281,11 @@ def draw_story_theme_relation():
                             svg['annotation'].text(xx, yy-53, v, cls="manual top")
 
     return svg, nx2 + nx1, ny2 + ny1
+
+
+
+def make_viz():
+    return draw_story_theme_relation()
 
 
 def main():
