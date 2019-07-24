@@ -5,6 +5,7 @@ import os
 import glob
 import json
 import urllib2
+import sys
 
 
 def solr_commit():
@@ -39,6 +40,11 @@ def solr_commit():
 
 
 def main():
+    if sys.argv[-1] == "build-heavy":
+        log.debug("START build_heavey_visualizations")
+        webquerylib.build_heavey_visualizations()
+        return
+
     log.debug("START cache_special_queries")
     webquerylib.cache_special_queries()
     log.debug("START cache_objects")

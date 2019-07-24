@@ -78,6 +78,27 @@ def cache_visualizations():
     write_to_path(base)
 
 
+def build_heavey_visualizations():
+    """
+    Create static images for defined visualizations.
+    These take a long time and are unsuitable for a blocking web request.
+    """
+    names = {
+        "commit_history": ("commit_history.svg",),
+    }
+    for name, fname in names.items():
+        mod = importlib.import_module("viz." + name)
+        base = get_public_path("tstpviz", *fname[:-1])
+        path = os.path.join(base, fname[-1])
+        log.debug("Creating visualization: %s => %s", name, path)
+        svg, width, height = mod.make_viz()
+        svg.write(path, width, height)
+
+    base = get_public_path("tstpviz", "themegraphs")
+    from viz.theme_graphs import write_to_path
+    write_to_path(base)
+
+
 def cached_special_query(act_type, req_type, obj_name):
     """
     Use cached version if available, else re-generate.
