@@ -481,6 +481,13 @@ class SVGPlot(SVG):
             ".datapoint": {
                 "stroke": "#ffffff",
             },
+            ".datapointlabel": {
+                "text-anchor": "middle",
+            },
+            ".datapointlabelmarker": {
+                "stroke": "none",
+                "fill": "#000000",
+            },
         }
         n = "." + self.name
         p = n + " "
@@ -620,7 +627,12 @@ class SVGPlot(SVG):
                         self.polyline(linepts, cls="dataline "+cls, style=style)
                     if shape in ("line", "area", "scatter"):
                         for x, y in linepts:
-                            self.circle(x, y, 4, cls="datapoint "+cls, style=style)
+                            self.circle(x, y, 3, cls="datapoint "+cls, style=style)
+                        if len(data) > 2 and data[-1] and isinstance(data[-1][0], str):
+                            for (x, y), label in zip(linepts, data[-1]):
+                                if label:
+                                    self.text(x, y-3, label, cls="datapointlabel " + cls, style=style)
+                                    self.circle(x, y, 1, cls="datapointlabelmarker "+cls, style=style)
 
 
 class SVGStockObjects(object):

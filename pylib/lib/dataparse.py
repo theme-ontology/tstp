@@ -310,7 +310,7 @@ def read_themes_from_txt(filename, verbose = True):
 
     for key in sorted(out_themes):
         themeobj = out_themes[key]
-        description = themeobj.description
+        description = getattr(themeobj, "description")
         example = out_composites[key]["example"].strip()
         references = out_composites[key]["references"].strip()
 
