@@ -94,10 +94,6 @@ def build_heavey_visualizations():
         svg, width, height = mod.make_viz()
         svg.write(path, width, height)
 
-    base = get_public_path("tstpviz", "themegraphs")
-    from viz.theme_graphs import write_to_path
-    write_to_path(base)
-
 
 def cached_special_query(act_type, req_type, obj_name):
     """
