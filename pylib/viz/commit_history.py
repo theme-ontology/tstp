@@ -96,6 +96,10 @@ def draw_story_theme_relation():
     x1, x2 = x1 - dx*0.05, x2 + dx*0.05
     y1, y2 = y1 - dy*0.05, y2 + dy*0.05
 
+    print(xs)
+    print(ys)
+
+
     svg = lib.mosvg.SVG(style = {
         "text": {
             "font-family": "Helvetica",

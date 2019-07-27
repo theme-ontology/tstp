@@ -8,7 +8,9 @@ import lib.files
 from dateutil.parser import parse
 import re
 import lib.dataparse
-
+import dbdefine
+import db
+import json
 
 DEBUG = False
 
@@ -84,25 +86,17 @@ def get_commits_data():
     by default Friday midnights every week.
     :return:
     """
-    basepath = GIT_THEMING_PATH_HIST
-    notespath = os.path.join(basepath, "notes")
-    os.chdir(basepath)
-
-    entries = list_commits(basepath)
-    prefixes = get_story_prefixes(basepath)
-    data = []
-    prefixes = sorted(((v, k) for k, v in prefixes.items()), reverse=True)
-    prefixset = set(k for _, k in prefixes[:20])
-    dt1 = entries[0][-1]
-    dt2 = entries[-1][-1]
+    entries = list(db.do("""
+        SELECT id, time, author, stats FROM commits_stats
+        ORDER BY time ASC
+    """))
+    dt1 = entries[0][1]
+    dt2 = entries[-1][1]
     dtiter = iter_days(dt1, dt2, "fri", "00:00")
-    # dtiter = iter_days("2019-07-01", dt2, "fri", "00:00") # debug
     atdt = next(dtiter)
+    data = []
 
-    for idx, (commit, author, date) in enumerate(entries):
-        if DEBUG:
-            if date < parse("2018-12", ignoretz=True): continue  # debug
-            if len(data) > 60: break  # debug
+    for idx, (commit, date, author, sdata) in enumerate(entries):
         while atdt < date:
             try:
                 atdt = next(dtiter)
@@ -113,29 +107,14 @@ def get_commits_data():
             break
 
         if idx < len(entries) - 1:
-            if atdt >= entries[idx+1][-1]:
+            if atdt >= entries[idx+1][1]:
                 continue
         # date must be the last viable date less than atdt
-        print(date.isoformat(), commit)
-        print("Evaluating for: {}...".format(atdt.isoformat()))
-        res = None
-
-        try:
-            #res = subprocess.check_output(['git', 'checkout', commit], stderr=open(os.devnull, 'wb')).decode("utf-8")
-            res = subprocess.check_output(['git', 'checkout', '-f', commit]).decode("utf-8")
-        except Exception as e:
-            print("GIT ERROR", e)
-            print(res, "...")
-            continue
-        try:
-            datapoint = get_datapoint(notespath)
-            nthemes = datapoint["themes"]
-        except Exception as e:
-            print("PARSE ERROR", e)
-            continue
+        datapoint = json.loads(sdata)
+        nthemes = datapoint["themes"]
         if (nthemes > 500):
             data.append((atdt, datapoint))
-            print(data[-1])
+            print("::", data[-1])
 
     return data
 
@@ -144,10 +123,6 @@ def dbstore_commit_data(recreate=False):
     """
     Store data for the last commit each date.
     """
-    import dbdefine
-    import db
-    import json
-
     dbdefine.create_tables(subset={"commits_stats"}, recreate=recreate)
     donerevs = set(x[0] for x in db.do("""SELECT id FROM commits_stats"""))
 
@@ -171,10 +146,16 @@ def dbstore_commit_data(recreate=False):
             print("SKIPPING EARLIER COMMIT:", (commit, author, date))
         else:
             try:
+                # res = subprocess.check_output(['git', 'checkout', commit], stderr=open(os.devnull, 'wb')).decode("utf-8")
+                res = subprocess.check_output(['git', 'checkout', '-f', commit]).decode("utf-8")
+            except Exception as e:
+                print("GIT ERROR", e)
+                print(res, "...")
+                continue
+            try:
                 datapoint = get_datapoint(notespath)
             except Exception as e:
                 print("PARSE ERROR", e)
-                raise
                 continue
             data = json.dumps(datapoint)
             row = (commit, date.strftime('%Y-%m-%d %H:%M:%S'), author, data)
