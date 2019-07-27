@@ -20,8 +20,8 @@ def get_story_prefixes(basepath):
     prefixes = defaultdict(int)
     for path in lib.files.walk(basepath, ".*\.(st)\.txt$", 0):
         if path.endswith(".st.txt"):
-            for obj in lib.dataparse.read_stories_from_txt(path, False):
-                cat = re.match(r"([A-Za-z]+)", obj.name).group(1)
+            for obj in lib.dataparse.read_storythemes_from_txt(path, False):
+                cat = re.match(r"([A-Za-z]+)", obj.name1).group(1)
                 prefixes[cat] += 1
     return dict(prefixes)
 
@@ -42,11 +42,14 @@ def get_datapoint(basepath):
             objs = list(lib.dataparse.read_themes_from_txt(path, False))
             counts["themes"].update(o.name for o in objs)
         if path.endswith(".st.txt"):
+            tobjs = lib.dataparse.read_storythemes_from_txt(path, False)
             objs = list(lib.dataparse.read_stories_from_txt(path, False))
             counts["stories"].update(o.name for o in objs)
+            counts["themedstories"].update(o.name1 for o in tobjs)
 
     data["themes"] = len(counts["themes"])
     data["stories"] = len(counts["stories"])
+    data["themedstories"] = len(counts["themedstories"])
     return data
 
 
@@ -138,6 +141,9 @@ def get_commits_data():
 
 
 def dbstore_commit_data(recreate=False):
+    """
+    Store data for the last commit each date.
+    """
     import dbdefine
     import db
     import json
@@ -149,10 +155,20 @@ def dbstore_commit_data(recreate=False):
     notespath = os.path.join(basepath, "notes")
     os.chdir(basepath)
     entries = list_commits(basepath)
+    bydate = defaultdict(list)
+    latestcommits = set()
+
+    for commit, _, date in entries:
+        bydate[date.date()].append((date, commit))
+    for datelist in bydate.values():
+        date, commit = max(datelist)
+        latestcommits.add(commit)
 
     for idx, (commit, author, date) in enumerate(entries):
         if commit in donerevs:
             print("EXISTS:", (commit, author, date), "...SKIPPING")
+        elif commit not in latestcommits:
+            print("SKIPPING EARLIER COMMIT:", (commit, author, date))
         else:
             try:
                 datapoint = get_datapoint(notespath)
@@ -167,7 +183,7 @@ def dbstore_commit_data(recreate=False):
 
 
 def main():
-    dbstore_commit_data(False)
+    dbstore_commit_data(True)
 
 
 

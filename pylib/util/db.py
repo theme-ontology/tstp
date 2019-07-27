@@ -17,7 +17,7 @@ def main():
         if len(args) < 2 or args[1] != "nowarn":
             if raw_input("Clear Database? (yes/no) ") != "yes":
                 return
-        dbdefine.create_tables(True)
+        dbdefine.create_tables(True, subset="web_.*$")
 
     elif args[0] == "import":
         themes = defaultdict(list)

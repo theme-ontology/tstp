@@ -2,6 +2,7 @@ from db import do
 import log
 import webobject
 import sys
+import re
 
 
 TABLES = {
@@ -104,7 +105,9 @@ TABLES = {
 }
 
 
-def create_tables(recreate = False, subset=None):
+def create_tables(recreate = False, subset="web_.*$"):
+    if isinstance(subset, str):
+        subset = set(k for k in TABLES.keys() if re.match(subset, k))
     if subset is None:
         subset = set(TABLES.keys())
     if recreate:
