@@ -2,110 +2,17 @@ from __future__ import print_function
 import lib.dataparse
 import lib.log
 import lib.mosvg
-import re
-from collections import defaultdict
-import numpy as np
 import sys
-from credentials import GIT_THEMING_PATH_HIST
-import os
-import subprocess
 import lib.files
-import datetime
 from dateutil.parser import parse
-from lib.dates import iter_days
+from lib.commits import get_commits_data
 
 
 lib.log.redirect()
 
-DEBUG = False
-
-
-def get_datapoint(basepath):
-    counts = defaultdict(set)
-    data = defaultdict(float)
-
-    for path in lib.files.walk(basepath, ".*\.(st|th)\.txt$", 0):
-        if path.endswith(".th.txt"):
-            objs = list(lib.dataparse.read_themes_from_txt(path, False))
-            counts["themes"].update(o.name for o in objs)
-        if path.endswith(".st.txt"):
-            objs = list(lib.dataparse.read_stories_from_txt(path, False))
-            counts["stories"].update(o.name for o in objs)
-
-    data["themes"] = len(counts["themes"])
-    data["stories"] = len(counts["stories"])
-    return data
-
 
 def get_data():
-    basepath = GIT_THEMING_PATH_HIST
-    notespath = os.path.join(basepath, "notes")
-    os.chdir(basepath)
-
-    subprocess.check_output('git checkout HEAD'.split()).decode("utf-8")
-    gitlog = subprocess.check_output('git log --no-merges --all'.split()).decode("utf-8")
-    entries = []
-    commit, author, date = None, None, None
-    data = []
-
-    for line in gitlog.split("\n"):
-        if line.startswith("commit ") and not commit:
-            commit = line.strip().split()[-1]
-            author, date = None, None
-        if line.startswith("Author: "):
-            author = line.strip().split()[1]
-        if line.startswith("Date: "):
-            date = line[5:].strip()
-        if not line.strip() and commit:
-            entries.append((commit, author, parse(date, ignoretz=True)))
-            commit, author, date = None, None, None
-
-    entries.sort(key=lambda x: x[-1])
-    dt1 = entries[0][-1]
-    dt2 = entries[-1][-1]
-    dtiter = iter_days(dt1, dt2, "fri", "00:00")
-    # dtiter = iter_days("2019-07-01", dt2, "fri", "00:00") # debug
-    atdt = next(dtiter)
-
-    for idx, (commit, author, date) in enumerate(entries):
-        if DEBUG:
-            if date < parse("2018-12", ignoretz=True): continue # debug
-            if len(data) > 60: break # debug
-        while atdt < date:
-            try:
-                atdt = next(dtiter)
-            except StopIteration:
-                atdt = None
-                break
-        if atdt is None:
-            break
-
-        if idx < len(entries) - 1:
-            if atdt >= entries[idx+1][-1]:
-                continue
-        # date must be the last viable date less than atdt
-        print(date.isoformat(), commit)
-        print("Evaluating for: {}...".format(atdt.isoformat()))
-	res = None
-
-        try:
-            #res = subprocess.check_output(['git', 'checkout', commit], stderr=open(os.devnull, 'wb')).decode("utf-8")
-            res = subprocess.check_output(['git', 'checkout', '-f', commit]).decode("utf-8")
-        except Exception as e:
-            print("GIT ERROR", e)
-            print(res, "...")
-            continue
-        try:
-            datapoint = get_datapoint(notespath)
-            nthemes = datapoint["themes"]
-        except:
-            print("PARSE ERROR")
-            continue
-        if (nthemes > 500):
-            data.append((atdt, datapoint))
-            print(data[-1])
-
-    return data
+    return get_commits_data()
 
 
 def draw_timeseries():
@@ -176,7 +83,6 @@ def draw_timeseries():
 
 def draw_story_theme_relation():
     data = get_data()
-
     xs = [ p['stories'] for _, p in data ]
     ys = [ p['themes'] for _, p in data ]
     labeldist = max(1, len(xs) / 10)
@@ -238,7 +144,7 @@ def draw_story_theme_relation():
             "dominant-baseline": "baseline",
         },
     })
-    svg['background'] #.rect(0, 0, 300, 300, style={"fill": "#cccccc", "fill-opacity": "0.9"})
+    svg['background']
     plot = svg["chart"].xychart(nx1, ny1, nx2, ny2,  x1, x2, y1, y2).config({
         'xtype': 'scalar',
     })
@@ -275,7 +181,6 @@ def draw_story_theme_relation():
                             svg['background'].rect(x0, ny1, x1-x0, ny2-ny1, style={"fill": "#dddddd", "fill-opacity": "0.4"})
                             svg['background'].line(x0, ny1, x0, ny2, style={"stroke": "#dddddd", "fill-opacity": "0.8"})
                             svg['background'].line(x1, ny1, x1, ny2, style={"stroke": "#dddddd", "fill-opacity": "0.8"})
-                            #svg['annotation'].line(xx, yy, xx, 500, cls="manual")
                             svg['annotation'].text(xx, 500, v, cls="manual")
                         if t == "event":
                             svg['annotation'].text(xx, yy-53, v, cls="manual top")

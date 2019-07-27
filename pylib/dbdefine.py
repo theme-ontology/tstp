@@ -89,16 +89,32 @@ TABLES = {
         DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
         ENGINE = MYISAM;
     """,
+
+    'commits_stats': """
+    CREATE TABLE IF NOT EXISTS `commits_stats` (
+        `id` VARCHAR(80) NOT NULL,
+        `time` DATETIME,
+        `author` VARCHAR(20),
+        `stats` TEXT,
+        PRIMARY KEY (`id`)
+    ) 
+    DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
+    ENGINE = MYISAM;
+""",
 }
 
 
-def create_tables(recreate = False):
+def create_tables(recreate = False, subset=None):
+    if subset is None:
+        subset = set(TABLES.keys())
     if recreate:
         for key, _query in TABLES.iteritems():
-            do("""DROP TABLE `%s`""" % key)
+            if key in subset:
+                do("""DROP TABLE `%s`""" % key)
 
     for key, query in TABLES.iteritems():
-        do(query)
+        if key in subset:
+            do(query)
 
 
 if __name__ == '__main__':
