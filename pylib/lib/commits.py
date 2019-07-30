@@ -11,6 +11,7 @@ import lib.dataparse
 import dbdefine
 import db
 import json
+import sys
 
 DEBUG = False
 
@@ -19,12 +20,48 @@ def get_story_prefixes(basepath):
     """
     Return counts for each SID prefix present in the dataset.
     """
-    prefixes = defaultdict(int)
+    prefixes = defaultdict(lambda: defaultdict(int))
+    dates = {}
+    undef = set()
+    baddates = {}
+    badsids = set()
+    counted = set()
+
     for path in lib.files.walk(basepath, ".*\.(st)\.txt$", 0):
         if path.endswith(".st.txt"):
-            for obj in lib.dataparse.read_storythemes_from_txt(path, False):
-                cat = re.match(r"([A-Za-z]+)", obj.name1).group(1)
-                prefixes[cat] += 1
+            for story in lib.dataparse.read_stories_from_txt(path, False):
+                dates[story.name.strip()] = story.date
+
+    for path in lib.files.walk(basepath, ".*\.(st)\.txt$", 0):
+        if path.endswith(".st.txt"):
+            for story in lib.dataparse.read_storythemes_from_txt(path, False):
+                if story.name1 not in counted:
+                    counted.add(story.name1)
+                    cat = re.match(r"([A-Za-z]+)", story.name1)
+                    if not cat:
+                        badsids.add(story.name1)
+                    else:
+                        cat = cat.group(1)
+                        year = None
+                        if story.name1 in dates:
+                            try:
+                                year = int(dates[story.name1][:4])
+                            except ValueError:
+                                baddates[story.name1] = dates[story.name1]
+                        else:
+                            siddate = re.search(r"\(([0-9]{4})\)$", story.name1)
+                            if siddate:
+                                year = int(siddate.group(1))
+                            else:
+                                undef.add(story.name1)
+                        if year:
+                            prefixes[cat][year] += 1
+    if undef:
+        print("UNDEFINED SIDS:", sorted(undef))
+    if baddates:
+        print("BAD DATES:", baddates)
+    if badsids:
+        print("BAD SIDS:", badsids)
     return dict(prefixes)
 
 
@@ -80,7 +117,7 @@ def list_commits(basepath):
     return entries
 
 
-def get_commits_data():
+def get_commits_data(period='weekly'):
     """
     Return information about the state of the repository for regularly spaced dates,
     by default Friday midnights every week.
@@ -92,7 +129,12 @@ def get_commits_data():
     """))
     dt1 = entries[0][1]
     dt2 = entries[-1][1]
-    dtiter = iter_days(dt1, dt2, "fri", "00:00")
+    if period == 'weekly':
+        dtiter = iter_days(dt1, dt2, daysofweek="fri", attime="00:00")
+    elif period == 'daily':
+        dtiter = iter_days(dt1, dt2, attime="00:00")
+    else:
+        raise ValueError("Bad period: {}".format(period))
     atdt = next(dtiter)
     data = []
 
@@ -114,7 +156,6 @@ def get_commits_data():
         nthemes = datapoint["themes"]
         if (nthemes > 500):
             data.append((atdt, datapoint))
-            print("::", data[-1])
 
     return data
 
@@ -154,8 +195,12 @@ def dbstore_commit_data(recreate=False):
                 continue
             try:
                 datapoint = get_datapoint(notespath)
-            except Exception as e:
+            except AssertionError as e:
                 print("PARSE ERROR", e)
+                continue
+            except Exception as e:
+                print("UNKNOWN ERROR", e)
+                raise
                 continue
             data = json.dumps(datapoint)
             row = (commit, date.strftime('%Y-%m-%d %H:%M:%S'), author, data)
@@ -164,7 +209,7 @@ def dbstore_commit_data(recreate=False):
 
 
 def main():
-    dbstore_commit_data(True)
+    dbstore_commit_data("-x" in sys.argv)
 
 
 

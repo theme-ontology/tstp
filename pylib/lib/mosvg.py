@@ -359,7 +359,7 @@ class SVG(object):
         ))
         return self
 
-    def xychart(self, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax):
+    def xychart(self, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax, baseline_reference=None):
         """
         Create a simple plot area with x/y axes.
 
@@ -367,7 +367,7 @@ class SVG(object):
         -------
         An SVGPlot component object on which data can be more easily plotted.
         """
-        plot = SVGPlot(self, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax)
+        plot = SVGPlot(self, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax, baseline_reference=baseline_reference)
         self.elements.append(plot)
         return plot
 
@@ -394,7 +394,11 @@ class SVG(object):
 class SVGPlot(SVG):
     iid = 0
 
-    def __init__(self, parent, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax, name="plot"):
+    #: set this to approximate font-height if you wish text to be aligned using such
+    #: an approximation instead of CSS alignment-baseline property (which IE doesn't support)
+    #:      baseline_reference = None
+
+    def __init__(self, parent, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax, name="plot", baseline_reference=None):
         dx = x2 - x1
         dy = y2 - y1
         dxv = float(xvmax - xvmin)
@@ -406,6 +410,7 @@ class SVGPlot(SVG):
         self.plotcmds = []
         self._plotstack = None
         self._finalized = False
+        self._baseline_reference = baseline_reference
         super(SVGPlot, self).__init__(unit=parent.unit, style=self.default_style())
         self._config = dict(self.default_config())
         self._iid = SVGPlot.iid
@@ -441,6 +446,7 @@ class SVGPlot(SVG):
         """
         A simple default plot style.
         """
+        bref = self._baseline_reference
         dd = {
             '': {
             },
@@ -462,13 +468,9 @@ class SVGPlot(SVG):
             },
             "text.xtick": {
                 "text-anchor": "middle",
-                "alignment-baseline": "text-before-edge",
-                "dominant-baseline": "text-before-edge",
             },
             "text.ytick": {
                 "text-anchor": "end",
-                "alignment-baseline": "central",
-                "dominant-baseline": "central",
             },
             "line.grid": {
                 "stroke": "#888888",
@@ -489,6 +491,17 @@ class SVGPlot(SVG):
                 "fill": "#000000",
             },
         }
+        # because IE sucks user may want to override this for a crappier method
+        if bref is None:
+            dd["text.xtick"].update({
+                "alignment-baseline": "text-before-edge",
+                "dominant-baseline": "text-before-edge",
+            })
+            dd["text.ytick"].update({
+                "alignment-baseline": "central",
+                "dominant-baseline": "central",
+            })
+
         n = "." + self.name
         p = n + " "
         return { (p + k if k else n) : v for k, v in dd.items() }
@@ -539,6 +552,10 @@ class SVGPlot(SVG):
         xtick_fmt = self.getcfg("xtick-format")
         ytick_fmt = self.getcfg("ytick-format")
 
+        bref = self._baseline_reference
+        xtickoffsety = 0 if bref is None else int(bref)
+        ytickoffsety = 0 if bref is None else int(bref / 3)
+
         with self.group(cls=self.name):
             self.rect2(x1, y1, x2, y2, cls='plotarea')
             self.line(x1, y2, x2, y2, cls='axis xaxis')
@@ -549,14 +566,14 @@ class SVGPlot(SVG):
                 xx = round(v2x(xtv))
                 self.line(xx, y2, xx, y2 + 3, cls='tick xtick')
                 self.line(xx, y1, xx, y2, cls='grid xgrid')
-                self.text(xx, y2 + 3, xtick_fmt.format(xtv), cls='tick xtick')
+                self.text(xx, y2 + 3 + xtickoffsety, xtick_fmt.format(xtv), cls='tick xtick')
             for ytv in yticksv:
                 yr = (ytv - yvmin) / dyv
                 yy = y1 + (y2 - y1) * yr
                 yy = round(v2y(ytv))
                 self.line(x1, yy, x1 - 3, yy, cls='tick ytick')
                 self.line(x1, yy, x2, yy, cls='grid ygrid')
-                self.text(x1 - 5, yy, ytick_fmt.format(ytv), cls='tick ytick')
+                self.text(x1 - 5, yy + ytickoffsety, ytick_fmt.format(ytv), cls='tick ytick')
 
         return self
 

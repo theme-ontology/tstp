@@ -84,21 +84,18 @@ def draw_timeseries():
 def draw_story_theme_relation():
     data = get_data()
     xs = [ p['stories'] for _, p in data ]
+    xs2 = [ p['themedstories'] for _, p in data ]
     ys = [ p['themes'] for _, p in data ]
     labeldist = max(1, len(xs) / 10)
     labels = [ x.date().isoformat() if idx%labeldist==labeldist//2 else '' for idx, (x, _) in enumerate(data) ]
 
     nx1, ny1, nx2, ny2 = 50, 40, 950, 550
-    x1, x2 = min(xs), max(xs)
+    x1, x2 = min(xs2), max(xs)
     y1, y2 = min(ys), max(ys)
     dx = xs[-1] - xs[0]
     dy = ys[-1] - ys[0]
     x1, x2 = x1 - dx*0.05, x2 + dx*0.05
     y1, y2 = y1 - dy*0.05, y2 + dy*0.05
-
-    print(xs)
-    print(ys)
-
 
     svg = lib.mosvg.SVG(style = {
         "text": {
@@ -112,16 +109,29 @@ def draw_story_theme_relation():
             "stroke": "black",
             "fill": "white",
         },
-        ".plot .datapoint": {
+        ".plot .story-theme-relation.datapoint": {
             'fill': '#ee8866',
+        },
+        ".plot .themedstory-theme-relation.datapoint": {
+            'fill': '#ddcc66',
+        },
+        ".plot .date-labels.datapoint": {
+            'visibility': 'hidden',
         },
         ".plot text.datapointlabel": {
             'fill': '#000000',
             "font-weight": "bold",
         },
-        ".plot .dataline": {
+        ".plot .story-theme-relation.dataline": {
             'stroke-width': '3px',
             'stroke': '#ee8866',
+        },
+        ".plot .themedstory-theme-relation.dataline": {
+            'stroke-width': '3px',
+            'stroke': '#ddcc66',
+        },
+        ".plot .date-labels.dataline": {
+            'visibility': 'hidden',
         },
 
         "text.annotation": {
@@ -157,7 +167,9 @@ def draw_story_theme_relation():
     svg['annotation'].text(nx1 + 10, ny1 - 10, "themes-count", cls="annotation")
     svg['annotation'].text((nx1 + nx2) / 2, ny2 + 25, "stories-count", cls="annotation")
     svg['annotation'].text((nx1 + nx2) / 2, 20, "All Themes/Stories Defined, relationship over time", cls="title")
-    plot.plot([xs, ys, labels], shape="line", cls='story-theme-relation', style={})
+    plot.plot([xs2, ys], shape="line", cls='themedstory-theme-relation', style={})
+    plot.plot([xs, ys], shape="line", cls='story-theme-relation', style={})
+    plot.plot([xs2, ys, labels], shape="line", cls='date-labels', style={})
     plot.plotarea()
 
     annotations = {
@@ -188,6 +200,12 @@ def draw_story_theme_relation():
                             svg['annotation'].text(xx, 500, v, cls="manual")
                         if t == "event":
                             svg['annotation'].text(xx, yy-53, v, cls="manual top")
+
+    svg['annotation'].rect(nx1 + 5, ny1 + 5, 120, 40, cls="background", style={"fill":"white", "stroke": "#000000"})
+    svg['annotation'].rect(nx1 + 15, ny1 + 15, 8, 8, style={"fill": "#ee8866"})
+    svg['annotation'].text(nx1 + 25, ny1 + 22, "stories defined")
+    svg['annotation'].rect(nx1 + 15, ny1 + 25, 8, 8, style={"fill": "#ddcc66"})
+    svg['annotation'].text(nx1 + 25, ny1 + 32, "stories themed")
 
     return svg, nx2 + nx1, ny2 + ny1
 

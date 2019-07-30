@@ -1,6 +1,8 @@
+from __future__ import print_function
 import lib.dataparse
 import lib.log
 import lib.mosvg
+import lib.commits
 import re
 from collections import defaultdict
 import numpy as np
@@ -9,13 +11,7 @@ import sys
 lib.log.redirect()
 
 
-def main():
-    path = sys.argv[-1] if len(sys.argv) > 2 else 'test.svg'
-    svg, width, height = make_viz()
-    svg.write(path, width, height)
-
-
-def get_data():
+def get_data_from_head():
     fromyear = 1890
     untilyear = 2020
     nn = untilyear - fromyear + 1
@@ -52,24 +48,26 @@ def iter_colors():
             yield c
 
 
-def make_viz():
-    nx1, ny1, nx2, ny2 = 50, 40, 950, 550
-
-    xs, data = get_data()
-    maxarray = sum(rec[2] for rec in data)
-    x1, x2 = xs[0] - 0.5, xs[-1] + 0.5
-    y1, y2 = 0, round(np.max(maxarray)+5, -1)
-
-    cutoff = 19
+def limit_data(data, cutoff=19):
     protected = [ x for x in data if x[1] in ['play', 'novel', 'movie', 'nonfiction'] ]
     data = [ x for x in data if x[1] not in ['play', 'novel', 'movie', 'nonfiction'] ]
     remains = data[cutoff-len(protected):]
     data = data[:cutoff-len(protected)] + protected
     data.sort(reverse=True)
-
     if remains:
         ys = sum(x[2] for x in remains)
-        data.append((0, 'miscellaneousmiscellaneousmiscellaneous', ys))
+        data.append((0, 'miscellaneous', ys))
+    return data
+
+
+def make_viz_from_data(xs, data, yrange=None, bigtitle=None):
+    nx1, ny1, nx2, ny2 = 50, 40, 950, 550
+    maxarray = sum(rec[2] for rec in data)
+    x1, x2 = xs[0] - 0.5, xs[-1] + 0.5
+    y1, y2 = 0, round(np.max(maxarray)+5, -1)
+
+    if yrange is not None:
+        y2 = yrange
 
     svg = lib.mosvg.SVG(style = {
         "text": {
@@ -90,17 +88,26 @@ def make_viz():
             "font-weight": "bold",
             "font-size": "11px",
         },
+        "text.bigtitle": {
+            "text-anchor": "end",
+            "font-weight": "bold",
+            "font-size": "16px",
+            "color": "#666666",
+        },
     })
-    plot = svg["chart"].xychart(nx1, ny1, nx2, ny2,  x1, x2, y1, y2).config({
+    plot = svg["chart"].xychart(nx1, ny1, nx2, ny2,  x1, x2, y1, y2, baseline_reference=10).config({
         'xtype': 'enum',
     })
     colorscale = iter_colors()
     lx0, ly0, ldx, lmaxx = nx1 + 10, ny1 + 10, 80, 320
     lx, ly = lx0, ly0
-    svg['annotation'].rect(lx0 - 5, ly0 - 5, 320, 20 * len(data) / 4 - 10, cls="background", style={"frill":"white"})
+    svg['annotation'].rect(lx0 - 5, ly0 - 5, 320, 10 + 15 * (len(data) / 4 + (1 if len(data)%4 else 0)), cls="background", style={"frill":"white"})
     svg['annotation'].text(nx1 + 10, ny1 - 10, "number of stories", cls="annotation")
     svg['annotation'].text((nx1 + nx2) / 2, ny2 + 25, "year of release", cls="annotation")
     svg['annotation'].text((nx1 + nx2) / 2, 20, "All Stories in Database by Year of Release", cls="title")
+
+    if bigtitle:
+        svg['annotation'].text(nx2, 30, bigtitle, cls="bigtitle")
 
     with plot.stack():
         for _, key, ys in data:
@@ -118,6 +125,97 @@ def make_viz():
 
     plot.plotarea()
     return svg, nx2 + nx1, ny2 + ny1
+
+
+def make_viz():
+    xs, data = get_data_from_head()
+    data = limit_data(data)
+    return make_viz_from_data(xs, data)
+
+
+def make_animation(path):
+    method = None
+    try:
+        from svglib.svglib import svg2rlg
+        from reportlab.graphics import renderPDF, renderPM
+        method = "svglib"
+    except Exception as e:
+        print("NO svglib", e)
+
+    xs, data = get_data_from_head()
+    data = limit_data(data)
+    keys = set(r[1] for r in data)
+    x0 = xs[0]
+    xx = xs[-1]
+    yrange = 80
+
+    for row in data:
+        print(row)
+
+    def make(datapoint, key):
+        aa = np.zeros(shape=len(xs))
+        years = datapoint.get('prefix:{}'.format(key), {})
+        for y, c in years.items():
+            y = int(y)
+            if x0 <= y <= xx:
+                aa[y-x0] += c
+            else:
+                print("BAD YEAR:", y, c)
+        return aa
+
+    for atdt, datapoint in lib.commits.get_commits_data(period='weekly'):
+        prefixes = {}
+        zeros = np.zeros(shape=len(xs))
+        for key in keys:
+            prefixes[key] = make(datapoint, key)
+        for pkey in datapoint:
+            aa = np.zeros(shape=len(xs))
+            if pkey.startswith("prefix:"):
+                key = pkey.split(":", 1)[-1]
+                if key not in prefixes:
+                    aa += make(datapoint, key)
+            prefixes['miscellanous'] = aa
+
+        for idx, (_, key, _) in enumerate(list(data)):
+            aa = prefixes.get(key, zeros)
+            data[idx] = (sum(aa), key, aa)
+
+        #dd = [(sum(aa), key, aa) for key, aa in prefixes.items()]
+        #dd = [x for x in dd if x[0]]
+        #dd.sort(reverse=True)
+        dd = data
+
+        dtstr = atdt.date().isoformat()
+        svg, width, height = make_viz_from_data(xs, dd, yrange=yrange, bigtitle=dtstr)
+        svgpath = path.format(dtstr)
+        svg.write(svgpath, width, height)
+        print("WROTE", svgpath)
+
+        if method == "svglib":
+            pngpath = path.format(atdt.date().isoformat()) + '.gif'
+            drawing = svg2rlg(svgpath)
+            renderPM.drawToFile(drawing, pngpath, fmt="GIF")
+            print("WROTE", pngpath)
+
+def main():
+    path = sys.argv[-1] if len(sys.argv) > 2 else 'test.svg'
+    if any(x == '-A' for x in sys.argv):
+        make_animation(path)
+    else:
+        svg, width, height = make_viz()
+        svg.write(path, width, height)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
