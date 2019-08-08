@@ -17,7 +17,7 @@
             <TABLE class="table table-striped">
                 <tbody>
                     <tr>
-                        <td width="250px"><A href = "/pub/tstpviz/">Assorted Auto-generated Charts</A></td>
+                        <td><A href = "/pub/tstpviz/">Assorted Auto-generated Charts</A></td>
                         <td>
                             Various views of the data that are generated as and when the database is updated.
                         </td>
@@ -28,17 +28,6 @@
                             Number of themes per story, stories per theme, etc.
                         </td>
                     </tr>
-                    <!--tr>
-                        <td><A href = ":3838/shiny/">Story Simularity</A></td>
-                        <td>Pick a story and see other stories that are thematically similar.</td>
-                    </tr-->
-                    <!--tr>
-                        <td><A href = "viz/themecube.html">Star Trek tos/tas/tng Theme Domain Distribution</A></td>
-                        <td>
-                            A case study of how themes are distributed between the three early Star Trek TV Series. 
-                            This delineates, to an extent, how the show changed over the years.
-                        </td>
-                    </tr-->
                     <tr>
                         <td><A href = "viz/themehierarchy.php">Theme Hierarchy Reference Sheet</A></td>
                         <td>
@@ -48,10 +37,10 @@
                     <tr>
                         <td><A href = "viz/stories-by-year.gif">Project Progress Over Time</A></td>
                         <td>
-                            An <A href = "viz/stories-by-year.gif">animated</A> version of 
-                            <A href = "/pub/tstpviz/all_stories_by_year.svg">static</A>
-                            all_stories_by_year.svg:
-                            <IMG width="700px" src="/pub/tstpviz/all_stories_by_year.svg">
+                            An animated version of 
+                            static all_stories_by_year.svg
+                            <A href = "/pub/tstpviz/all_stories_by_year.svg">
+                            <IMG width="80%" src="/pub/tstpviz/all_stories_by_year.svg"></A>
                         </td>
                     </tr>
                 </tbody>
@@ -59,13 +48,26 @@
         </div>
 
         <div class="panel-body">
-            <H3 class="px-3">Helpful Tools</H3>
+            <H3 class="px-3">Helpful Tools & Links</H3>
             <TABLE class="table table-striped">
                 <tbody>
                     <tr>
-                        <td width="250px"><A href="newstory">import story entries</A></td>
+                        <td><A href="newstory">import story entries</A></td>
                         <td>Import story entries from Wikipedia and other supported sources.</td>
                     </tr>
+                    <tr>
+                        <td><A href = "https://github.com/theme-ontology/theming">https://github.com/theme-ontology/theming</A></td>
+                        <td>The theme repository.</td>
+                    </tr>
+                    <tr>
+                        <td><A href = "https://github.com/theme-ontology/theming/releases">https://github.com/theme-ontology/theming/releases</A></td>
+                        <td>Versioned releases of the theme ontology.</td>
+                    </tr>
+                    <tr>
+                        <td><A href = "https://cran.r-project.org/web/packages/stoRy/index.html">https://cran.r-project.org/web/packages/stoRy/index.html</A></td>
+                        <td>R package using the hypergeometric test to identify over represented themes in a given story set.</td>
+                    </tr>
+
                 </tbody>
             </TABLE>
         </div>
@@ -75,7 +77,7 @@
         	<TABLE class="table table-striped">
             	<tbody>
 	            	<tr>
-		            	<td width="250px"><A href = "download.php?what=storydefinitions&fmt=txt">Story Definitions (txt)</A></td>
+		            	<td><A href = "download.php?what=storydefinitions&fmt=txt">Story Definitions (txt)</A></td>
 	            		<td>For each story, a description of what it is and other relevant data.</td>
 		            </tr>
 	            	<tr>
@@ -121,39 +123,12 @@
         	</TABLE>
         </div>
 
-		<div class="panel-body">
-          	<H3 class="px-3">Frozen Versions</H3>
-          	<P>These .tsv files are described in the manual for 
-          		<A href="https://cran.r-project.org/web/packages/stoRy/index.html">the R package stoRy</A>.</P>
-        	<TABLE class="table table-striped">
-            	<tbody>
-	            	<tr>
-		            	<td width="250px"><A href = "data/lto-0.1.0.tsv">lto-0.1.0.tsv</A></td>
-	            		<td>pre-2018 version of the ontology.</td>
-		            </tr>
-	            	<tr>
-		            	<td><A href = "data/lto-0.1.1.tsv">lto-0.1.1.tsv</A></td>
-	            		<td>pre-2018</td>
-		            </tr>
-                    <tr>
-                        <td><A href = "data/lto-0.1.2.tsv">lto-0.1.2.tsv</A></td>
-                        <td>pre-2018</td>
-                    </tr>
-                    <tr>
-                        <td><A href = "data/lto-0.2.0.tsv">lto-0.2.0.tsv</A></td>
-                        <td>2019-06-25</td>
-                    </tr>
-	            	</tbody>
-        	</TABLE>
-
-    	</div>
-
         <div class="panel-body">
             <H3 class="px-3">Guides</H3>
             <TABLE class="table table-striped">
                 <tbody>
                     <tr>
-                        <td width="250px"><A href = "data/how-to-theme-flowchart-extended.pdf">How to Theme, part I</A></td>
+                        <td><A href = "data/how-to-theme-flowchart-extended.pdf">How to Theme, part I</A></td>
                         <td>Breakdown of all theme categories.</td>
                     </tr>
                     <tr>

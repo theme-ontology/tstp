@@ -282,7 +282,8 @@ def read_themes_from_txt(filename, verbose = True):
     }
     composite_fields = {
         "description": "description",
-        "example": "example",
+        "examples": "examples",
+        "notes": "notes",
         "references": "references",
     }
 
@@ -311,11 +312,14 @@ def read_themes_from_txt(filename, verbose = True):
     for key in sorted(out_themes):
         themeobj = out_themes[key]
         description = getattr(themeobj, "description")
-        example = out_composites[key]["example"].strip()
+        examples = out_composites[key]["examples"].strip()
+        notes = out_composites[key]["notes"].strip()
         references = out_composites[key]["references"].strip()
 
-        if example:
-            description += "\n\nExample:\n" + example
+        if notes:
+            description += "\n\nNotes:\n" + notes
+        if examples:
+            description += "\n\nExamples:\n" + examples
         if references:
             description += "\n\nReferences:\n"
             for line in references.split("\n"):

@@ -52,8 +52,10 @@ function formatBlobForHTML(txt)
     {
         var pp = escapeHtml(paragraphs[ii]);
 
-        if (pp.startsWith("Example:"))
-            pp = "<b>Example:</b><BR>" + pp.slice(9);
+        if (pp.startsWith("Notes:"))
+            pp = "<b>Notes:</b><BR>" + pp.slice(6);
+        if (pp.startsWith("Examples:"))
+            pp = "<b>Examples:</b><BR>" + pp.slice(9);
         if (pp.startsWith("References:"))
         {
             var lines = pp.slice(12).split("\n");

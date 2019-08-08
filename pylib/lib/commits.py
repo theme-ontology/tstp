@@ -160,7 +160,7 @@ def get_commits_data(period='weekly'):
     return data
 
 
-def dbstore_commit_data(recreate=False):
+def dbstore_commit_data(recreate=False, quieter=False):
     """
     Store data for the last commit each date.
     """
@@ -182,9 +182,11 @@ def dbstore_commit_data(recreate=False):
 
     for idx, (commit, author, date) in enumerate(entries):
         if commit in donerevs:
-            print("EXISTS:", (commit, author, date), "...SKIPPING")
+            if not quieter:
+                print("EXISTS:", (commit, author, date), "...SKIPPING")
         elif commit not in latestcommits:
-            print("SKIPPING EARLIER COMMIT:", (commit, author, date))
+            if not quieter:
+                print("SKIPPING EARLIER COMMIT:", (commit, author, date))
         else:
             try:
                 # res = subprocess.check_output(['git', 'checkout', commit], stderr=open(os.devnull, 'wb')).decode("utf-8")
@@ -205,7 +207,8 @@ def dbstore_commit_data(recreate=False):
             data = json.dumps(datapoint)
             row = (commit, date.strftime('%Y-%m-%d %H:%M:%S'), author, data)
             db.do("""INSERT INTO commits_stats VALUES(%s, %s, %s, %s)""", values=[row])
-            print("INSERTED: ", str(row)[:120], "...")
+            if not quieter:
+                print("INSERTED: ", str(row)[:120], "...")
 
 
 def main():

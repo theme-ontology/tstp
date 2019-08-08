@@ -32,9 +32,11 @@
         if ($action == "importgit")
         {
             $out = tstp_pyrun('webtask.importgit 2>&1');
-            echo "<pre>" . htmlentities($out) . "</pre>\n";
+            echo "<h1>webtask.importgit</h1><pre>" . htmlentities($out) . "</pre>\n";
             $out = tstp_pyrun('webtask.cache_queries 2>&1');
-            echo "<pre>" . htmlentities($out) . "</pre>\n";
+            echo "<h1>webtask.cache_queries</h1><pre>" . htmlentities($out) . "</pre>\n";
+            $out = tstp_pyrun('webtask.maintenance 2>&1');
+            echo "<h1>webtask.maintenance</h1><pre>" . htmlentities($out) . "</pre>\n";
         }
         echo "<p>Task " . $action . " completed.</p>";
     }
