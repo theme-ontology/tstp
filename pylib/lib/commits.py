@@ -201,7 +201,6 @@ def dbstore_commit_data(recreate=False, quieter=False):
                 continue
             except Exception as e:
                 print("UNKNOWN ERROR", e)
-                raise
                 continue
             data = json.dumps(datapoint)
             row = (commit, date.strftime('%Y-%m-%d %H:%M:%S'), author, data)
