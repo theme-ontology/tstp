@@ -1,3 +1,4 @@
+from __future__ import print_function
 import cgitb; cgitb.enable()
 import log
 log.set_level('SILENT')
@@ -27,20 +28,20 @@ def main():
             leafcount[parent] = count + min(1, count2)
 
     for root in roots:
-        print "<H1>%s</H1>" % make_link(root)
+        print("<H1>%s</H1>" % make_link(root))
 
         for l2 in children[root]:
             pending = list(children[l2])
-            print "  <H2>%s</H2>" % make_link(l2)
-            print "  <TABLE>"
+            print("  <H2>%s</H2>" % make_link(l2))
+            print("  <TABLE>")
 
             while any(pending):
                 pending, current = [], pending
-                print "<tr>"
+                print("<tr>")
                 for theme in current:
                     if theme in leafcount:
                         nn = leafcount[theme]
-                        print "<th colspan=%s>%s</th>" % (nn, make_link(theme))
+                        print("<th colspan=%s>%s</th>" % (nn, make_link(theme)))
                         pending.extend(th for th in children[theme] if children[th])
                         acc = [ th for th in children[theme] if not children[th] ]
                         if acc:
@@ -49,9 +50,9 @@ def main():
                                 item += ", ..."
                             pending.append(item)
                     else:
-                        print "<td>%s</td>" % theme
+                        print("<td>%s</td>" % theme.encode("utf-8"))
                         pending.append("")
 
-                print "</tr>"
+                print("</tr>")
 
-            print "  </TABLE>"
+            print("  </TABLE>")
