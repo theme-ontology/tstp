@@ -48,8 +48,9 @@
                     <tr>
                         <td><A href = "viz/stories-by-year.gif">Project Progress Over Time</A></td>
                         <td>
-                            An animated version of
-                            <A href = "/pub/tstpviz/all_stories_by_year.svg">all_stories_by_year.svg</A>:
+                            An <A href = "viz/stories-by-year.gif">animated</A> version of 
+                            <A href = "/pub/tstpviz/all_stories_by_year.svg">static</A>
+                            all_stories_by_year.svg:
                             <IMG width="700px" src="/pub/tstpviz/all_stories_by_year.svg">
                         </td>
                     </tr>
