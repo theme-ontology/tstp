@@ -14,6 +14,8 @@
         }
 
         h1 {
+            background: #c0c0c0;
+            border-bottom: 3px solid black;
             margin-top: 3em;
             margin-bottom: 0em;
         }

@@ -28,11 +28,13 @@ def main():
             leafcount[parent] = count + min(1, count2)
 
     for root in roots:
-        print("<H1>%s</H1>" % make_link(root))
+        rootlink = make_link(root)
+        print("<H1>%s</H1>" % rootlink)
 
         for l2 in children[root]:
             pending = list(children[l2])
-            print("  <H2>%s</H2>" % make_link(l2))
+            l2link = make_link(l2)
+            print("  <H2>%s > %s</H2>" % (rootlink, l2link))
             print("  <TABLE>")
 
             while any(pending):
@@ -50,7 +52,7 @@ def main():
                                 item += ", ..."
                             pending.append(item)
                     else:
-                        print("<td>%s</td>" % theme.encode("utf-8"))
+                        print("<td>%s</td>" % make_link(theme))
                         pending.append("")
 
                 print("</tr>")
