@@ -192,15 +192,15 @@ def dbstore_commit_data(recreate=False, quieter=False):
                 # res = subprocess.check_output(['git', 'checkout', commit], stderr=open(os.devnull, 'wb')).decode("utf-8")
                 res = subprocess.check_output(['git', 'checkout', '-f', commit]).decode("utf-8")
             except Exception as e:
-                print("GIT ERROR", e)
+                print("GIT ERROR", repr(e))
                 continue
             try:
                 datapoint = get_datapoint(notespath)
             except AssertionError as e:
-                print("PARSE ERROR", e)
+                print("PARSE ERROR", repr(e))
                 continue
             except Exception as e:
-                print("UNKNOWN ERROR", e)
+                print("UNKNOWN ERROR", repr(e))
                 continue
             data = json.dumps(datapoint)
             row = (commit, date.strftime('%Y-%m-%d %H:%M:%S'), author, data)
