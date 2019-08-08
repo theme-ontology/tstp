@@ -17,33 +17,40 @@
             <TABLE class="table table-striped">
                 <tbody>
                     <tr>
-                        <td><A href = "/pub/tstpviz/">Assorted Auto-generated Charts</A></td>
+                        <td width="250px"><A href = "/pub/tstpviz/">Assorted Auto-generated Charts</A></td>
                         <td>
-                            Various views of the data.
+                            Various views of the data that are generated as and when the database is updated.
                         </td>
                     </tr>
                     <tr>
                         <td><A href = "viz/dist-themeusage.html">Themes distribution</A></td>
                         <td>
-                            How many minor/major/choice themes are assigned to each story? 
-                            What are the most frequently used themes?
+                            Number of themes per story, stories per theme, etc.
                         </td>
                     </tr>
                     <!--tr>
                         <td><A href = ":3838/shiny/">Story Simularity</A></td>
                         <td>Pick a story and see other stories that are thematically similar.</td>
                     </tr-->
-                    <tr>
+                    <!--tr>
                         <td><A href = "viz/themecube.html">Star Trek tos/tas/tng Theme Domain Distribution</A></td>
                         <td>
                             A case study of how themes are distributed between the three early Star Trek TV Series. 
                             This delineates, to an extent, how the show changed over the years.
                         </td>
-                    </tr>
+                    </tr-->
                     <tr>
                         <td><A href = "viz/themehierarchy.php">Theme Hierarchy Reference Sheet</A></td>
                         <td>
-                            Overview of all themes in the current hierarchy.
+                            Browser friendly, tabular, overview of all themes in the current hierarchy.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><A href = "viz/stories-by-year.gif">Project Progress Over Time</A></td>
+                        <td>
+                            An animated version of
+                            <A href = "/pub/tstpviz/all_stories_by_year.svg">all_stories_by_year.svg</A>:
+                            <IMG width="700px" src="/pub/tstpviz/all_stories_by_year.svg">
                         </td>
                     </tr>
                 </tbody>
@@ -55,7 +62,7 @@
             <TABLE class="table table-striped">
                 <tbody>
                     <tr>
-                        <td><A href="newstory">import story entries</A></td>
+                        <td width="250px"><A href="newstory">import story entries</A></td>
                         <td>Import story entries from Wikipedia and other supported sources.</td>
                     </tr>
                 </tbody>
@@ -67,7 +74,7 @@
         	<TABLE class="table table-striped">
             	<tbody>
 	            	<tr>
-		            	<td><A href = "download.php?what=storydefinitions&fmt=txt">Story Definitions (txt)</A></td>
+		            	<td width="250px"><A href = "download.php?what=storydefinitions&fmt=txt">Story Definitions (txt)</A></td>
 	            		<td>For each story, a description of what it is and other relevant data.</td>
 		            </tr>
 	            	<tr>
@@ -120,20 +127,20 @@
         	<TABLE class="table table-striped">
             	<tbody>
 	            	<tr>
-		            	<td><A href = "data/lto-0.1.0.tsv">lto-0.1.0.tsv</A></td>
-	            		<td>Earlier version of the ontology.</td>
+		            	<td width="250px"><A href = "data/lto-0.1.0.tsv">lto-0.1.0.tsv</A></td>
+	            		<td>pre-2018 version of the ontology.</td>
 		            </tr>
 	            	<tr>
 		            	<td><A href = "data/lto-0.1.1.tsv">lto-0.1.1.tsv</A></td>
-	            		<td>Earlier version of the ontology.</td>
+	            		<td>pre-2018</td>
 		            </tr>
                     <tr>
                         <td><A href = "data/lto-0.1.2.tsv">lto-0.1.2.tsv</A></td>
-                        <td>Earlier version of the ontology.</td>
+                        <td>pre-2018</td>
                     </tr>
                     <tr>
                         <td><A href = "data/lto-0.2.0.tsv">lto-0.2.0.tsv</A></td>
-                        <td>Earlier version of the ontology.</td>
+                        <td>2019-06-25</td>
                     </tr>
 	            	</tbody>
         	</TABLE>
@@ -145,7 +152,7 @@
             <TABLE class="table table-striped">
                 <tbody>
                     <tr>
-                        <td><A href = "data/how-to-theme-flowchart-extended.pdf">How to Theme, part I</A></td>
+                        <td width="250px"><A href = "data/how-to-theme-flowchart-extended.pdf">How to Theme, part I</A></td>
                         <td>Breakdown of all theme categories.</td>
                     </tr>
                     <tr>

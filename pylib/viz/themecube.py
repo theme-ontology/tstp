@@ -191,7 +191,7 @@ def calculate_series_affinity_v1(themes, themesets, scope):
 
 
 def get_viz_data(
-    roots = ('the human condition', 'society', 'the pursuit of knowledge', 'alternate reality'),
+    roots = ('the human condition', 'society', 'the pursuit of knowledge', 'speculative fiction theme'),
     colors = ("#6F0F0F", "#176F0F", "#0F0F6F", "#6F5F0F"),
     themesets = (
         ("tos", "tos[0-3]x\\d\\d"), 
