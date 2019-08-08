@@ -16,7 +16,7 @@ import sys
 DEBUG = False
 
 
-def get_story_prefixes(basepath):
+def get_story_prefixes(basepath, verbose=False):
     """
     Return counts for each SID prefix present in the dataset.
     """
@@ -56,12 +56,13 @@ def get_story_prefixes(basepath):
                                 undef.add(story.name1)
                         if year:
                             prefixes[cat][year] += 1
-    if undef:
-        print("UNDEFINED SIDS:", sorted(undef))
-    if baddates:
-        print("BAD DATES:", baddates)
-    if badsids:
-        print("BAD SIDS:", badsids)
+    if verbose:
+        if undef:
+            print("UNDEFINED SIDS:", sorted(undef))
+        if baddates:
+            print("BAD DATES:", baddates)
+        if badsids:
+            print("BAD SIDS:", badsids)
     return dict(prefixes)
 
 
