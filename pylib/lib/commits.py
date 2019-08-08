@@ -193,7 +193,6 @@ def dbstore_commit_data(recreate=False, quieter=False):
                 res = subprocess.check_output(['git', 'checkout', '-f', commit]).decode("utf-8")
             except Exception as e:
                 print("GIT ERROR", e)
-                print(res, "...")
                 continue
             try:
                 datapoint = get_datapoint(notespath)
