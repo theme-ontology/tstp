@@ -26,7 +26,8 @@ DBS['tstp'] = DBS['tstp@dreamhost']
 SERVER_URL = "http://127.0.0.1/tstp/webui/"
 
 #: where is the theming git repository located?
-GIT_THEMING_PATH = "f:\\theming"
+GIT_THEMING_PATH = "c:\\repos\\theming"
+GIT_THEMING_PATH_HIST = "c:\\repos\\theming-hist"
 
 #: public directory
 PUBLIC_DIR = "f:\\www\\pub"
