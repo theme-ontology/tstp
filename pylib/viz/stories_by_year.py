@@ -197,6 +197,7 @@ def make_animation(path):
             renderPM.drawToFile(drawing, pngpath, fmt="GIF")
             print("WROTE", pngpath)
 
+
 def main():
     path = sys.argv[-1] if len(sys.argv) > 2 else 'test.svg'
     if any(x == '-A' for x in sys.argv):

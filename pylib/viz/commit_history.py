@@ -181,7 +181,6 @@ def draw_story_theme_relation():
     done = set()
     ants = sorted((parse(k, ignoretz=True), v) for k, v in annotations.items())
     for idx, (dt, p) in enumerate(data):
-        print(idx, (dt, p))
         if idx + 1 < len(data):
             dt2, p2 = data[idx + 1]
             for ii, (k, v) in enumerate(ants):

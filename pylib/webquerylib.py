@@ -64,6 +64,7 @@ def cache_visualizations():
     names = {
         "stories_by_year": ("all_stories_by_year.svg",),
         "themeusage_timelines": ("startrek", "metathemes_by_episode.svg"),
+        "commit_history": ("commit_history.svg",),
     }
     for name, fname in names.items():
         mod = importlib.import_module("viz." + name)
@@ -84,7 +85,6 @@ def build_heavey_visualizations():
     These take a long time and are unsuitable for a blocking web request.
     """
     names = {
-        "commit_history": ("commit_history.svg",),
     }
     for name, fname in names.items():
         mod = importlib.import_module("viz." + name)
