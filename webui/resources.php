@@ -17,6 +17,12 @@
             <TABLE class="table table-striped">
                 <tbody>
                     <tr>
+                        <td><A href = "/tstp/webui/gitlog">Project History</A></td>
+                        <td>
+                            A history of the project in two pictures and a table.
+                        </td>
+                    </tr>
+                    <tr>
                         <td><A href = "/pub/tstpviz/">Assorted Auto-generated Charts</A></td>
                         <td>
                             Various views of the data that are generated as and when the database is updated.
@@ -35,7 +41,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><A href = "viz/stories-by-year.gif">Project Progress Over Time</A></td>
+                        <td><A href = "viz/stories-by-year.gif">Animated Project Progress Over Time</A></td>
                         <td>
                             An animated version of 
                             static all_stories_by_year.svg

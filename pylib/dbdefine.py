@@ -92,16 +92,28 @@ TABLES = {
     """,
 
     'commits_stats': """
-    CREATE TABLE IF NOT EXISTS `commits_stats` (
+        CREATE TABLE IF NOT EXISTS `commits_stats` (
+            `id` VARCHAR(80) NOT NULL,
+            `time` DATETIME,
+            `author` VARCHAR(20),
+            `stats` TEXT,
+            PRIMARY KEY (`id`)
+        ) 
+        DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
+        ENGINE = MYISAM;
+    """,
+
+    'commits_log': """
+    CREATE TABLE IF NOT EXISTS `commits_log` (
         `id` VARCHAR(80) NOT NULL,
         `time` DATETIME,
         `author` VARCHAR(20),
-        `stats` TEXT,
+        `message` TEXT,
         PRIMARY KEY (`id`)
     ) 
     DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
     ENGINE = MYISAM;
-""",
+    """,
 }
 
 

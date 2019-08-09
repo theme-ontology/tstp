@@ -14,6 +14,9 @@ import credentials
 
 
 TARGET = "web"
+PROC_SPECIAL_QUERIES = {
+    "commits_log": lambda *args: get_commit_log(*args),
+}
 
 
 def get_public_path(name, *args):
@@ -98,7 +101,13 @@ def build_heavey_visualizations():
 def cached_special_query(act_type, req_type, obj_name):
     """
     Use cached version if available, else re-generate.
+    Queries may be cached on disk or in SQL. The latter case is recovered through procedures.
     """
+    if act_type in PROC_SPECIAL_QUERIES:
+        return json.dumps({
+            "data": PROC_SPECIAL_QUERIES[act_type](act_type, req_type, obj_name)
+        })
+
     path = get_cache_path(act_type, req_type, obj_name)
 
     if os.path.isfile(path):
@@ -150,6 +159,8 @@ def cached_special_query(act_type, req_type, obj_name):
 
 
 def cache_special_query(act_type, req_type, obj_name):
+    """
+    """
     path = get_cache_path(act_type, req_type, obj_name)
 
     if os.path.isfile(path):
@@ -271,4 +282,15 @@ def cache_objects():
                 size += os.stat(path).st_size / (1024.0 ** 2)
 
         log.debug("..total json size: %.2f Mb", size)
+
+
+def get_commit_log(*args):
+    """
+    Return commit log stored in SQL.
+    """
+    return [   (cid, time.strftime("%Y-%m-%d\n%H:%M:%S"), author, message)
+        for cid, time, author, message in  do("""
+            SELECT id, time, author, message from commits_log ORDER BY time DESC 
+        """)
+    ]
 

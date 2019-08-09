@@ -34,11 +34,14 @@ td.tstp-date-cell {
     font-family: monospace;
     font-size: 12px;
 }
-
 td.tstp-description-cell {
 	font-weight: normal;
 	font-family: Arial;
   word-wrap: break-word;
+}
+td.tstp-gitid-cell {
+    font-family: monospace;
+    word-break: break-all;
 }
 
 

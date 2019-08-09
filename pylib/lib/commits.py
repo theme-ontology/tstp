@@ -111,8 +111,11 @@ def list_commits(basepath):
         if line.startswith("Date: "):
             date = line[5:].strip()
         if not line.strip() and commit:
-            entries.append((commit, author, parse(date, ignoretz=True)))
+            entries.append([commit, author, parse(date, ignoretz=True), ""])
             commit, author, date = None, None, None
+
+        if not commit and line.startswith("    ") and entries:
+            entries[-1][-1] += line[4:] + "\n"
 
     entries.sort(key=lambda x: x[-1])
     return entries
@@ -165,7 +168,7 @@ def dbstore_commit_data(recreate=False, quieter=False):
     """
     Store data for the last commit each date.
     """
-    dbdefine.create_tables(subset={"commits_stats"}, recreate=recreate)
+    dbdefine.create_tables(subset={"commits_stats", "commits_log"}, recreate=recreate)
     donerevs = set(x[0] for x in db.do("""SELECT id FROM commits_stats"""))
 
     basepath = GIT_THEMING_PATH_HIST
@@ -174,14 +177,17 @@ def dbstore_commit_data(recreate=False, quieter=False):
     entries = list_commits(basepath)
     bydate = defaultdict(list)
     latestcommits = set()
+    logrows = [ (commit, date, author, msg) for commit, author, date, msg in entries ]
 
-    for commit, _, date in entries:
+    db.do("""INSERT INTO commits_log VALUES(%s, %s, %s, %s)""", values=logrows)
+
+    for commit, _, date, _ in entries:
         bydate[date.date()].append((date, commit))
     for datelist in bydate.values():
         date, commit = max(datelist)
         latestcommits.add(commit)
 
-    for idx, (commit, author, date) in enumerate(entries):
+    for idx, (commit, author, date, _) in enumerate(entries):
         if commit in donerevs:
             if not quieter:
                 print("EXISTS:", (commit, author, date), "...SKIPPING")

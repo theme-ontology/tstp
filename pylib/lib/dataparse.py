@@ -215,7 +215,7 @@ def parse(file, subjects=None, default_parser=None):
 
     # subjects begin with "::", content may be parsed in different ways
     for lines in sections:
-        identifier = lines[0]
+        identifier = lines[0] if lines else None
         subject = None
         lineacc = []
 
