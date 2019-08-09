@@ -17,7 +17,7 @@
             <TABLE class="table table-striped">
                 <tbody>
                     <tr>
-                        <td><A href = "/tstp/webui/gitlog">Project History</A></td>
+                        <td><A href = "/gitlog">Project History</A></td>
                         <td>
                             A history of the project in two pictures and a table.
                         </td>
