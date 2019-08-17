@@ -37,6 +37,8 @@
             echo "<h1>webtask.cache_queries</h1><pre>" . htmlentities($out) . "</pre>\n";
             $out = tstp_pyrun('webtask.maintenance 2>&1');
             echo "<h1>webtask.maintenance</h1><pre>" . htmlentities($out) . "</pre>\n";
+            $out = tstp_pyrun('webtask.test_integrity 2>&1');
+            echo "<h1>webtask.test_integrity</h1><pre>" . htmlentities($out) . "</pre>\n";
         }
         echo "<p>Task " . $action . " completed.</p>";
     }
