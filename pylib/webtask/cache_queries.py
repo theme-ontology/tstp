@@ -5,8 +5,8 @@ import sys
 
 def main():
     if sys.argv[-1] == "build-heavy":
-        log.debug("START build_heavey_visualizations")
-        webquerylib.build_heavey_visualizations()
+        log.debug("START build_heavy_visualizations")
+        webquerylib.build_heavy_visualizations()
         return
 
     log.debug("START cache_special_queries")

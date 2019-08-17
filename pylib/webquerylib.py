@@ -82,7 +82,7 @@ def cache_visualizations():
     write_to_path(base)
 
 
-def build_heavey_visualizations():
+def build_heavy_visualizations():
     """
     Create static images for defined visualizations.
     These take a long time and are unsuitable for a blocking web request.
