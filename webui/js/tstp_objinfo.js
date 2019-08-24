@@ -52,6 +52,8 @@ function formatBlobForHTML(txt)
     {
         var pp = escapeHtml(paragraphs[ii]);
 
+        if (pp.startsWith("Aliases:"))
+            pp = "<b>Aliases:</b><BR>" + pp.slice(8);
         if (pp.startsWith("Notes:"))
             pp = "<b>Notes:</b><BR>" + pp.slice(6);
         if (pp.startsWith("Examples:"))

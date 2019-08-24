@@ -179,7 +179,7 @@ def dbstore_commit_data(recreate=False, quieter=False):
     latestcommits = set()
     logrows = [ (commit, date, author, msg) for commit, author, date, msg in entries ]
 
-    db.do("""INSERT INTO commits_log VALUES(%s, %s, %s, %s)""", values=logrows)
+    db.do("""REPLACE INTO commits_log VALUES(%s, %s, %s, %s)""", values=logrows)
 
     for commit, _, date, _ in entries:
         bydate[date.date()].append((date, commit))

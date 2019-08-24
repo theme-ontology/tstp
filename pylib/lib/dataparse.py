@@ -285,6 +285,11 @@ def read_themes_from_txt(filename, verbose = True):
         "examples": "examples",
         "notes": "notes",
         "references": "references",
+        "aliases": "aliases",
+    }
+    unused_fieldnames = {
+        "related themes",
+        "other parents",
     }
 
     for notice in notices:
@@ -307,12 +312,14 @@ def read_themes_from_txt(filename, verbose = True):
             setattr(themeobj, attr, data[0])
         else:
             if verbose:
-                lib.log.warn("%s: %s.%s - don't grok", filename, theme, field)
+                if lfield not in composite_fields and lfield not in unused_fieldnames:
+                    lib.log.warn("""%s: "%s": unrecognized field name "%s" """, filename, theme, field)
 
     for key in sorted(out_themes):
         themeobj = out_themes[key]
         description = getattr(themeobj, "description")
         examples = out_composites[key]["examples"].strip()
+        aliases = out_composites[key]["aliases"].strip()
         notes = out_composites[key]["notes"].strip()
         references = out_composites[key]["references"].strip()
 
@@ -320,6 +327,8 @@ def read_themes_from_txt(filename, verbose = True):
             description += "\n\nNotes:\n" + notes
         if examples:
             description += "\n\nExamples:\n" + examples
+        if aliases:
+            description += "\n\nAliases:\n" + aliases
         if references:
             description += "\n\nReferences:\n"
             for line in references.split("\n"):
