@@ -1,3 +1,5 @@
+<?php include 'favicon.html'; ?>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" type="text/css" href="DataTables/datatables.min.css"/>
@@ -8,7 +10,6 @@
 <script type="text/javascript" src="DataTables/jQuery-2.2.3/jquery-2.2.3.min.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="DataTables/datatables.js"></script>
-
 <script type="text/javascript" src="js/typeahead.bundle.js"></script>
 <script type="text/javascript" src="js/jquery.form.js"></script>
 
