@@ -5,7 +5,7 @@
 ?>
 <head>
 	<meta charset="UTF-8">
-	<title>TSTP <?php echo $SID; ?></title>
+	<title>Theme Ontology <?php echo $SID; ?></title>
 
 <?php include "header.php"; ?>
 

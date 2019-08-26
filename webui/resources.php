@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>TSTP</title>
+<title>Theme Ontology resources</title>
 <?php include "header.php"; ?>
 </head>
 
