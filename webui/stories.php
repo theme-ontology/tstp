@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>TSTP stories</title>
+	<title>Theme Ontology stories</title>
 
 <?php include "header.php"; ?>
 
