@@ -48,7 +48,8 @@
 						    "render": function ( data, type, row ) {
                                 if (!IN_COLLECTION) {
                                     if (data.startsWith("collection:") || data.startsWith("Collection:")) {
-                                        var csid = data;
+                                        // because datatables is even more retarded than javascript
+                                        var csid = data.toString().replace("\'", '&&&datatables-is-retarded-quote&&&');
                                         return "<A style='cursor:pointer;' onclick='loadCollectionData(\"" + csid + "\")'>" + data + "</A>";
                                     }
                                 }
@@ -84,7 +85,7 @@
 
         function loadCollectionData(sid) {
             var table = $('#stories_datatable').DataTable();
-            var urldata = encodeURIComponent(sid);
+            var urldata = encodeURIComponent(sid.replace("&&&datatables-is-retarded-quote&&&", "'"));
             var url = BASE_URL + "&collectionfilter=" + urldata;
             clearSearchNoReload();
             table.clear().draw();
