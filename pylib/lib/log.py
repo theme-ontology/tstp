@@ -52,7 +52,7 @@ def set_logmode(mode = "utf-8"):
         sys.stdout = bin_stdout
         sys.stderr = bin_stderr
     else:
-        raise RuntimeError, "no such mode: " + mode
+        raise RuntimeError("no such mode: " + mode)
 
     LOGTARGETMODE = mode
     redirect(lt)

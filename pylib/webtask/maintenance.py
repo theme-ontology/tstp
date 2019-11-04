@@ -5,6 +5,7 @@ import glob
 import json
 import urllib2
 import lib.commits
+import re
 
 
 def solr_commit():
@@ -14,6 +15,7 @@ def solr_commit():
         log.debug("pysolr not present, skipping indexing")
         return
 
+    sanitizer = re.compile(ur'[^\x00-\x7F\x80-\xFF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF]')
     patterns = {
         'story': '/tmp/webjson/storydefinitions/*.json',
         'theme': '/tmp/webjson/themedefinitions/*.json',
@@ -27,7 +29,9 @@ def solr_commit():
                 objs = []
             with open(fn) as fh:
                 obj = json.load(fh)
-                blob = '\n\n'.join(obj.itervalues())
+                for kk in obj:
+                    obj[kk] = sanitizer.sub(u' ', obj[kk])
+                blob = '\n\n'.join(sorted(obj.itervalues()))
                 obj['_text_'] = blob
                 objs.append(obj)
         solr.add(objs)
