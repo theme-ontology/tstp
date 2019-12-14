@@ -27,11 +27,33 @@
         function makeThemeLink(data, color = null)
         {
             urldata = encodeURIComponent(data);
+            iframe = ''; 
             if (color)
             {
-                return '<A style="color:' + color + ';" href="theme.php?name=' + urldata + '">' + data + '</A>';
+                return '<A style="color:' + color + ';" href="theme.php?name=' + urldata + '">' 
+                    + data + iframe + '</A>';
             }
-            return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
+            return "<A href=\"theme.php?name=" + urldata + "\">" + data + iframe + "</A>";
+        }
+
+        function makeStoryLink(data, color = null)
+        {
+            urldata = encodeURIComponent(data);
+            href = " href=\"story.php?name=" + urldata + "\"";
+            pwurl = "storystub.php?name=" + urldata;
+            iframe = ' <iframe id="preview' + urldata + 
+                    '" frameborder="0" scrolling="no" class="previewer" src="' + pwurl + '"></iframe>';
+            jstags = " onmouseover='showPreview(\"preview" + urldata + "\")'";
+            jstags += " onmouseout='hidePreview(\"preview" + urldata + "\")'";
+            return "<A " + jstags + href + ">" + data + iframe + "</A>";
+        }
+
+        function showPreview(name) {
+            $("#" + name).show();
+        }
+
+        function hidePreview(name) {
+            $("#" + name).hide();
         }
 
         function loadTablesOnReady() {
@@ -50,7 +72,8 @@
                         {
                             "render": function ( data, type, row ) {
                                 urldata = encodeURIComponent(data);
-                                return "<A href=\"story.php?name=" + urldata + "\">" + data + "</A>";
+                                html = makeStoryLink(data);
+                                return html;
                             },
                             "className": "theme-cell",
                             "targets": 0,
