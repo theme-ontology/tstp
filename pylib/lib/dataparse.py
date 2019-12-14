@@ -515,4 +515,69 @@ def read_storythemes_from_xls_compact(filename):
                 )        
 
 
+def dataframe(source="txt", debug=False):
+    """
+    Return one big pandas dataframe with all story and theme data in DB.
+    Returns:
+
+    """
+    import pandas as pd
+    import os.path
+    import lib.files
+
+    objs = [[], [], []]
+    dfs = []
+
+    if source == "txt":
+        from credentials import GIT_THEMING_PATH
+        basepath = GIT_THEMING_PATH
+        notespath = os.path.join(basepath, "notes")
+        for path in lib.files.walk(notespath, ".*\.(st|th)\.txt$", 0):
+            if debug:
+                print(path)
+            if path.endswith(".th.txt"):
+                ol = list(lib.dataparse.read_themes_from_txt(path, False))
+                objs[0].extend(ol)
+            if path.endswith(".st.txt"):
+                ol1 = lib.dataparse.read_storythemes_from_txt(path, False)
+                ol2 = list(lib.dataparse.read_stories_from_txt(path, False))
+                objs[1].extend(ol1)
+                objs[2].extend(ol2)
+    if source == "db":
+        objs[0].extend(read_themes_from_db())
+        objs[1].extend(read_storythemes_from_db())
+        objs[2].extend(read_stories_from_db())
+
+    for olist in objs:
+        fields = olist[0].fields
+        for obj in olist:
+            if fields != obj.fields:
+                raise RuntimeError("Expected all %s objects to have same field definition" % type(obj))
+        fields = [f for f in fields if not f.startswith("category")]
+        data = [[getattr(obj, f) for f in fields] for obj in olist]
+        dfs.append(pd.DataFrame(columns=fields, data=data))
+
+    dfT, dfST, dfS = dfs
+    dfT.rename(columns={"name": "theme", "description": "theme_def"}, inplace=True)
+    dfST.rename(columns={"name1": "sid", "name2": "theme"}, inplace=True)
+    dfS.rename(columns={"name": "sid", "description": "story_def"}, inplace=True)
+    dfT.set_index("theme", inplace=True)
+    dfST.set_index(["sid", "theme"], inplace=True)
+    dfS.set_index("sid", inplace=True)
+
+    df = dfST.join([dfS, dfT])
+    return df
+
+
+def main():
+    df = dataframe()
+    dff = df.reset_index()  # because fuck pandas
+    dfp = dff[dff["theme"] == "pride"]
+    print(dfp)
+    df.to_excel("unpurge.xls")
+    dfp.to_excel("unpurge_pride.xls")
+
+
+
+
 

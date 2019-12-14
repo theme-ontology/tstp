@@ -24,6 +24,8 @@ FIELDRENAME = {
 FIELDFORMATTERS = {
     "*": lambda lines: " ".join(x.strip() for x in lines),
     "description": lib.dataparse.block_fill,
+    "examples": lib.dataparse.block_fill,
+    "notes": lib.dataparse.block_fill,
     "choice themes": lib.dataparse.themejoin,
     "major themes": lib.dataparse.themejoin,
     "minor themes": lib.dataparse.themejoin,
@@ -32,12 +34,16 @@ FIELDFORMATTERS = {
 
 FIELDORDER = [
     "Title",
-    "Description",
     "Date",
-    "Ratings",
+    "Description",
+    "Parents",
+    "Notes",
+    "Examples",
+    "References",
     "Main Characters",
     "Supporting Cast",
     "Genre",
+    "Ratings",
     "Choice Themes",
     "Major Themes",
     "Minor Themes",
