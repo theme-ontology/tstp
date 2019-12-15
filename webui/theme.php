@@ -39,17 +39,32 @@
         function makeStoryLink(data, color = null)
         {
             urldata = encodeURIComponent(data);
+            pwid = "preview" + data.hashCode();
             href = " href=\"story.php?name=" + urldata + "\"";
             pwurl = "storystub.php?name=" + urldata;
-            iframe = ' <iframe id="preview' + urldata + 
-                    '" frameborder="0" scrolling="no" class="previewer" src="' + pwurl + '"></iframe>';
-            jstags = " onmouseover='showPreview(\"preview" + urldata + "\")'";
-            jstags += " onmouseout='hidePreview(\"preview" + urldata + "\")'";
+            iframe = ' <iframe id="' + pwid + 
+                    '" frameborder="0" scrolling="no" class="previewer" dsrc="' + pwurl + '"></iframe>';
+            jstags = " onmouseover='showPreview(\"" + pwid + "\")'";
+            jstags += " onmouseout='hidePreview(\"" + pwid + "\")'";
             return "<A " + jstags + href + ">" + data + iframe + "</A>";
         }
 
+        function loadPreview(frame) {
+            frame.attr("src", frame.attr("dsrc"));
+            /* // doesn't work because iframe content is loaded async
+            frame.load(resizeIframe);
+            function resizeIframe() {
+                var h = frame.contents().find("body").height();
+                console.log(h);
+                frame.height(h);
+            }
+            */
+        }
+
         function showPreview(name) {
-            $("#" + name).show();
+            var obj = $("#" + name);
+            if (!obj.attr("src")) loadPreview(obj);
+            obj.show();
         }
 
         function hidePreview(name) {
