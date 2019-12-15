@@ -30,7 +30,7 @@
     <script type="text/javascript" src="js/tstp_objinfo.js"></script>
 </head>
 
-<body style="padding: 0px; margin:0px;">
+<body style="padding: 0px; margin:0px; background-color: transparent;">
 <div class="container main-body">
 <?php // Basic information //?>
     <div class="row">

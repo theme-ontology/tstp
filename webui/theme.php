@@ -42,11 +42,11 @@
             pwid = "preview" + data.hashCode();
             href = " href=\"story.php?name=" + urldata + "\"";
             pwurl = "storystub.php?name=" + urldata;
-            iframe = ' <iframe id="' + pwid + 
-                    '" frameborder="0" scrolling="no" class="previewer" dsrc="' + pwurl + '"></iframe>';
+            iframe = ' \n<iframe id="' + pwid + 
+                    '" frameborder="0" allowtransparency="true" scrolling="no" class="previewer" dsrc="' + pwurl + '"></iframe>';
             jstags = " onmouseover='showPreview(\"" + pwid + "\")'";
             jstags += " onmouseout='hidePreview(\"" + pwid + "\")'";
-            return "<A " + jstags + href + ">" + data + iframe + "</A>";
+            return "<div style=\"position:relative;\"><A " + jstags + href + ">" + data + iframe + "</A></div>";
         }
 
         function loadPreview(frame) {
@@ -64,6 +64,7 @@
         function showPreview(name) {
             var obj = $("#" + name);
             if (!obj.attr("src")) loadPreview(obj);
+            obj.hide();
             obj.show();
         }
 
