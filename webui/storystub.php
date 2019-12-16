@@ -35,9 +35,8 @@
 <?php // Basic information //?>
     <div class="row">
         <div id="div_maininfo" class="basebox">
-
             <div class="col-md-12">
-                <div class="panel panel-default">
+                <div class="panel panel-default" style="box-shadow: 0 0 10px;">
                     <div class="panel-heading">
                         <div style="float:right;"><H4><span class="label label-story">story</span></H4></div>
                         <H4><?php echo $SID; ?></H4>

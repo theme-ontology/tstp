@@ -74,8 +74,9 @@
 			        "columnDefs" : [
 			        	{
 						    "render": function ( data, type, row ) {
-						    	urldata = encodeURIComponent(data);
-						        return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
+						    	//urldata = encodeURIComponent(data);
+						        //return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
+                                return makeThemeLink(data);
 						    },
 			        		"className": "theme-cell",
 						    "targets": 0,

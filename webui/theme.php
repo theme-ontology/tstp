@@ -24,54 +24,6 @@
             loadTablesOnReady();
         });
 
-        function makeThemeLink(data, color = null)
-        {
-            urldata = encodeURIComponent(data);
-            iframe = ''; 
-            if (color)
-            {
-                return '<A style="color:' + color + ';" href="theme.php?name=' + urldata + '">' 
-                    + data + iframe + '</A>';
-            }
-            return "<A href=\"theme.php?name=" + urldata + "\">" + data + iframe + "</A>";
-        }
-
-        function makeStoryLink(data, color = null)
-        {
-            urldata = encodeURIComponent(data);
-            pwid = "preview" + data.hashCode();
-            href = " href=\"story.php?name=" + urldata + "\"";
-            pwurl = "storystub.php?name=" + urldata;
-            iframe = ' \n<iframe id="' + pwid + 
-                    '" frameborder="0" allowtransparency="true" scrolling="no" class="previewer" dsrc="' + pwurl + '"></iframe>';
-            jstags = " onmouseover='showPreview(\"" + pwid + "\")'";
-            jstags += " onmouseout='hidePreview(\"" + pwid + "\")'";
-            return "<div style=\"position:relative;\"><A " + jstags + href + ">" + data + iframe + "</A></div>";
-        }
-
-        function loadPreview(frame) {
-            frame.attr("src", frame.attr("dsrc"));
-            /* // doesn't work because iframe content is loaded async
-            frame.load(resizeIframe);
-            function resizeIframe() {
-                var h = frame.contents().find("body").height();
-                console.log(h);
-                frame.height(h);
-            }
-            */
-        }
-
-        function showPreview(name) {
-            var obj = $("#" + name);
-            if (!obj.attr("src")) loadPreview(obj);
-            obj.hide();
-            obj.show();
-        }
-
-        function hidePreview(name) {
-            $("#" + name).hide();
-        }
-
         function loadTablesOnReady() {
             $(document).ready(function() {
                 $('#stories_datatable').DataTable( {

@@ -190,3 +190,56 @@ function receivedStoryInfoData(result)
     }
 
 }
+
+
+function loadPreview(frame) {
+    frame.attr("src", frame.attr("dsrc"));
+}
+
+
+function showPreview(name) {
+    var obj = $("#" + name);
+    if (!obj.attr("src")) loadPreview(obj);
+    obj.hide();
+    obj.show();
+}
+
+
+function hidePreview(name) {
+    $("#" + name).hide();
+}
+
+
+function makeThemeLink(data, color = null)
+{
+    urldata = encodeURIComponent(data);
+    pwid = "preview" + data.hashCode();
+    href = " href=\"theme.php?name=" + urldata + "\"";
+    pwurl = "themestub.php?name=" + urldata;
+    iframe = ' \n<iframe id="' + pwid + 
+            '" frameborder="0" allowtransparency="true" scrolling="no" class="previewer" dsrc="' + pwurl + '"></iframe>';
+    jstags = " onmouseover='showPreview(\"" + pwid + "\")'";
+    jstags += " onmouseout='hidePreview(\"" + pwid + "\")'";
+    if (color)
+    {
+        return '<A style="color:' + color + ';"' + href + '>' 
+            + data + iframe + '</A>';
+    }
+    return "<div style=\"position:relative;\"><A " 
+        + jstags + href + ">" + data + iframe + "</A></div>";
+}
+
+function makeStoryLink(data, color = null)
+{
+    urldata = encodeURIComponent(data);
+    pwid = "preview" + data.hashCode();
+    href = " href=\"story.php?name=" + urldata + "\"";
+    pwurl = "storystub.php?name=" + urldata;
+    iframe = ' \n<iframe id="' + pwid + 
+            '" frameborder="0" allowtransparency="true" scrolling="no" class="previewer" dsrc="' + pwurl + '"></iframe>';
+    jstags = " onmouseover='showPreview(\"" + pwid + "\")'";
+    jstags += " onmouseout='hidePreview(\"" + pwid + "\")'";
+    return "<div style=\"position:relative;\"><A " 
+        + jstags + href + ">" + data + iframe + "</A></div>";
+}
+
