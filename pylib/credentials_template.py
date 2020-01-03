@@ -29,4 +29,6 @@ GIT_THEMING_PATH_HIST = "c:\\repos\\theming-hist"
 #: public directory
 PUBLIC_DIR = "f:\\www\\pub"
 
+#: Apache Solr server URL base, must end with /
+SOLR_URL = "http://localhost:8983/solr/"
 

@@ -6,9 +6,11 @@ import json
 import urllib2
 import lib.commits
 import re
+import credentials
 
 
 def solr_commit():
+    url = credentials.SOLR_URL
     try:
         import pysolr
     except ImportError:
@@ -21,7 +23,7 @@ def solr_commit():
         'theme': '/tmp/webjson/themedefinitions/*.json',
     }
     for key, pattern in patterns.iteritems():
-        solr = pysolr.Solr('http://localhost:8983/solr/tstp' + key, timeout=10)
+        solr = pysolr.Solr(url + 'tstp' + key, timeout=10)
         objs = []
         for fn in glob.glob(pattern):
             if len(objs) > 100:
@@ -37,9 +39,9 @@ def solr_commit():
         solr.add(objs)
 
     # rebuild dictionaries
-    urllib2.urlopen('http://localhost:8983/solr/tstptheme/suggest?suggest.build=true&suggest.dictionary=completer')
-    urllib2.urlopen('http://localhost:8983/solr/tstptheme/spell?spellcheck.build=true')
-    urllib2.urlopen('http://localhost:8983/solr/tstpstory/spell?spellcheck.build=true')
+    urllib2.urlopen(url + 'tstptheme/suggest?suggest.build=true&suggest.dictionary=completer')
+    urllib2.urlopen(url + 'tstptheme/spell?spellcheck.build=true')
+    urllib2.urlopen(url + 'tstpstory/spell?spellcheck.build=true')
 
 
 def main():
@@ -50,7 +52,7 @@ def main():
 
     if False and os.name != 'nt' and os.path.isdir('/usr/local/solr'):
         log.debug("INDEX using Solr command line")
-        delcmd = "curl http://localhost:8983/solr/tstp/update?commit=true -H \"Content-Type: text/xml\" --data-binary '<delete><query>*:*</query></delete>'"
+        delcmd = "curl %ststp/update?commit=true -H \"Content-Type: text/xml\" --data-binary '<delete><query>*:*</query></delete>'" % credentials.SOLR_URL
         subprocess.call(delcmd, shell=True)
         subprocess.call("/usr/local/solr/bin/post -c tstp /tmp/webjson/storydefinitions/*.json", shell=True)
         subprocess.call("/usr/local/solr/bin/post -c tstp /tmp/webjson/themedefinitions/*.json", shell=True)
