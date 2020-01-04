@@ -4,9 +4,11 @@ import json
 from collections import defaultdict
 import lib.log
 import itertools
+import credentials
 
+#"http://www.themeontology.org:8983/solr/tstp"
+URL_BASE = credentials.SOLR_URL + "tstp"
 
-URL_BASE = "http://www.themeontology.org:8983/solr/tstp"
 DEBUG = False
 FIELD_WEIGHT = {
     'theme': 100.0,
