@@ -35,7 +35,7 @@ def get_data_path(name, *args):
     """
     Get temp path for this data and make sure it exists.
     """
-    path = os.path.join(tempfile.gettempdir(), name, *args)
+    path = os.path.join(credentials.TEMP_PATH, name, *args)
     if not os.path.exists(path):
         os.makedirs(path)
     return path
