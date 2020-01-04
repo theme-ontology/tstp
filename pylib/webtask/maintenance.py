@@ -19,8 +19,8 @@ def solr_commit():
 
     sanitizer = re.compile(ur'[^\x00-\x7F\x80-\xFF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF]')
     patterns = {
-        'story': '/tmp/webjson/storydefinitions/*.json',
-        'theme': '/tmp/webjson/themedefinitions/*.json',
+        'story': os.path.join(credentials.TEMP_PATH, 'webjson/storydefinitions/*.json'),
+        'theme': os.path.join(credentials.TEMP_PATH, 'webjson/themedefinitions/*.json'),
     }
     for key, pattern in patterns.iteritems():
         solr = pysolr.Solr(url + 'tstp' + key, timeout=10)
