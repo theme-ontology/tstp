@@ -7,6 +7,8 @@ import re
 from collections import defaultdict
 import numpy as np
 import sys
+import subprocess
+import os.path
 
 lib.log.redirect()
 
@@ -135,6 +137,7 @@ def make_viz():
 
 def make_animation(path):
     method = None
+    gifs = []
     try:
         from svglib.svglib import svg2rlg
         from reportlab.graphics import renderPDF, renderPM
@@ -164,6 +167,12 @@ def make_animation(path):
         return aa
 
     for atdt, datapoint in lib.commits.get_commits_data(period='weekly'):
+        dtstr = atdt.date().isoformat()
+        svgpath = path.format(dtstr)
+        gifpath = path.format(atdt.date().isoformat()) + '.gif'
+        gifs.append(gifpath)
+        if os.path.isfile(gifpath):
+            continue
         prefixes = {}
         zeros = np.zeros(shape=len(xs))
         for key in keys:
@@ -180,23 +189,23 @@ def make_animation(path):
             aa = prefixes.get(key, zeros)
             data[idx] = (sum(aa), key, aa)
 
-        #dd = [(sum(aa), key, aa) for key, aa in prefixes.items()]
-        #dd = [x for x in dd if x[0]]
-        #dd.sort(reverse=True)
         dd = data
-
-        dtstr = atdt.date().isoformat()
         svg, width, height = make_viz_from_data(xs, dd, yrange=yrange, bigtitle=dtstr)
-        svgpath = path.format(dtstr)
         svg.write(svgpath, width, height)
         print("WROTE", svgpath)
 
         if method == "svglib":
-            pngpath = path.format(atdt.date().isoformat()) + '.gif'
             drawing = svg2rlg(svgpath)
-            renderPM.drawToFile(drawing, pngpath, fmt="GIF")
-            print("WROTE", pngpath)
+            renderPM.drawToFile(drawing, gifpath, fmt="GIF")
+            print("WROTE", gifpath)
 
+    if method:
+        # convert -delay 2 -loop 0 tmp/*.gif -delay 1000 tmp/stories_2020-01-03.svg.gif test.gif
+        outpath = path.format("animation") + ".gif"
+        files = " ".join(gifs)
+        cmd = "convert -delay 10 -loop 0 {} -delay 1000 {} {}".format(files, gifs[-1], outpath)
+        print("RUNNING:", cmd)
+        subprocess.call(cmd, shell=True)
 
 def main():
     path = sys.argv[-1] if len(sys.argv) > 2 else 'test.svg'
