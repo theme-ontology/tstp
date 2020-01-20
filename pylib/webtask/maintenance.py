@@ -39,7 +39,8 @@ def solr_commit():
         solr.add(objs)
 
     # rebuild dictionaries
-    urllib2.urlopen(url + 'tstptheme/suggest?suggest.build=true&suggest.dictionary=completer')
+    # suggester was not activated after Jan2020 rebuild
+    #urllib2.urlopen(url + 'tstptheme/suggest?suggest.build=true&suggest.dictionary=completer')
     urllib2.urlopen(url + 'tstptheme/spell?spellcheck.build=true')
     urllib2.urlopen(url + 'tstpstory/spell?spellcheck.build=true')
 
