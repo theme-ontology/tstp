@@ -15,9 +15,17 @@ def triangle_infidelity_1():
     print(dfr)
     dfr.to_excel("temp.xls")
 
-def main():
-    triangle_infidelity_1()
 
+def alien_morals_list():
+    themes = ("alien morals", "alien customs", "conflict of moral codes", "cultural differences")
+    df = lib.dataparse.dataframe().reset_index()
+    dfp = df[df["theme"].isin(themes)]
+    print(dfp)
+    dfp.to_excel("temp.xls")
+
+
+def main():
+    alien_morals_list()
 
 
 
