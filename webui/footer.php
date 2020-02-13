@@ -10,6 +10,7 @@
 			 <A href="upload">workflow</A>
 			 | <A href="util">util</A>
 			 | <A href="log">log</A>
+			 | <A href="m4">m4</A>
 
 <?php if ($_SERVER["SERVER_PORT"] == "8080") { ?>
 			 | <A href="http://www.themeontology.org/">prod</A>

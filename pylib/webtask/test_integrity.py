@@ -15,6 +15,11 @@ class Tests(object):
             if path.endswith(".th.txt"):
                 _ = list(lib.dataparse.read_themes_from_txt(path, True))
 
+    def test_read_stories(self):
+        for path in lib.files.walk(NOTESPATH, r".*\.(st|th)\.txt$", 0):
+            if path.endswith(".st.txt"):
+                _ = list(lib.dataparse.read_stories_from_txt(path, True))
+
     def test_theme_cycles(self):
         import networkx as nx  # may not be present in which case test simply fails
         graph = nx.DiGraph()
@@ -24,7 +29,6 @@ class Tests(object):
                 for theme in objs:
                     for parent in theme.parents.split(","):
                         graph.add_edge(theme, parent.strip())
-
         cycles = list(nx.simple_cycles(graph))
         if cycles:
             for cycle in cycles:
