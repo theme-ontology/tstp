@@ -18,7 +18,7 @@ class Tests(object):
     def test_read_stories(self):
         for path in lib.files.walk(NOTESPATH, r".*\.(st|th)\.txt$", 0):
             if path.endswith(".st.txt"):
-                _ = list(lib.dataparse.read_stories_from_txt(path, True))
+                _ = list(lib.dataparse.read_stories_from_txt(path, verbose=True))
 
     def test_theme_cycles(self):
         import networkx as nx  # may not be present in which case test simply fails

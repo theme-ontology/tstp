@@ -346,7 +346,7 @@ def read_themes_from_txt(filename, verbose = True):
                 lib.log.warn("%s: %s.%s - %s", filename, theme, field, str(e))
 
 
-def read_stories_from_txt(filename, verbose = True, addextras=False):
+def read_stories_from_txt(filename, verbose=True, addextras=False):
     """
     Stories in our special text file format.
     """
@@ -365,6 +365,34 @@ def read_stories_from_txt(filename, verbose = True, addextras=False):
         "references": "references",
         "collections": "collections",
     }
+    recognized_fields = set([
+        "aliens",
+        "altercations",
+        "associations",
+        "authors",
+        "choice themes",
+        "deaths",
+        "errors",
+        "genre",
+        "humorous situations",
+        "injuries",
+        "locations",
+        "main characters",
+        "major themes",
+        "medical complications",
+        "mind complications",
+        "minor themes",
+        "not themes",
+        "notes",
+        "other keywords",
+        "plot devices",
+        "ratings",
+        "settings",
+        "supporting cast",
+        "technobabble",
+        "theatrics",
+        "transports",
+    ] + composite_fields.keys() + field_map.keys())
     global_collections = []
 
     for notice in notices:
@@ -388,12 +416,14 @@ def read_stories_from_txt(filename, verbose = True, addextras=False):
 
         if lfield in composite_fields:
             out_composites[item][lfield] = '\n'.join(data)
-
         if attr and attr in obj.fields:
             setattr(obj, attr, data[0])
         elif addextras:
             exattr = lfield.replace(" ", "")
             setattr(obj, exattr, data)
+        elif lfield in recognized_fields:
+            # recognized so don't warn even if we're not adding them
+            pass
         else:
             if verbose:
                 lib.log.warn("%s: %s.%s - don't grok", filename, item, field)
