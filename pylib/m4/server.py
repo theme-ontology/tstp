@@ -149,7 +149,7 @@ def runtask(name):
         LOGS[name] = outpath
         fhlog = open(outpath, "a+")
         fhlog.seek(0, os.SEEK_END)
-        p = subprocess.Popen(cmd, stdout=fhlog, stderr=fhlog, shell=True)
+        p = subprocess.Popen(" ".join(cmd), stdout=fhlog, stderr=fhlog, shell=True)
         phandles[name] = (p, fhlog)
         taskcount[name] += 1
         msg = "[%s] started task, logging in %s" % (name, outpath)
