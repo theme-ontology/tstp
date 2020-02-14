@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Theme Ontology M-4 Ontologionic Assistant</title>
+<title>Theme Ontology M-4 Themeontolonic Assistant</title>
 <?php include "header.php"; ?>
 </head>
 
@@ -19,7 +19,7 @@
     <div class="row">
         <div id="div_m4status" class="col-md-12 hpad0">
             <div class="basebox">
-                <H4>The M-4 Ontologionic Assistant</H4>
+                <H4>The M-4 Themeontolonic Assistant</H4>
 
 <?php
 foreach ($m4status->subtasks as &$task)
