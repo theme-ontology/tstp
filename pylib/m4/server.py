@@ -19,7 +19,6 @@ app = Flask(__name__)
 phandles = {}
 TASKLIST = {
     "validate": "validate-git-repository-notes",
-    "dummytask": "placeholder-task-for-testing",
 }
 taskcount = defaultdict(int)
 LOGPATH = os.path.join(credentials.PUBLIC_DIR, "m4", "logs", "m4.log")
@@ -50,7 +49,6 @@ class TaskTimer(threading.Thread):
             self.reset()
             while time.time() < self.nextalarm:
                 time.sleep(1.0)
-                #print(time.time() - self.nextalarm)
             if self.active:
                 self.func()
             if not self.repeating:
@@ -82,11 +80,11 @@ def getlogpath(name, newversion=True):
         return os.path.join(credentials.PUBLIC_DIR, "m4", "logs", "%s-%s.%03d.log" % (
             today, name, version))
     today = date.today().isoformat().replace("-", "")
-    for version in range(0, 100):
+    for version in range(0, 1000):
         outpath = mkpath(today, name, version)
         if not os.path.isfile(outpath):
             break
-    if newversion and version < 100:
+    if newversion and version < 1000:
         return outpath
     else:
         return mkpath(today, name, version-1)
@@ -199,7 +197,7 @@ def ping():
 
 @app.route("/task/validate")
 def validate():
-    scheduletask("validate", 6.0)
+    scheduletask("validate", 15.0)
     return "[OK]"
 
 
@@ -225,8 +223,8 @@ def status():
 
 def main():
     timed_tasks = [
-        #TaskTimer(validate, 3600 * 8, repeating=True)
-        TaskTimer(checktasks, 5.0, repeating=True)
+        TaskTimer(validate, 3600 * 8, repeating=True),
+        TaskTimer(checktasks, 1.0, repeating=True),
     ]
     app.run(host="127.0.0.1", port="31985")
     for task in timed_tasks:

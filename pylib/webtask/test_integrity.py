@@ -4,6 +4,7 @@ import os
 import lib.files
 import traceback
 import lib.dataparse
+from collections import defaultdict
 
 
 NOTESPATH = os.path.join(GIT_THEMING_PATH, "notes")
@@ -11,14 +12,34 @@ NOTESPATH = os.path.join(GIT_THEMING_PATH, "notes")
 
 class Tests(object):
     def test_read_themes(self):
+        lu = defaultdict(list)
         for path in lib.files.walk(NOTESPATH, r".*\.(st|th)\.txt$", 0):
             if path.endswith(".th.txt"):
-                _ = list(lib.dataparse.read_themes_from_txt(path, True))
+                for th in lib.dataparse.read_themes_from_txt(path, verbose=True):
+                    lu[th.name].append(path)
+        for name in lu:
+            if len(lu[name]) > 1:
+                log.debug("multiple theme definitions for '%s' in: %s" % (name, lu[name]))
 
     def test_read_stories(self):
+        lu = defaultdict(list)
         for path in lib.files.walk(NOTESPATH, r".*\.(st|th)\.txt$", 0):
             if path.endswith(".st.txt"):
-                _ = list(lib.dataparse.read_stories_from_txt(path, verbose=True))
+                for st in lib.dataparse.read_stories_from_txt(path, verbose=True):
+                    lu[st.name].append(path)
+        for name in lu:
+            if len(lu[name]) > 1:
+                log.debug("multiple story definitions for '%s' in: %s" % (name, lu[name]))
+
+    def test_read_storythemes(self):
+        lu = defaultdict(list)
+        for path in lib.files.walk(NOTESPATH, r".*\.(st|th)\.txt$", 0):
+            if path.endswith(".st.txt"):
+                for st in lib.dataparse.read_storythemes_from_txt(path, verbose=True):
+                    lu[(st.name1, st.name2)].append(path)
+        for name in lu:
+            if len(lu[name]) > 1:
+                log.debug("multiple story themes for '%s' in: %s" % (name, lu[name]))
 
     def test_theme_cycles(self):
         import networkx as nx  # may not be present in which case test simply fails
