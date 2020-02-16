@@ -4,15 +4,31 @@
 <meta charset="UTF-8">
 <title>Theme Ontology M-4 Themeontolonic Assistant</title>
 <?php include "header.php"; ?>
+
+<script>
+    function scrollToBottom(name) 
+    {
+        var element = document.getElementById(name);
+        element.scrollTop = element.scrollHeight;
+        console.log("scrolled");
+    }
+</script>
 </head>
 
-<body>
+<body onLoad="scrollToBottom('m4log');">
 <?php include "navbar.php"; ?>
 
 <?php
     $url = "http://127.0.0.1:31985/status";
     $m4status = file_get_contents($url);
     $m4status = json_decode($m4status);
+    if ($m4status == NULL) {
+        $m4status = [
+            "m4log" => "<empty>\n",
+            "status" => "NOT RESPONDING",
+            "subtasks" => [],
+        ];
+    }
 ?>
 
 <div class="container main-body">
@@ -44,6 +60,7 @@ foreach ($m4status->subtasks as &$task)
                     <font><?php echo substr($t, 0, 19); ?></font>:
                     <?php echo $title; ?>, exit code <?php echo $s; ?>.
                     <div style="float:right;">
+                        [<A href="m4notify?name=<?php echo $task->shortname; ?>">ping</A>]
 <?php
     if ($s === "unknown") {
 ?>
@@ -63,8 +80,12 @@ foreach ($m4status->subtasks as &$task)
 ?>
 
                 <BR>
-                <H5>M-4 status is:</H5>
-                <pre><?php echo htmlentities($m4status->m4log); ?></pre>
+                <H5>M-4 status is <?php echo $m4status->status; ?>:</H5>
+                <pre id="m4log"
+                     style="overflow:auto; max-height:200px;" 
+                ><?php 
+                    echo htmlentities($m4status->m4log); 
+                ?></pre>
                 <P><A href="/pub/m4/">browse all m4 information</A></P>
             </div>
 
