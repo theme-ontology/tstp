@@ -35,7 +35,8 @@
     <div class="row">
         <div id="div_m4status" class="col-md-12 hpad0">
             <div class="basebox">
-                <H4>The M-4 Themeontolonic Assistant</H4>
+                <P><IMG src="img/icon-machine.svg" height="100px"></P>
+                <H4>Welcome to The M-4 Themeontolonic Assistant</H4>
 
 <?php
 foreach ($m4status->subtasks as &$task)
