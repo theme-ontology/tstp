@@ -68,13 +68,13 @@ class Tests(object):
         """
         Report a count of various objects defined.
         """
-        def histogram(dd, refval):
+        def histogram(dd, refwidth=0, refval=0):
             vals = sorted(dd.items(), key=lambda x: -x[1])
-            width = (max(len(k) for k in dd) + 1) / 4 * 4 + 4
+            width = ((refwidth or max(len(k) for k in dd)) + 1) / 4 * 4 + 4
             barfactor = 60.0 / (refval or vals[0][1])
-            patt = "%% %ds %%-6d" % width
+            patt = "%% %ds %%-7d" % width
             for key, val in vals:
-                print(patt % (key, val) + "*" * int(barfactor * (val + 0.5)))
+                log.printfunc(patt % (key, val) + "*" * int(barfactor * (val + 0.5)))
 
         allfields = defaultdict(int)
         allstats = {}
@@ -88,13 +88,14 @@ class Tests(object):
                         fields[attr] += 1
                         allfields[attr] += 1
             allstats[path] = (fields,)
+        refwidth = max(len(k) for k in allfields)
         refval = max(v for v in allfields.values())
         for path, (fields,) in allstats.items():
             log.debug("Stats for %s:", path[len(NOTESPATH):])
-            histogram(fields, refval)
+            histogram(fields, refwidth, refval)
 
         log.debug("Stats for ALL THEME files:")
-        histogram(allfields, refval)
+        histogram(allfields, refwidth, refval)
 
         allfields = defaultdict(int)
         allstats = {}
@@ -108,13 +109,14 @@ class Tests(object):
                         fields[attr] += 1
                         allfields[attr] += 1
             allstats[path] = (fields,)
+        refwidth = max(len(k) for k in allfields)
         refval = max(v for v in allfields.values())
         for path, (fields,) in allstats.items():
             log.debug("Stats for %s:", path[len(NOTESPATH):])
-            histogram(fields, refval)
+            histogram(fields, refwidth, refval)
 
         log.debug("Stats for ALL STORY files:")
-        histogram(allfields, refval)
+        histogram(allfields, refwidth, refval)
 
 
 
