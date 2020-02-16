@@ -23,7 +23,7 @@
     $m4status = file_get_contents($url);
     $m4status = json_decode($m4status);
     if ($m4status == NULL) {
-        $m4status = [
+        $m4status = (object) [
             "m4log" => "<empty>\n",
             "status" => "NOT RESPONDING",
             "subtasks" => [],

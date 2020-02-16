@@ -211,9 +211,12 @@ def status():
             res += fh.read()
     return json.dumps({
         "m4log": res,
+        "status": "ALIVE",
         "subtasks": [
             {
                 "name": TASKLIST.get(name, ""),
+                "shortname": name,
+                "pingurl": "m4notify?name=%s" % name,
                 "status": STATUS.get(name, ["n/a", "unknown"]),
                 "logpath": path2url(LOGS.get(name, "")),
             }
