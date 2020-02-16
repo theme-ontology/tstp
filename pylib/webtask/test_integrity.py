@@ -5,6 +5,7 @@ import lib.files
 import traceback
 import lib.dataparse
 from collections import defaultdict
+import sys
 
 
 NOTESPATH = os.path.join(GIT_THEMING_PATH, "notes")
@@ -123,6 +124,9 @@ class Tests(object):
 def main():
     log.debug("START test_integrity")
     tests = Tests()
+    exitcode = 0
+    failedcount = 0
+    successcount = 0
 
     for name in dir(tests):
         if name.startswith("test_"):
@@ -133,9 +137,23 @@ def main():
                 res = meth()
             except:
                 log.debug("ERROR in %s!" % name)
+                exitcode = max(exitcode, 2)
+                res = "test raised exception"
                 traceback.print_exc()
             if res:
                 log.debug("FAIL in %s!" % name)
+                exitcode = max(exitcode, 1)
+                failedcount += 1
                 log.debug(res)
             else:
                 log.debug("SUCCESS")
+                successcount += 1
+
+    log.debug("DONE Running tests. %d Failed, %d Succeeded." % (failedcount, successcount))
+
+    if exitcode != 0:
+        log.error("some tests Failed, setting exit code %d" % exitcode)
+        sys.exit(exitcode)
+
+
+
