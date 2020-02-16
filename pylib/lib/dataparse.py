@@ -421,6 +421,7 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
         elif addextras:
             exattr = lfield.replace(" ", "")
             setattr(obj, exattr, data)
+            obj.extra_fields += (exattr,)
         elif lfield in recognized_fields:
             # recognized so don't warn even if we're not adding them
             pass
