@@ -1,7 +1,7 @@
 <?php
 $name = $_GET["name"];
 $url = NULL;
-if($name == "gitupdate" || $name == "validate") 
+if($name == "gitupdate") 
 {
     $url = "http://127.0.0.1:31985/event/gitchanged";
 }

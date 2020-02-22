@@ -202,7 +202,7 @@ def validate():
     return "[OK]"
 
 
-@app.route("/task/validate")
+@app.route("/task/monitorgit")
 def validate():
     scheduletask("monitorgit", 10.0)
     return "[OK]"
