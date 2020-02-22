@@ -197,19 +197,19 @@ def ping():
 
 
 @app.route("/task/validate")
-def validate():
+def task_validate():
     scheduletask("validate", 10.0)
     return "[OK]"
 
 
 @app.route("/task/monitorgit")
-def validate():
+def task_monitorgit():
     scheduletask("monitorgit", 10.0)
     return "[OK]"
 
 
 @app.route("/event/gitchanged")
-def validate():
+def event_gitchanged():
     scheduletask("validate", 15.0)
     scheduletask("monitorgit", 1800.0)
     return "[OK]"
@@ -240,7 +240,7 @@ def status():
 
 def main():
     timed_tasks = [
-        TaskTimer(validate, 3600 * 8, repeating=True),
+        TaskTimer(task_validate, 3600 * 8, repeating=True),
         TaskTimer(checktasks, 1.0, repeating=True),
     ]
     app.run(host="127.0.0.1", port="31985")
