@@ -19,6 +19,7 @@ app = Flask(__name__)
 phandles = {}
 TASKLIST = {
     "validate": "validate-git-repository-notes",
+    "monitorgit": "monitor-git-repository-notes",
 }
 taskcount = defaultdict(int)
 LOGPATH = os.path.join(credentials.PUBLIC_DIR, "m4", "logs", "m4.log")
@@ -198,6 +199,7 @@ def ping():
 @app.route("/task/validate")
 def validate():
     scheduletask("validate", 15.0)
+    scheduletask("monitorgit", 3600.0)
     return "[OK]"
 
 

@@ -97,12 +97,13 @@ def list_commits(basepath):
     """
     Return a list of all commits ever done in repository.
     """
-    subprocess.check_output('git checkout HEAD'.split()).decode("utf-8")
+    subprocess.check_output('git fetch origin'.split()).decode("utf-8")
+    subprocess.check_output('git reset --hard origin/master'.split()).decode("utf-8")
     gitlog = subprocess.check_output('git log --no-merges --all'.split()).decode("utf-8")
     entries = []
     commit, author, date = None, None, None
 
-    for line in gitlog.split("\n"):
+    for ii, line in enumerate(gitlog.split("\n")):
         if line.startswith("commit ") and not commit:
             commit = line.strip().split()[-1]
             author, date = None, None
@@ -117,7 +118,7 @@ def list_commits(basepath):
         if not commit and line.startswith("    ") and entries:
             entries[-1][-1] += line[4:] + "\n"
 
-    entries.sort(key=lambda x: x[-1])
+    entries.sort(key=lambda x: x[2])
     return entries
 
 
@@ -158,18 +159,21 @@ def get_commits_data(period='weekly'):
         # date must be the last viable date less than atdt
         datapoint = json.loads(sdata)
         nthemes = datapoint["themes"]
-        if (nthemes > 500):
+        if nthemes > 500:
             data.append((atdt, datapoint))
 
     return data
 
 
-def dbstore_commit_data(recreate=False, quieter=False):
+def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
     """
     Store data for the last commit each date.
     """
     dbdefine.create_tables(subset={"commits_stats", "commits_log"}, recreate=recreate)
-    donerevs = set(x[0] for x in db.do("""SELECT id FROM commits_stats"""))
+    commits = list(db.do("""SELECT id, time FROM commits_stats"""))
+    donerevs = set(x[0] for x in commits)
+    if fromdate == "<latest>":
+        fromdate = max(x[1] for x in commits)
 
     basepath = GIT_THEMING_PATH_HIST
     notespath = os.path.join(basepath, "notes")
@@ -188,7 +192,10 @@ def dbstore_commit_data(recreate=False, quieter=False):
         latestcommits.add(commit)
 
     for idx, (commit, author, date, _) in enumerate(entries):
-        if commit in donerevs:
+        if date <= fromdate:
+            if not quieter:
+                print("EARLIER:", (commit, author, date), "...SKIPPING")
+        elif commit in donerevs:
             if not quieter:
                 print("EXISTS:", (commit, author, date), "...SKIPPING")
         elif commit not in latestcommits:

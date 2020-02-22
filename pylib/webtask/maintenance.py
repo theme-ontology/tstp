@@ -46,8 +46,6 @@ def solr_commit():
 
 
 def main():
-    log.debug("START lib.commits.dbstore_commit_data")
-    lib.commits.dbstore_commit_data(recreate=False, quieter=True)
     log.debug("START solr commit")
     solr_commit()
 

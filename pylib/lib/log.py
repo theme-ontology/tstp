@@ -68,7 +68,7 @@ def printfunc(s):
     
 def printmsg(msg, level = 'INFO', args = None):
     dt = datetime.now()
-    tstr = dt.strftime( '%m/%d %H:%M:%S' )
+    tstr = dt.strftime( '%Y-%m-%d %H:%M:%S' )
     
     if args:
         msg = msg % args
