@@ -61,7 +61,7 @@ foreach ($m4status->subtasks as &$task)
                     <font><?php echo substr($t, 0, 19); ?></font>:
                     <?php echo $title; ?>, exit code <?php echo $s; ?>.
                     <div style="float:right;">
-                        [<A href="m4notify?name=<?php echo $task->shortname; ?>">ping</A>]
+                        [<A target="_top" href="m4notify?name=<?php echo $task->shortname; ?>">ping</A>]
 <?php
     if ($s === "unknown") {
 ?>

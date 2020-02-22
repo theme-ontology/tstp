@@ -168,7 +168,7 @@ def scheduletask(name, delay=60.0):
     if name not in SCHEDULER or not SCHEDULER[name].active:
         SCHEDULER[name] = TaskTimer(lambda: runtask(name), delay)
     SCHEDULER[name].reset()
-    lib.log.info("[%s] scheduled task to run in %.2s seconds" % (name, delay))
+    lib.log.info("[%s] scheduled task to run in %s seconds" % (name, delay))
     return "scheduled"
 
 
@@ -198,8 +198,20 @@ def ping():
 
 @app.route("/task/validate")
 def validate():
+    scheduletask("validate", 10.0)
+    return "[OK]"
+
+
+@app.route("/task/validate")
+def validate():
+    scheduletask("monitorgit", 10.0)
+    return "[OK]"
+
+
+@app.route("/event/gitchanged")
+def validate():
     scheduletask("validate", 15.0)
-    scheduletask("monitorgit", 3600.0)
+    scheduletask("monitorgit", 1800.0)
     return "[OK]"
 
 
