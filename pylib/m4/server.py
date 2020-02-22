@@ -213,7 +213,7 @@ def status():
             res += fh.read()
     return json.dumps({
         "m4log": res,
-        "status": "ALIVE",
+        "status": "Functioning Within Normal Parameters",
         "subtasks": [
             {
                 "name": TASKLIST.get(name, ""),
