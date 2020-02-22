@@ -16,7 +16,7 @@ import json
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 app = Flask(__name__)
-phandles = {}
+PROCLIST = {}
 TASKLIST = {
     "validate": "validate-git-repository-notes",
     "monitorgit": "monitor-git-repository-notes",
@@ -24,7 +24,7 @@ TASKLIST = {
 taskcount = defaultdict(int)
 LOGPATH = os.path.join(credentials.PUBLIC_DIR, "m4", "logs", "m4.log")
 SCHEDULER = {}
-STATUS = {}
+LAST_STATUS = {}
 LOGS = {}
 
 
@@ -102,18 +102,18 @@ def checktask(name, terminate=False):
     Returns:
         True if subtask is still running, False otherwise.
     """
-    if name in phandles:
-        p, fh = phandles[name]
+    if name in PROCLIST:
+        p, fh = PROCLIST[name]
         if p.poll() is None:
             return True
         lib.log.info("[%s] previous task ended with code %s" % (
             name, p.returncode))
-        STATUS[name] = [
+        LAST_STATUS[name] = [
             now(),
             p.returncode,
         ]
         fh.close()
-        del phandles[name]
+        del PROCLIST[name]
     return False
 
 
@@ -122,7 +122,7 @@ def checktasks():
     Go through all currently ctive tasks and see if they are done.
     Cleanup and update statuses if so.
     """
-    for name in list(phandles):
+    for name in list(PROCLIST):
         checktask(name)
 
 
@@ -149,7 +149,7 @@ def runtask(name):
         fhlog = open(outpath, "a+")
         fhlog.seek(0, os.SEEK_END)
         p = subprocess.Popen(" ".join(cmd), stdout=fhlog, stderr=fhlog, shell=True)
-        phandles[name] = (p, fhlog)
+        PROCLIST[name] = (p, fhlog)
         taskcount[name] += 1
         msg = "[%s] started task, logging in %s" % (name, outpath)
     lib.log.info(msg)
@@ -231,7 +231,8 @@ def status():
                 "name": TASKLIST.get(name, ""),
                 "shortname": name,
                 "pingurl": "m4notify?name=%s" % name,
-                "status": STATUS.get(name, ["n/a", "unknown"]),
+                "status": LAST_STATUS.get(name, ["n/a", "unknown"]),
+                "running": 1 if name in PROCLIST else 0,
                 "logpath": path2url(LOGS.get(name, "")),
             }
             for name in TASKLIST

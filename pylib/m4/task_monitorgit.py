@@ -4,6 +4,7 @@ import lib.commits
 import db
 import subprocess
 import re
+import credentials
 
 DEBUG = False
 REAL_RAINBOW_DASH = """
@@ -125,12 +126,13 @@ def sendmail(maildef):
         maildef: SES boto3 API.
     """
     import boto3
-    sendermail = "mikael@odinlake.net"
+    sendermail = "M-4 Assistant <noreply@themeontology.org>"
+    targetmail = credentials.EMAIL_ADMIN
     client = boto3.client('ses')
     response = client.send_email(
-        Destination = { "ToAddresses": [sendermail] },
-        Message = maildef,
-        Source = sendermail,
+        Destination={"ToAddresses": targetmail},
+        Message=maildef,
+        Source=sendermail,
     )
     lib.log.debug(response)
 
@@ -219,6 +221,8 @@ def makemail(entries, txtdiff):
 def main():
     lib.log.info("task starting")
     lib.log.LOGTARGET.flush()
+
+    db.do("""DELETE FROM commits_log WHERE time > '2020-02-21 00:00:00'""")
 
     lib.log.debug("START lib.commits.dbstore_commit_data")
     fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]

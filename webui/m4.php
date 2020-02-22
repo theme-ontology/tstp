@@ -43,7 +43,8 @@ foreach ($m4status->subtasks as &$task)
 {
     $s = $task->status[1];
     $t = $task->status[0];
-    if ($s === "unknown") { 
+    $r = $task->running;
+    if ($s === "unknown" || $r > 0) { 
         $alerttype = "warning"; 
         $title = "unknown status"; 
     }
