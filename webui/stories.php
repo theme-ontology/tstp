@@ -145,7 +145,8 @@
 
 <div class="container main-body">
     <div class="row">
-        <div style="padding: 0em 4em;">
+        <DIV style="float:left;"><IMG src="img/icon-book.svg" height="100px"></DIV>
+        <div style="padding: 2em 2em 0em 10em;">
             <form autocomplete="off" onkeypress="return event.keyCode != 13;">
                 <fieldset class="form-group">
                     <label for="fieldFind">Fuzzy Search:</label>
