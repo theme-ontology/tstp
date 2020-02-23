@@ -185,7 +185,7 @@ def makemail(entries, txtdiff):
             <TABLE class="motable">
             <tr>
                 <th>rev</th>
-                <th>time</th>
+                <th>utc</th>
                 <th>author</th>
                 <th>comment</th>
             </tr>
@@ -224,6 +224,8 @@ def makemail(entries, txtdiff):
 def main():
     lib.log.info("task starting")
     lib.log.LOGTARGET.flush()
+
+    #db.do("""DELETE FROM commits_log WHERE time > '2020-02-23 00:00:00'""")
 
     fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]
     sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')

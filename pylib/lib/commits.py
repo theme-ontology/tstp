@@ -99,7 +99,10 @@ def list_commits(basepath):
     """
     subprocess.check_output('git fetch origin'.split()).decode("utf-8")
     subprocess.check_output('git reset --hard origin/master'.split()).decode("utf-8")
-    gitlog = subprocess.check_output('git log --no-merges --all'.split()).decode("utf-8")
+    gitlog = subprocess.check_output(
+        'git log --no-merges --all --date=local'.split(),
+        env=dict(os.environ, TZ="UTC")
+    ).decode("utf-8")
     entries = []
     commit, author, date = None, None, None
 
