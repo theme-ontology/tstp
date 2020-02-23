@@ -42,7 +42,9 @@ class TaskTimer(threading.Thread):
         self.start()
         self.nextalarm = 0
 
-    def reset(self):
+    def reset(self, newdelay=None):
+        if newdelay:
+            self.delay = newdelay
         self.nextalarm = time.time() + self.delay
 
     def run(self):
@@ -167,7 +169,7 @@ def scheduletask(name, delay=60.0):
     """
     if name not in SCHEDULER or not SCHEDULER[name].active:
         SCHEDULER[name] = TaskTimer(lambda: runtask(name), delay)
-    SCHEDULER[name].reset()
+    SCHEDULER[name].reset(delay)
     lib.log.info("[%s] scheduled task to run in %s seconds" % (name, delay))
     return "scheduled"
 
@@ -247,5 +249,5 @@ def main():
     app.run(host="127.0.0.1", port="31985")
     for task in timed_tasks:
         task.stop()
-    for name in list(phandles):
+    for name in list(PROCLIST):
         checktask(name, terminate=True)
