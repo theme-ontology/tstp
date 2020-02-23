@@ -124,7 +124,7 @@
 
 </head>
 
-<body>
+<body style="overflow-y: scroll;">
 <?php include "navbar.php"; ?>
 
 <div class="container main-body">
