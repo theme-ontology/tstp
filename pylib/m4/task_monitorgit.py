@@ -157,7 +157,8 @@ def makemail(entries, txtdiff):
     for entry in entries:
         rev, ctime, author, msg = entry[:4]
         ctime = ctime.strftime('%Y-%m-%d %H:%M:%S')
-        loglines.append("""<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>""" % (rev, ctime, author, msg))
+        arev = """<A href="https://github.com/theme-ontology/theming/commit/%s">%s</A>""" % (rev, rev)
+        loglines.append("""<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>""" % (arev, ctime, author, msg))
 
     pieces = []
     filediffs = ""

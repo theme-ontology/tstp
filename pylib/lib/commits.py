@@ -111,7 +111,11 @@ def list_commits(basepath):
             commit = line.strip().split()[-1]
             author, date = None, None
         if line.startswith("Author: "):
-            author = line.strip().split()[1]
+            try:
+                author = re.match("^Author: ([^<>]+)", line).group(1).strip()
+            except:
+                print("UNEXPECTED Author format: " + line)
+                author = line.strip().split()[1]
         if line.startswith("Date: "):
             date = line[5:].strip()
         if not line.strip() and commit:
@@ -195,7 +199,7 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
         latestcommits.add(commit)
 
     for idx, (commit, author, date, _) in enumerate(entries):
-        if date <= fromdate:
+        if fromdate and date <= fromdate:
             if not quieter:
                 print("EARLIER:", (commit, author, date), "...SKIPPING")
         elif commit in donerevs:
