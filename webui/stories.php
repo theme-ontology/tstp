@@ -149,7 +149,7 @@
         <div style="padding: 2em 2em 0em 10em;">
             <form autocomplete="off" onkeypress="return event.keyCode != 13;">
                 <fieldset class="form-group">
-                    <label for="fieldFind">Fuzzy Search:</label>
+                    <label for="fieldFind">Story Search:</label>
                     <input id="fieldFind" type="text" class="form-control search-story"  autofocus 
                         onchange="scheduleReload()" oninput="scheduleReload()">
                 </fieldset>
