@@ -225,7 +225,7 @@ def main():
     lib.log.info("task starting")
     lib.log.LOGTARGET.flush()
 
-    db.do("""DELETE FROM commits_log WHERE time > '2020-02-23 00:00:00'""")
+    #db.do("""DELETE FROM commits_log WHERE time > '2020-02-23 00:00:00'""")
 
     fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]
     sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
