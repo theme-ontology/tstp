@@ -227,18 +227,18 @@ def main():
 
     fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]
     sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
-    lib.log.debug("last previous commit is %s at %s", fromid, sfromtime)
+    lib.log.debug("last previously known commit is %s at %s", fromid, sfromtime)
     lib.commits.dbstore_commit_data(fromdate=fromtime, recreate=False, quieter=True)
     entries = list(db.do("""
         SELECT id, time, author, message FROM commits_log
         WHERE time > '%s' ORDER BY time ASC""" % sfromtime
     ))
-    toid, totime = entries[-1][:2]
-    stotime = totime.strftime('%Y-%m-%d %H:%M:%S')
-    lib.log.debug("last discovered commit is %s at %s", toid, stotime)
     if not entries:
         lib.log.debug("NO NEW CHANGES! Aborting.")
     else:
+        toid, totime = entries[-1][:2]
+        stotime = totime.strftime('%Y-%m-%d %H:%M:%S')
+        lib.log.debug("last newly discovered commit is %s at %s", toid, stotime)
         diffcmd = 'git diff %s..%s' % (fromid, toid)
         txtdiff = subprocess.check_output(diffcmd.split()).decode("utf-8")
         maildef = makemail(entries, txtdiff)
