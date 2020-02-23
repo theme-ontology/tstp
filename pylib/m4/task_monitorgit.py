@@ -127,14 +127,17 @@ def sendmail(maildef):
     """
     import boto3
     sendermail = "M-4 Assistant <noreply@themeontology.org>"
-    targetmail = credentials.EMAIL_ADMIN
     client = boto3.client('ses')
-    response = client.send_email(
-        Destination={"ToAddresses": targetmail},
-        Message=maildef,
-        Source=sendermail,
-    )
-    lib.log.debug(response)
+    for targetmail in credentials.EMAIL_ADMIN:
+        try:
+            response = client.send_email(
+                Destination={"ToAddresses": [targetmail]},
+                Message=maildef,
+                Source=sendermail,
+            )
+            lib.log.debug(response)
+        except client.exceptions.MessageRejected:
+            lib.log.error("Failed to send email to %s", targetmail)
 
 
 def makemail(entries, txtdiff):
@@ -229,15 +232,13 @@ def main():
         SELECT id, time, author, message FROM commits_log
         WHERE time > '%s' ORDER BY time ASC""" % fromtime
     ))
-
     if not entries:
         lib.log.debug("NO NEW CHANGES! Aborting.")
-        return
-
-    diffcmd = 'git diff %s..%s' % (fromid, entries[-1][0])
-    txtdiff = subprocess.check_output(diffcmd.split()).decode("utf-8")
-    maildef = makemail(entries, txtdiff)
-    sendmail(maildef)
+    else:
+        diffcmd = 'git diff %s..%s' % (fromid, entries[-1][0])
+        txtdiff = subprocess.check_output(diffcmd.split()).decode("utf-8")
+        maildef = makemail(entries, txtdiff)
+        sendmail(maildef)
 
     sys.stdout.flush()
     sys.stderr.flush()

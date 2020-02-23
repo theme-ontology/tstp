@@ -7,6 +7,7 @@ from datetime import datetime
 import timeit
 import sys
 import codecs
+import traceback
 
 bin_stdout = sys.stdout
 bin_stderr = sys.stderr
@@ -97,8 +98,10 @@ def status(msg, *args):
 def info(msg, *args):
     printmsg(msg, 'INFO', args)
 
-def error(msg, *args):
+def error(msg, exc_info=False, *args):
+    exc_info = sys.exc_info()
     printmsg(msg, 'ERROR', args)
+    traceback.print_exception(*exc_info)
 
 def warn(msg, *args):
     printmsg(msg, 'WARN', args)
