@@ -5,6 +5,8 @@ import db
 import subprocess
 import re
 import credentials
+from collections import OrderedDict
+
 
 DEBUG = False
 REAL_RAINBOW_DASH = """
@@ -71,8 +73,8 @@ REAL_RAINBOW_DASH = """
 .highlight .il { color: #5918bb; font-weight: bold } /* Literal.Number.Integer.Long */
 div.highlight {
     margin: 1em 0em;
-    padding: 0em 1em;
-    background: #e8e4e0;
+    padding: 0em .5em;
+    background: #efedeb;
     color: #4d4d4d;
     border: 1px solid #c8c4c0;
     overflow-x: auto;
@@ -116,6 +118,9 @@ table.motable tfoot .links a{
 H4, P {
     font-family: sans-serif;
     margin: .2em 0em;
+}
+pre {
+    font-size: normal;
 }
 """
 
@@ -162,7 +167,7 @@ def makemail(entries, txtdiff):
 
     pieces = []
     filediffs = ""
-    hfmt = HtmlFormatter()
+    hfmt = HtmlFormatter(style="rainbow_dash", noclasses=True)
     for line in txtdiff.split("\n"):
         match = re.match("^diff --git a/(.+?) b/(.+?)$", line)
         if match:
@@ -178,22 +183,20 @@ def makemail(entries, txtdiff):
         }
         %s
         </style>
-        <DIV style="margin: 1em;">
-            <DIV style="margin-bottom: 1em;">
-                <H4><b>Your friendly M-4 Themeontolonic Assistant</b> detected changes in GIT.</H4>
-                <P>Go to <A href="https://themeontology.org/">https://themeontology.org/</A> for more information.</P>
-            </DIV>
-            <TABLE class="motable">
-            <tr>
-                <th>rev</th>
-                <th>utc</th>
-                <th>author</th>
-                <th>comment</th>
-            </tr>
-            %s
-            </TABLE>
-            %s
+        <DIV style="margin-bottom: 1em;">
+            <H4><b>Your friendly M-4 Themeontolonic Assistant</b> detected changes in GIT.</H4>
+            <P>Go to <A href="https://themeontology.org/">https://themeontology.org/</A> for more information.</P>
         </DIV>
+        <TABLE class="motable">
+        <tr>
+            <th>rev</th>
+            <th>utc</th>
+            <th>author</th>
+            <th>comment</th>
+        </tr>
+        %s
+        </TABLE>
+        %s
 """ % (REAL_RAINBOW_DASH, "\n".join(loglines), filediffs)
 
     if DEBUG:
@@ -206,19 +209,15 @@ def makemail(entries, txtdiff):
 
     return {
         "Body": {
-            "Text": {
-                "Charset": "UTF-8",
-                "Data": txtdiff,
-            },
             "Html": {
                 "Charset": "UTF-8",
                 "Data": htmldiff,
             },
         },
-         "Subject": {
-             "Charset": "UTF-8",
-             "Data": "M-4 Yellow Alert! ",
-         },
+        "Subject": {
+            "Charset": "UTF-8",
+            "Data": "M-4 Yellow Alert! ",
+        },
     }
 
 
@@ -226,7 +225,7 @@ def main():
     lib.log.info("task starting")
     lib.log.LOGTARGET.flush()
 
-    #db.do("""DELETE FROM commits_log WHERE time > '2020-02-23 00:00:00'""")
+    db.do("""DELETE FROM commits_log WHERE time > '2020-02-23 00:00:00'""")
 
     fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]
     sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
