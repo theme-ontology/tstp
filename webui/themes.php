@@ -129,8 +129,8 @@
 
 <div class="container main-body">
     <div class="row">
-        <DIV style="float:left;"><IMG src="img/icon-idea.svg" height="100px"></DIV>
-        <div style="padding: 2em 2em 0em 10em;">
+        <DIV style="float:left;"><IMG src="img/icon-idea.svg" height="80em"></DIV>
+        <div style="padding: 0.7em 1em 0em 7em;">
             <form autocomplete="off" onkeypress="return event.keyCode != 13;">
                 <fieldset class="form-group">
                     <label for="fieldFind">Theme Search:</label>
