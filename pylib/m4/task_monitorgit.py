@@ -193,7 +193,7 @@ def profanities(text):
     for line in text.split("\n"):
         line = line.strip().lower()
         if line.startswith("+"):
-            if any(" "+x in line for x in NAUGHTY):
+            if any(x in line for x in NAUGHTY):
                 suspicious.append(line)
     return suspicious
 
