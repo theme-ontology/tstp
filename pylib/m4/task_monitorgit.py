@@ -5,7 +5,7 @@ import db
 import subprocess
 import re
 import credentials
-from collections import OrderedDict
+from datetime import datetime, timedelta
 
 
 DEBUG = False
@@ -159,6 +159,7 @@ NAUGHTY = ['2g1c', '2 girls 1 cup', 'anal', 'anus', 'arse', 'ass', 'asshole', 'a
            'tits', 'titties', 'titty', 'titfuck', 'tittiefucker', 'titties', 'tittyfuck', 'tittywank', 'titwank',
            'threesome', 'three some', 'throating', 'twat', 'twathead', 'twatty', 'twunt', 'viagra', 'vagina',
            'vulva', 'wank', 'wanker', 'wanky', 'whore', 'whoar', 'xxx', 'xx', 'yaoi', 'yury']
+NAUGHTYSTEMS = []
 
 
 def sendmail(maildef):
@@ -189,11 +190,27 @@ def profanities(text):
     Returns:
         A list of those lines that begin with "+" and seem to contain foul language.
     """
+    global NAUGHTYSTEMS
     suspicious = []
+    try:
+        from nltk.stem import PorterStemmer
+        from nltk.tokenize import word_tokenize
+    except ImportError:
+        lib.log.error("Failed to import NLTK, foul language detection disabled")
+        return suspicious
+    ps = PorterStemmer()
+    if not NAUGHTYSTEMS:
+        NAUGHTYSTEMS = set(ps.stem(w) for w in NAUGHTY)
     for line in text.split("\n"):
         line = line.strip().lower()
         if line.startswith("+"):
-            if any(x in line for x in NAUGHTY):
+            line = re.sub("[^\w']", " ", line)
+            try:
+                stems = set(ps.stem(w) for w in word_tokenize(line))
+            except LookupError:
+                lib.log.error("Failed to tokenize with NLTK, foul language detection disabled")
+                return suspicious
+            if stems.intersection(NAUGHTYSTEMS):
                 suspicious.append(line)
     return suspicious
 
@@ -287,7 +304,9 @@ def main():
     lib.log.info("task starting")
     lib.log.LOGTARGET.flush()
 
-    #db.do("""DELETE FROM commits_log WHERE time > '2020-02-28 00:00:00'""")
+    if DEBUG:
+        ts = (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
+        db.do("""DELETE FROM commits_log WHERE time > '%s'""" % ts)
 
     fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]
     sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
@@ -305,7 +324,10 @@ def main():
         lib.log.debug("last newly discovered commit is %s at %s", toid, stotime)
         diffcmd = 'git diff %s..%s' % (fromid, toid)
         txtdiff = subprocess.check_output(diffcmd.split()).decode("utf-8")
-        #txtdiff += """+ and some profane shit\n"""
+        if DEBUG:
+            txtdiff += """+ and some profane shit\n"""
+            txtdiff += """+ you Dick\n"""
+            pass
         maildef = makemail(entries, txtdiff)
         sendmail(maildef)
 
