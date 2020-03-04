@@ -202,11 +202,11 @@ def profanities(text):
     if not NAUGHTYSTEMS:
         NAUGHTYSTEMS = set(ps.stem(w) for w in NAUGHTY)
     for line in text.split("\n"):
-        line = line.strip().lower()
-        if line.startswith("+"):
-            line = re.sub("[^\w']", " ", line)
+        wline = line.strip().lower()
+        if wline.startswith("+"):
+            wline = re.sub("[^\w']", " ", wline)
             try:
-                stems = set(ps.stem(w) for w in word_tokenize(line))
+                stems = set(ps.stem(w) for w in word_tokenize(wline))
             except LookupError:
                 lib.log.error("Failed to tokenize with NLTK, foul language detection disabled")
                 return suspicious
