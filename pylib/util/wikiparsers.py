@@ -157,7 +157,7 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
                     description = info['extract']
 
                 titlestack.append((sid, title, director, author, date))
-                #print("ADD", titlestack[-1])
+                print("ADD", titlestack[-1])
 
             else:
                 descriptionfield = row.find("td", class_ = "description")
@@ -168,7 +168,9 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
                 desclist = get_descriptions(descriptionfield)
                 numstories = min(len(desclist), len(titlestack))
                 for description in desclist:
-                    #print("POP", titlestack[0])
+                    if not titlestack:
+                        break
+                    print("POP", titlestack[0])
                     sid, title, director, author, date = titlestack.popleft()
                     sidcounter[sid] += 1
                     if numstories > 1:
