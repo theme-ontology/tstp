@@ -6,6 +6,7 @@ import webobject
 import lib.xls
 import lib.log
 import textwrap
+from lib.func import memoize
 
 
 def expload_field( field ):
@@ -546,6 +547,7 @@ def read_storythemes_from_xls_compact(filename):
                 )        
 
 
+@memoize
 def dataframe(source="txt", debug=False):
     """
     Return one big pandas dataframe with all story and theme data in DB.
@@ -596,7 +598,8 @@ def dataframe(source="txt", debug=False):
     dfST.set_index(["sid", "theme"], inplace=True)
     dfS.set_index("sid", inplace=True)
 
-    df = dfST.join([dfS, dfT])
+    df = dfST.join(dfS, on="sid", how="left")
+    df = df.join(dfT, on="theme", how="left")
     return df
 
 
