@@ -9,6 +9,7 @@ import sys
 
 
 NOTESPATH = os.path.join(GIT_THEMING_PATH, "notes")
+STATSLEVEL = 1
 
 
 class Tests(object):
@@ -112,9 +113,10 @@ class Tests(object):
             allstats[path] = (fields,)
         refwidth = max(len(k) for k in allfields)
         refval = max(v for v in allfields.values())
-        for path, (fields,) in allstats.items():
-            log.debug("Stats for %s:", path[len(NOTESPATH):])
-            histogram(fields, refwidth, refval)
+        if STATSLEVEL >= 2:
+            for path, (fields,) in allstats.items():
+                log.debug("Stats for %s:", path[len(NOTESPATH):])
+                histogram(fields, refwidth, refval)
 
         log.debug("Stats for ALL STORY files:")
         histogram(allfields, refwidth, refval)
