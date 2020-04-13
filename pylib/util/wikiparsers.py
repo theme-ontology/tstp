@@ -165,7 +165,10 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
                     description = descriptionfield.get_text().strip()
 
             if description and sids:
-                desclist = get_descriptions(descriptionfield)
+                if descriptionfield:
+                    desclist = get_descriptions(descriptionfield)
+                else:
+                    desclist = [description]
                 numstories = min(len(desclist), len(titlestack))
                 for description in desclist:
                     if not titlestack:

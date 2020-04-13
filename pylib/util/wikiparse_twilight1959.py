@@ -9,13 +9,15 @@ def main():
     fn = sys.argv[-1]
 
     urls = [
-        "https://en.wikipedia.org/wiki/List_of_Night_Gallery_episodes",
+        "https://en.wikipedia.org/wiki/List_of_The_Twilight_Zone_(1959_TV_series)_episodes",
     ]
     stories = {}
 
     for idx, url in enumerate(urls):
+        # cols:
+        # titlefield, directorfield, authorfield, datefield
         for story in find_episodes_st1(
-            url, -1, "nightgallery", cols = (1, 2, 3, 4), isterse = True
+            url, 1, "tz1959e", cols = (1, 2, 3, 4), isterse = True, tableclass = "wikiepisodetable",
         ):
             stories[story.name] = story
 
