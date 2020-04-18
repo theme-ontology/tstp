@@ -34,16 +34,31 @@ def themes_with_usage():
     """
     themes = list(lib.dataparse.read_themes_from_db())
     storythemes = list(lib.dataparse.read_storythemes_from_db())
-    result = { t.name : t for t in themes }
-
+    result = {}
     for th in themes:
         th.stories = {}
         result[th.name] = th
-
     for st in storythemes:
         th = result[st.name2]
         th.stories[st.name1] = st
+    return result
 
+
+@memoize
+def stories_with_themes():
+    """
+    Returns { story_name => story_object } where for each story object st,
+    st.stories is { theme_name => storytheme_object }.
+    """
+    stories = list(lib.dataparse.read_stories_from_db())
+    storythemes = list(lib.dataparse.read_storythemes_from_db())
+    result = {}
+    for sobj in stories:
+        sobj.themes = {}
+        result[sobj.name] = sobj
+    for st in storythemes:
+        sobj = result[st.name1]
+        sobj.themes[st.name2] = st
     return result
 
 

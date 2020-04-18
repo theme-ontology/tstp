@@ -20,6 +20,7 @@ PROCLIST = {}
 TASKLIST = {
     "validate": "validate-git-repository-notes",
     "monitorgit": "monitor-git-repository-notes",
+    "challenge": "create-creative-challenge",
 }
 taskcount = defaultdict(int)
 LOGPATH = os.path.join(credentials.PUBLIC_DIR, "m4", "logs", "m4.log")
@@ -66,7 +67,7 @@ def now():
     Returns:
     String representation of current time.
     """
-    return datetime.now().isoformat().replace("T", " ");
+    return datetime.now().isoformat().replace("T", " ")
 
 
 def getlogpath(name, newversion=True):
@@ -79,6 +80,7 @@ def getlogpath(name, newversion=True):
     Returns:
         path to logfile for task.
     """
+    version, outpath = None, None  # shut lint up
     def mkpath(today, name, version):
         return os.path.join(credentials.PUBLIC_DIR, "m4", "logs", "%s-%s.%03d.log" % (
             today, name, version))
@@ -245,9 +247,17 @@ def main():
     timed_tasks = [
         TaskTimer(task_validate, 3600 * 8, repeating=True),
         TaskTimer(checktasks, 1.0, repeating=True),
+        TaskTimer(lambda: scheduletask("challenge", 5.0), 3600 * 8, repeating=True),
     ]
     app.run(host="127.0.0.1", port="31985")
     for task in timed_tasks:
         task.stop()
     for name in list(PROCLIST):
         checktask(name, terminate=True)
+
+
+
+
+
+
+
