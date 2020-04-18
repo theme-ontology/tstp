@@ -33,11 +33,12 @@ class TaskTimer(threading.Thread):
     """
     A simple timer that calls the given function at regular intervals.
     """
-    def __init__(self, func, delay, repeating=False):
+    def __init__(self, func, delay, repeating=False, nowAndRepeat=False):
         super(TaskTimer, self).__init__()
         self.func = func
         self.delay = delay
-        self.repeating = repeating
+        self.repeating = repeating or nowAndRepeat
+        self.nowAndRepeat = nowAndRepeat
         self.active = True
         self.setDaemon(True)
         self.start()
@@ -49,6 +50,9 @@ class TaskTimer(threading.Thread):
         self.nextalarm = time.time() + self.delay
 
     def run(self):
+        time.sleep(1.0)
+        if self.active and self.nowAndRepeat:
+            self.func()
         while self.active:
             self.reset()
             while time.time() < self.nextalarm:
@@ -247,7 +251,7 @@ def main():
     timed_tasks = [
         TaskTimer(task_validate, 3600 * 8, repeating=True),
         TaskTimer(checktasks, 1.0, repeating=True),
-        TaskTimer(lambda: scheduletask("challenge", 5.0), 3600 * 8, repeating=True),
+        TaskTimer(lambda: scheduletask("challenge", 5.0), 3600 * 8, nowAndRepeat=True),
     ]
     app.run(host="127.0.0.1", port="31985")
     for task in timed_tasks:
