@@ -1,6 +1,7 @@
 import os
 import os.path
 import re
+import credentials
 
 
 def safe_filename(unsafe):
@@ -39,3 +40,34 @@ def mkdirs(path):
     """
     if not os.path.isdir(path):
         os.makedirs(path)
+
+
+def preparefile(path):
+    """
+    A ensure that the base path exists by creating it if needed. Then check if file exists.
+
+    Args:
+        path: path fo a file.
+
+    Returns:
+    Return True if the file does not exist, False if it does.
+    """
+    if not path:
+        return False
+    basepath = os.path.split(path)[0]
+    mkdirs(basepath)
+    return not os.path.isfile(path)
+
+
+def path2url(path):
+    """
+    Take a local path and convert it to a url by which the object is
+    accessible, assuming it lies in the public dir.
+    Returns: url
+    """
+    basepath = os.path.join(credentials.PUBLIC_DIR, "m4")
+    if path.startswith(basepath):
+        urlobj = path[len(basepath):].replace("\\", "/").strip("/")
+        return credentials.SERVER_PUB_URL + "m4/" + urlobj
+    return ""
+

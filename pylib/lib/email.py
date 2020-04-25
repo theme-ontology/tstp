@@ -1,5 +1,8 @@
 import lib.log
 import credentials
+import lib.files
+import requests
+import json
 
 
 ST_BASE = """
@@ -140,6 +143,78 @@ def sendmail(maildef):
             lib.log.debug(response)
         except client.exceptions.MessageRejected:
             lib.log.error("Failed to send email to %s", targetmail)
+
+
+def publish(html, mailsubject=None, slackmessage=None, filepath=None):
+    """
+    Publish html data in a variety of ways.
+    Args:
+        html: Html content to publish.
+        mailsubject: If emailing, subject of email.
+        slackmessage: If posting to slack, mrkdwn text message to include.
+        filepath: If saving as a file, path to file. If path is in public dir, a url
+            will be in included in the slack message.
+    Returns: None
+    """
+    url = None
+    if lib.files.preparefile(filepath):
+        with open(filepath, "w+") as fh:
+            fh.write(html)
+    if filepath:
+        url = lib.files.path2url(filepath)
+    if mailsubject:
+        sendmail({
+            "Body": {
+                "Html": {
+                    "Charset": "UTF-8",
+                    "Data": html,
+                },
+            },
+            "Subject": {
+                "Charset": "UTF-8",
+                "Data": mailsubject,
+            },
+        })
+    if slackmessage:
+        data = {
+            "blocks": [{
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": slackmessage,
+                },
+            }],
+        }
+        if url:
+            data["blocks"][-1]["text"]["text"] += " " + url
+        lib.log.info("Posting to slack...")
+        response = requests.post(
+            credentials.SLACK_WEBHOOK_URL,
+            headers={'Content-type': 'application/json'},
+            data=json.dumps(data),
+        )
+        code = response.status_code()
+        if code != 200:
+            lib.log.error("Something went wrong, response code: %s", code)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

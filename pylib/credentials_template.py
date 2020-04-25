@@ -43,4 +43,5 @@ EMAIL_ADMIN = [
 	"example@foo.bar",
 ]
 
-
+#: how to post to slack
+SLACK_WEBHOOK_URL = None

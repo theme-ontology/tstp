@@ -6,6 +6,7 @@ import subprocess
 import re
 from datetime import datetime, timedelta
 import lib.email
+import m4.tasks
 
 
 DEBUG = False
@@ -167,41 +168,30 @@ def makemail(entries, txtdiff):
 
 
 def main():
-    lib.log.info("task starting")
-    lib.log.LOGTARGET.flush()
-
-    if DEBUG:
-        ts = (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
-        db.do("""DELETE FROM commits_log WHERE time > '%s'""" % ts)
-
-    fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]
-    sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
-    lib.log.debug("last previously known commit is %s at %s", fromid, sfromtime)
-    lib.commits.dbstore_commit_data(fromdate=fromtime, recreate=False, quieter=True)
-    entries = list(db.do("""
-        SELECT id, time, author, message FROM commits_log
-        WHERE time > '%s' ORDER BY time ASC""" % sfromtime
-    ))
-    if not entries:
-        lib.log.debug("NO NEW CHANGES! Aborting.")
-    else:
-        toid, totime = entries[-1][:2]
-        stotime = totime.strftime('%Y-%m-%d %H:%M:%S')
-        lib.log.debug("last newly discovered commit is %s at %s", toid, stotime)
-        diffcmd = 'git diff %s..%s' % (fromid, toid)
-        txtdiff = subprocess.check_output(diffcmd.split()).decode("utf-8")
+    with m4.tasks.ctx():
         if DEBUG:
-            txtdiff += """+ and some profane shit\n"""
-            txtdiff += """+ you Dick\n"""
-            pass
-        maildef = makemail(entries, txtdiff)
-        lib.email.sendmail(maildef)
+            ts = (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
+            db.do("""DELETE FROM commits_log WHERE time > '%s'""" % ts)
 
-    sys.stdout.flush()
-    sys.stderr.flush()
-    lib.log.LOGTARGET.flush()
-    lib.log.info("task finished")
-
-
-
-
+        fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]
+        sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
+        lib.log.debug("last previously known commit is %s at %s", fromid, sfromtime)
+        lib.commits.dbstore_commit_data(fromdate=fromtime, recreate=False, quieter=True)
+        entries = list(db.do("""
+            SELECT id, time, author, message FROM commits_log
+            WHERE time > '%s' ORDER BY time ASC""" % sfromtime
+        ))
+        if not entries:
+            lib.log.debug("NO NEW CHANGES! Aborting.")
+        else:
+            toid, totime = entries[-1][:2]
+            stotime = totime.strftime('%Y-%m-%d %H:%M:%S')
+            lib.log.debug("last newly discovered commit is %s at %s", toid, stotime)
+            diffcmd = 'git diff %s..%s' % (fromid, toid)
+            txtdiff = subprocess.check_output(diffcmd.split()).decode("utf-8")
+            if DEBUG:
+                txtdiff += """+ and some profane shit\n"""
+                txtdiff += """+ you Dick\n"""
+                pass
+            maildef = makemail(entries, txtdiff)
+            lib.email.sendmail(maildef)

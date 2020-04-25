@@ -11,6 +11,7 @@ import time
 import sys
 from collections import defaultdict
 import json
+import lib.files
 
 
 log = logging.getLogger('werkzeug')
@@ -180,19 +181,6 @@ def scheduletask(name, delay=60.0):
     return "scheduled"
 
 
-def path2url(path):
-    """
-    Take a local path and convert it to a url by which the object is
-    accessible, assuming it lies in the public dir.
-    Returns: url
-    """
-    basepath = os.path.join(credentials.PUBLIC_DIR, "m4")
-    if path.startswith(basepath):
-        urlobj = path[len(basepath):].replace("\\", "/").strip("/")
-        return credentials.SERVER_PUB_URL + "m4/" + urlobj
-    return ""
-
-
 @app.route("/")
 def root():
     lib.log.info("manual ping from %s", request.remote_addr)
@@ -241,7 +229,7 @@ def status():
                 "pingurl": "m4notify?name=%s" % name,
                 "status": LAST_STATUS.get(name, ["n/a", "unknown"]),
                 "running": 1 if name in PROCLIST else 0,
-                "logpath": path2url(LOGS.get(name, "")),
+                "logpath": lib.files.path2url(LOGS.get(name, "")),
             }
             for name in TASKLIST
         ],

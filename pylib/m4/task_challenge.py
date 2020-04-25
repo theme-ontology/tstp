@@ -1,5 +1,4 @@
 import lib.log
-import sys
 import lib.datastats
 from random import random as rnd
 import random
@@ -9,6 +8,7 @@ import lib.email
 import os
 import os.path
 import datetime
+import m4.tasks
 
 
 DEBUG = False
@@ -147,19 +147,7 @@ def makemail(stlist, cutoff=5):
         %s
         </TABLE>
     """ % (lib.email.ST_BASE, themelist1, cutoff+1, themelist2, explainedlist)
-
-    return {
-        "Body": {
-            "Html": {
-                "Charset": "UTF-8",
-                "Data": html,
-            },
-        },
-        "Subject": {
-            "Charset": "UTF-8",
-            "Data": "M-4 Creative Challenge",
-        },
-    }
+    return html
 
 
 def create_challenge():
@@ -180,33 +168,25 @@ def create_challenge():
 
 
 def main():
-    lib.log.info("task starting")
-    lib.log.LOGTARGET.flush()
-
-    td = datetime.date.today()
-    if td.weekday() == 5 or DEBUG:  # only run on Saturdays
-        lib.log.info("It Is Saturday! Creating Challenge...")
-        tds = td.isoformat()
-        basepath = os.path.join(credentials.PUBLIC_DIR, "m4", "challenge")
-        path = os.path.join(basepath, tds + ".html")
-        if not os.path.exists(path) or DEBUG:
-            maildef = create_challenge()
-            lib.log.info("Sending challenge...")
-            lib.email.sendmail(maildef)
-            lib.log.info("Saving challenge...")
-            if not os.path.exists(basepath):
-                os.makedirs(basepath)
-            with open(path, "w+") as fh:
-                fh.write(maildef["Body"]["Html"]["Data"])
+    with m4.tasks.ctx():
+        td = datetime.date.today()
+        if td.weekday() == 5 or DEBUG:  # only run on Saturdays
+            lib.log.info("It Is Saturday! Creating Challenge...")
+            tds = td.isoformat()
+            basepath = os.path.join(credentials.PUBLIC_DIR, "m4", "challenge")
+            path = os.path.join(basepath, tds + ".html")
+            if not os.path.exists(path) or DEBUG:
+                html = create_challenge()
+                lib.email.publish(html,
+                    mailsubject="M-4 Creative Challenge",
+                    filepath=path,
+                    slackmessage="A new challenge has been published:",
+                )
+            else:
+                lib.log.info("Challenge for today already created.")
         else:
-            lib.log.info("Challenge for today already created.")
-    else:
-        lib.log.info("It is not Saturday :(")
+            lib.log.info("It is not Saturday :(")
 
-    sys.stdout.flush()
-    sys.stderr.flush()
-    lib.log.LOGTARGET.flush()
-    lib.log.info("task finished")
 
 
 
