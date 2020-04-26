@@ -180,7 +180,7 @@ def main():
                 lib.email.publish(html,
                     mailsubject="M-4 Creative Challenge",
                     filepath=path,
-                    slackmessage="A new challenge has been published:",
+                    slackmessage="Beep beep, I have a new challenge for you here:",
                 )
             else:
                 lib.log.info("Challenge for today already created.")
