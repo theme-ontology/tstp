@@ -29,7 +29,7 @@ def xls_sheet_to_memory(filename, sheets = 'ALL'):
     return outdict
 
 
-def read_xls(filename, headers = None, sheetname = ".*"):
+def read_xls(filename, headers=None, sheetname=".*"):
     """
     Return cells in rows with given headers for all sheets in file.
     """
@@ -52,19 +52,16 @@ def read_xls(filename, headers = None, sheetname = ".*"):
                     if headers is None:
                         headers = row
                         results.append(row)
-
                     idxs = []
-
                     for header in headers:
                         try:
                             idxs.append(row.index(header))
                         except ValueError:
                             raise IOError("Missing header: '%s' in %s" % (header, str(row)))
-                            
                     continue
                 
                 rowcount += 1
-                results.append([ row[i] for i in idxs ])
+                results.append([row[i] for i in idxs])
     
     return results, sheetcount, rowcount
 
