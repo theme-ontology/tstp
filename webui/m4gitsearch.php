@@ -97,7 +97,7 @@
 <div class="container main-body">
     <div class="row">
         <div class="basebox">
-            <P><IMG src="img/icon-machine.svg" height="100px"></P>
+            <P><IMG src="img/icon-machine-tool.svg" height="100px"></P>
             <H4>M-4 Robotic Extension</H4>
         </div>
         <div class="basebox">
