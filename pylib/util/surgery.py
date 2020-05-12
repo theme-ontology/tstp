@@ -44,12 +44,42 @@ def makejoined(dfs):
     return dfacc
 
 
+def parse_themes(args):
+    """
+    Args:
+        args: sys.argv, or segment thereof
+
+    Returns:
+        list of themes
+    """
+    themeobjs = list(lib.dataparse.read_themes_from_db())
+    themes = []
+    flag = ""
+
+    for arg in args:
+        if arg.startswith("-"):
+            flag = arg
+        else:
+            if flag == "-co":
+                print("children of of '%s':" % arg)
+                for obj in themeobjs:
+                    if arg in obj.list_parents():
+                        themes.append(obj.name)
+                        print("  + %s" % obj.name)
+            else:
+                themes.append(arg)
+                print("+ %s" % arg)
+            flag = ""
+
+    return sorted(set(themes))
+
+
 def main():
     args = sys.argv[sys.argv.index("util.surgery")+1:]
     if len(args) <= 1:
         raise ValueError("not enough arguments")
     filename = args[-1]
-    themes = args[:-1]
+    themes = parse_themes(args[:-1])
     dfs = [makelist(tl) for k, tl in groupby(themes, lambda x: x == "--") if not k]
     df = makejoined(dfs)
     print(df)

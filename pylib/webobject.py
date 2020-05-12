@@ -571,6 +571,15 @@ class Theme(TSTPObject):
         "parents",
     )
 
+    def list_parents(self):
+        """
+        Parse the "parents" field
+        Returns:
+        List of parent theme names.
+        """
+        parents = [t.strip() for t in self.parents.split(",")]
+        return parents
+
 
 ##################################################################
 ##

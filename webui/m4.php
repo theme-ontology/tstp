@@ -37,7 +37,13 @@
             <div class="basebox">
                 <P><IMG src="img/icon-machine.svg" height="100px"></P>
                 <H4>Welcome to The M-4 Themeontolonic Assistant</H4>
-
+            </div>
+            <div class="basebox">
+                <H5>M-4 Tools</H5>
+                    <A href="m4gitsearch">git-search</A>
+            </div>
+            <div class="basebox">
+                <H5>M-4 Tasks</H5>
 <?php
 foreach ($m4status->subtasks as &$task)
 {
@@ -80,8 +86,8 @@ foreach ($m4status->subtasks as &$task)
 <?php
 }
 ?>
-
-                <BR>
+            </div>
+            <div class="basebox">
                 <H5>M-4 status is <?php echo $m4status->status; ?>:</H5>
                 <pre id="m4log"
                      style="overflow:auto; max-height:200px;" 

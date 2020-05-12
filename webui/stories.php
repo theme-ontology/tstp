@@ -25,8 +25,6 @@
 			        "pageLength" : 100,
 			        "paging" : true,
                     "lengthMenu": [ 10, 100, 1000, 10000 ],
-                    "order": [],
-
                     "order": [
                         [ 3, "desc" ],
                         [ 2, "asc" ],

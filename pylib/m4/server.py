@@ -12,6 +12,7 @@ import sys
 from collections import defaultdict
 import json
 import lib.files
+from urllib import unquote_plus
 
 
 log = logging.getLogger('werkzeug')
@@ -234,6 +235,19 @@ def status():
             for name in TASKLIST
         ],
     })
+
+
+@app.route("/tool/gitsearch", methods=['POST', 'GET'])
+def event_gitsearch():
+    from util.searchgithistory import find_githistory
+    query = unquote_plus(request.form.get("query"))
+    lib.log.info("find_githistory: %s (starting)", query)
+    data = find_githistory(query)
+    lib.log.info("find_githistory: %s (done)", query)
+    return json.dumps({
+        "data": data,
+    })
+
 
 def main():
     timed_tasks = [
