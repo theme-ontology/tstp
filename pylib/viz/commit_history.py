@@ -6,6 +6,7 @@ import sys
 import lib.files
 from dateutil.parser import parse
 from lib.commits import get_commits_data
+import textwrap
 
 
 lib.log.redirect()
@@ -177,6 +178,8 @@ def draw_story_theme_relation():
         "2019-03-15": "event: The Great Theme Purge",
         "2019-05-15": "series: Night Gallery",
         "2019-07-10": "series: Tales of the Unexpected",
+        "2019-11-05": "series: The Twilight Zone (1985)",
+        "2020-04-12": "series: The Twilight Zone (1959)",
     }
     done = set()
     ants = sorted((parse(k, ignoretz=True), v) for k, v in annotations.items())
@@ -188,6 +191,7 @@ def draw_story_theme_relation():
                     if k not in done:
                         done.add(k)
                         t, v = v.split(": ", 1)
+                        title = "\n".join(textwrap.wrap(v, 12))
                         x0 = round(plot.v2x(p['stories']))
                         x1 = round(plot.v2x(p2['stories']))
                         xx = round(plot.v2x((p['stories'] + p2['stories']) // 2))
@@ -196,9 +200,9 @@ def draw_story_theme_relation():
                             svg['background'].rect(x0, ny1, x1-x0, ny2-ny1, style={"fill": "#dddddd", "fill-opacity": "0.4"})
                             svg['background'].line(x0, ny1, x0, ny2, style={"stroke": "#dddddd", "fill-opacity": "0.8"})
                             svg['background'].line(x1, ny1, x1, ny2, style={"stroke": "#dddddd", "fill-opacity": "0.8"})
-                            svg['annotation'].text(xx, 500, v, cls="manual")
+                            svg['annotation'].text(xx, 500, title, valign=1.0, cls="manual")
                         if t == "event":
-                            svg['annotation'].text(xx, yy-53, v, cls="manual top")
+                            svg['annotation'].text(xx, yy-53, title, cls="manual top")
 
     svg['annotation'].rect(nx1 + 5, ny1 + 5, 120, 40, cls="background", style={"fill":"white", "stroke": "#000000"})
     svg['annotation'].rect(nx1 + 15, ny1 + 15, 8, 8, style={"fill": "#ee8866"})

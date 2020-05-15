@@ -179,6 +179,8 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
     dbdefine.create_tables(subset={"commits_stats", "commits_log"}, recreate=recreate)
     commits = list(db.do("""SELECT id, time FROM commits_stats"""))
     donerevs = set(x[0] for x in commits)
+    if not commits:
+        fromdate = None
     if fromdate == "<latest>":
         fromdate = max(x[1] for x in commits)
 
@@ -231,7 +233,7 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
 
 
 def main():
-    dbstore_commit_data("-x" in sys.argv)
+    dbstore_commit_data(fromdate="<latest>", recreate=("-x" not in sys.argv))
 
 
 

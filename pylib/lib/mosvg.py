@@ -336,7 +336,7 @@ class SVG(object):
             pts.append('%s %s' % (dx, dy))
         self.path(pts, cls=cls, style=style)
 
-    def text(self, x, y, txt, cls=None, style=None, tags=None):
+    def text(self, x, y, txt, cls=None, style=None, tags=None, linespacing=10, valign=1.0):
         """
         Draws text at a coordinate.
 
@@ -348,15 +348,20 @@ class SVG(object):
         :param tags:
         :return:
         """
-        x, y = self._meta.units(x, y)
         cls_str = 'class="%s" ' % cls if cls else ''
         style_str = 'style="%s" ' % self._meta.make_style(style) if style else ''
         tag_str = (' '.join('%s="%s"' % (k, v) for k, v in tags.items()) + ' ') if tags else ''
-        self.elements.append("""
-            <text x="%s" y="%s" %s%s%s>%s</text>
-        """.strip() % (
-            x, y, cls_str, style_str, tag_str, txt
-        ))
+        lines = txt.split("\n")
+        hh = linespacing * len(lines)
+        y -= (hh - linespacing) * valign
+        for line in lines:
+            xx, yy = self._meta.units(x, y)
+            self.elements.append("""
+                <text x="%s" y="%s" %s%s%s>%s</text>
+            """.strip() % (
+                xx, yy, cls_str, style_str, tag_str, line
+            ))
+            y += linespacing
         return self
 
     def xychart(self, x1, y1, x2, y2, xvmin, xvmax, yvmin, yvmax, baseline_reference=None):
