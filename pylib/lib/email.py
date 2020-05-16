@@ -193,7 +193,7 @@ def publish(html, mailsubject=None, slackmessage=None, filepath=None):
             headers={'Content-type': 'application/json'},
             data=json.dumps(data),
         )
-        code = response.status_code()
+        code = response.status_code
         if code != 200:
             lib.log.error("Something went wrong, response code: %s", code)
 

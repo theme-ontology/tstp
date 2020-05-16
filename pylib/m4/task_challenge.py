@@ -11,7 +11,7 @@ import datetime
 import m4.tasks
 
 
-DEBUG = False
+DEBUG = True
 
 
 def rchoice(ramp):
@@ -136,7 +136,7 @@ def makemail(stlist, cutoff=5):
         </DIV>
         <H5>Invent a story that combines the following central themes:</H5>
         <OL>%s</OL>
-        <H5>Include peripheral themes:</H5>
+        <H5>Optionally, include the peripheral themes:</H5>
         <OL start="%s">%s</OL>
         <H5>Relevant Prior Art:</H5>
         <TABLE class="motable">
@@ -158,13 +158,13 @@ def create_challenge():
     themes = lib.datastats.themes_with_usage()
     tobj = picktheme(themes.values())
     stlist = [[None, tobj]]
-    for _ in range(4):
+    for _ in range(2):
         extend_list(stlist)
     for _ in range(3):
         extend_list(stlist, minorleap=True)
     for sobj, tobj in stlist:
         print("%50s: %s" % (sobj.name[:45] if sobj else "", tobj.name))
-    return makemail(stlist, cutoff=5)
+    return makemail(stlist, cutoff=3)
 
 
 def main():
