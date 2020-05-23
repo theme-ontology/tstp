@@ -8,3 +8,6 @@ class TestCache(unittest.TestCase):
         self.assertIsInstance(colls, dict)
 
     
+def main():
+    unittest.main(verbosity=2)
+

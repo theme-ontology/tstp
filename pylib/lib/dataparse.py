@@ -481,46 +481,6 @@ def read_storythemes_from_txt(filename, verbose = True):
                     )
 
 
-def read_themes_from_xls(filename):
-    """
-    Themes in our spreadsheet format.
-    """
-    headers = [
-        "Keyword", 
-        "Implications", 
-        "Definition", 
-    ]
-    stuff, sheetcount, rowcount = lib.xls.read_xls(filename, headers)
-        
-    for keyword, parents, description in sorted(stuff):
-        yield webobject.Theme.create(
-            name = keyword,
-            description = description,
-            parents = parents,
-        )        
-
-
-def read_stories_from_xls(filename):
-    """
-    Stories in our spreadsheet format.
-    """
-    headers = [
-        "StoryID", 
-        "Title", 
-        "ReleaseDate",
-        "Description",
-    ]
-    stuff, sheetcount, rowcount = lib.xls.read_xls(filename, headers)
-        
-    for sid, title, rdate, description in sorted(stuff):
-        yield webobject.Story.create(
-            name = sid,
-            title = title,
-            date = rdate,
-            description = description,
-        )
-
-
 def read_storythemes_from_xls_compact(filename):
     """
     Story-themes in our compact spreadsheet format.

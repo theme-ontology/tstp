@@ -1,7 +1,5 @@
 import unittest
-import sys
 import webquerylib
-import lib.log
 
 
 class TestCache(unittest.TestCase):
@@ -14,3 +12,6 @@ class TestCache(unittest.TestCase):
     def test_cache_object(self):
         webquerylib.cache_objects()
 
+
+def main():
+    unittest.main(verbosity=2)

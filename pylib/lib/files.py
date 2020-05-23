@@ -2,6 +2,7 @@ import os
 import os.path
 import re
 import credentials
+import subprocess
 
 
 def safe_filename(unsafe):
@@ -70,4 +71,36 @@ def path2url(path):
         urlobj = path[len(basepath):].replace("\\", "/").strip("/")
         return credentials.SERVER_PUB_URL + "m4/" + urlobj
     return ""
+
+
+def split(path):
+    """
+    Take a path as string and return its components as a list.
+    Args:
+        path: string
+    Returns: list
+    """
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path:  # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
+
+
+def pyrun(module):
+    pass
+
+
+
+
+
+
 

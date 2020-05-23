@@ -5,6 +5,7 @@ import os
 import lib.dataparse
 import lib.log
 import logging
+import credentials
 
 logging.basicConfig(level = logging.DEBUG)
 lib.log.printfunc = logging.debug
@@ -12,22 +13,17 @@ lib.log.printfunc = logging.debug
 
 class TestCollection(unittest.TestCase):
     def setUp(self):
-        self.voyager_path = os.path.join(os.environ['TSTPPATH'], "resources", "voyager-stories.st.txt")
+        self.voyager_path = os.path.join(credentials.GIT_THEMING_PATH, "notes", "tv-startrek-voyager.st.txt")
 
     def test_voyager(self):
         stories = list(lib.dataparse.read_stories_from_txt(self.voyager_path))
-
-        for story in stories:
-            print "::", story
-            print story.collections
+        lib.log.debug("read %s stories  from %s", len(stories), self.voyager_path)
 
 
 class TestThemes(unittest.TestCase):
-
     def setUp(self):
-        fh = tempfile.NamedTemporaryFile(delete = False)
+        fh = tempfile.NamedTemporaryFile(delete=False)
         self.fn_txt = fh.name
-
         fh.write("""
 identifier1
 ===========
@@ -48,39 +44,17 @@ identifier1
 
     def test_txt(self):
         themes = list(lib.dataparse.read_themes_from_txt(self.fn_txt))
-
-        lib.log.debug("read themes:")
-        for theme in themes:
-            lib.log.debug("  " + str(theme))
-
+        lib.log.debug("read %s themes", len(themes))
         theme = themes[0]
         self.assertEqual(len(themes), 1)
         self.assertFalse(hasattr(theme, "unknown_field"))
-        self.assertEqual(theme.description, "stuff")
-        self.assertEqual(theme.parents, "more stuff")
-
-    def test_xls(self):
-        path = os.path.join(os.environ['TSTPPATH'], "resources", "test_themedefinitions.xls")
-        themes = list(lib.dataparse.read_themes_from_xls(path))
-
-        lib.log.debug("read themes:")
-        for theme in themes:
-            lib.log.debug("  " + str(theme))
-
-        theme = themes[0]
-        self.assertEqual(len(themes), 3)
-        self.assertFalse(hasattr(theme, "unknown_field"))
-        self.assertEqual(theme.description, "stuff")
-        self.assertEqual(theme.parents, "more stuff")
+        self.assertEqual(theme.description.strip(), "stuff")
+        self.assertEqual(theme.parents.strip(), "more stuff")
 
     def test_db(self):
         n = 5
-        themes = list(lib.dataparse.read_themes_from_db(limit = n))[:n]
-
-        lib.log.debug("read themes:")
-        for theme in themes:
-            lib.log.debug("  " + str(theme))
-
+        themes = list(lib.dataparse.read_themes_from_db(limit=n))[:n]
+        lib.log.debug("read %s themes", len(themes))
         theme = themes[0]
         self.assertEqual(len(themes), n)
         self.assertFalse(hasattr(theme, "unknown_field"))
@@ -89,11 +63,9 @@ identifier1
 
 
 class TestStories(unittest.TestCase):
-
     def setUp(self):
-        fh = tempfile.NamedTemporaryFile(delete = False)
+        fh = tempfile.NamedTemporaryFile(delete=False)
         self.fn_txt = fh.name
-
         fh.write("""
 identifier1
 ===========
@@ -117,41 +89,18 @@ somedescription
 
     def test_txt(self):
         stories = list(lib.dataparse.read_stories_from_txt(self.fn_txt))
-        
-        lib.log.debug("read stories:")
-        for story in stories:
-            lib.log.debug("  " + str(story))
-
+        lib.log.debug("read %s stories...", len(stories))
         story = stories[0]
         self.assertEqual(len(stories), 1)
         self.assertFalse(hasattr(stories, "unknown_field"))
-        self.assertEqual(story.title, "sometitle")
-        self.assertEqual(story.description, "somedescription")
-        self.assertEqual(story.date, "1981-04-15")
-
-    def test_xls(self):
-        path = os.path.join(os.environ['TSTPPATH'], "resources", "test_storydefinitions.xls")
-        stories = list(lib.dataparse.read_stories_from_xls(path))
-
-        lib.log.debug("read stories:")
-        for story in stories:
-            lib.log.debug("  " + str(story))
-
-        story = stories[0]
-        self.assertEqual(len(stories), 1)
-        self.assertFalse(hasattr(stories, "unknown_field"))
-        self.assertEqual(story.title, "sometitle")
-        self.assertEqual(story.description, "somedescription")
-        self.assertEqual(story.date, "1981-04-15")
+        self.assertEqual(story.title.strip(), "sometitle")
+        self.assertEqual(story.description.strip(), "somedescription")
+        self.assertEqual(story.date.strip(), "1981-04-15")
 
     def test_db(self):
         n = 5
-        stories = list(lib.dataparse.read_stories_from_db(limit = n))[:n]
-
-        lib.log.debug("read stories:")
-        for story in stories:
-            lib.log.debug("  " + str(story))
-
+        stories = list(lib.dataparse.read_stories_from_db(limit=n))[:n]
+        lib.log.debug("read %s stories...", len(stories))
         story = stories[0]
         self.assertEqual(len(stories), n)
         self.assertFalse(hasattr(story, "unknown_field"))
@@ -161,11 +110,9 @@ somedescription
 
 
 class TestStoryThemes(unittest.TestCase):
-
     def setUp(self):
-        fh = tempfile.NamedTemporaryFile(delete = False)
+        fh = tempfile.NamedTemporaryFile(delete=False)
         self.fn_txt = fh.name
-
         fh.write("""
 identifier1
 ===========
@@ -192,63 +139,30 @@ t4, t5 [another, comment]
 
     def test_txt(self):
         objs = list(lib.dataparse.read_storythemes_from_txt(self.fn_txt))
-        
-        lib.log.debug("read story-themes:")
-        for obj in objs:
-            lib.log.debug("  " + str(obj))
-
+        lib.log.debug("read %s story-themes", len(objs))
         self.assertEqual(len(objs), 5)
-
         obj = objs[0]
         self.assertEqual(obj.name1, "identifier1")
         self.assertEqual(obj.name2, "t1")
         self.assertEqual(obj.weight, "choice")
         self.assertEqual(obj.motivation, "some, comment")
-
         obj = objs[4]
         self.assertEqual(obj.name1, "identifier1")
         self.assertEqual(obj.name2, "t5")
         self.assertEqual(obj.weight, "minor")
         self.assertEqual(obj.motivation, "another, comment")
 
-    def test_xls_compact(self):
-        path = os.path.join(os.environ['TSTPPATH'], "resources", "test_storythemes_compact.xls")
-        objs = list(lib.dataparse.read_storythemes_from_xls_compact(path))
-
-        lib.log.debug("read storythemes:")
-        for obj in objs:
-            lib.log.debug("  " + str(obj))
-
-        self.assertEqual(len(objs), 10)
-
-        obj = objs[0]
-        self.assertEqual(obj.name1, "story1")
-        self.assertEqual(obj.name2, "ct1")
-        self.assertEqual(obj.weight, "choice")
-        self.assertEqual(obj.motivation, "some, comment")
-
-        obj = objs[9]
-        self.assertEqual(obj.name1, "story2")
-        self.assertEqual(obj.name2, "mit3")
-        self.assertEqual(obj.weight, "minor")
-        self.assertEqual(obj.motivation, "comment")
-
     def test_db(self):
-        return
-
         n = 5
-        stories = list(lib.dataparse.read_stories_from_db(limit = n))[:n]
-
-        lib.log.debug("read stories:")
-        for story in stories:
-            lib.log.debug("  " + str(story))
-
-        story = stories[0]
-        self.assertEqual(len(stories), n)
-        self.assertFalse(hasattr(story, "unknown_field"))
-        self.assertTrue(hasattr(story, "title"))
-        self.assertTrue(hasattr(story, "description"))
-        self.assertTrue(hasattr(story, "date"))
+        objs = list(lib.dataparse.read_storythemes_from_db(limit=n))[:n]
+        lib.log.debug("read %s story-themes", len(objs))
+        st = objs[0]
+        self.assertEqual(len(objs), n)
+        self.assertFalse(hasattr(st, "unknown_field"))
+        self.assertTrue(hasattr(st, "name1"))
+        self.assertTrue(hasattr(st, "name2"))
+        self.assertTrue(hasattr(st, "weight"))
+        self.assertTrue(hasattr(st, "motivation"))
 
 
 def main():
