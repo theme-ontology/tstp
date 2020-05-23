@@ -12,7 +12,7 @@
     <script>
         var g_objType = "story";
         var g_objName = "<?php echo $SID; ?>";
-        var g_objFields = [ "name", "title", "date", "description" ];
+        var g_objFields = [ "name", "title", "date", "description", "meta" ];
 
         var g_objDefs = {
         	"main" : {
@@ -156,7 +156,19 @@
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <div style="float:right;"><H4><span class="label label-story">story</span></H4></div>
+                        <div style="float:right;"><H4>
+                            <span class="label label-story"
+                                onmouseover='showPreview("storystatsdiv")'
+                                onmouseout='hidePreview("storystatsdiv")'
+                                onclick='togglePreview("storystatsdiv")'
+                            >story</span><div style="position:relative;">
+                                <div id="storystatsdiv" class="panel panel-default statsbox">
+                                    <div>
+                                        <dl id="statslist" class="row small"></dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </H4></div>
                         <H4><?php echo $SID; ?></H4>
                     </div>
                     <div class="panel-body">

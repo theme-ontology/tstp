@@ -104,7 +104,19 @@
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <div style="float:right;"><H4><span class="label label-theme">theme</span></H4></div>
+                        <div style="float:right;"><H4>
+                            <span class="label label-theme"
+                                onmouseover='showPreview("themestatsdiv")'
+                                onmouseout='hidePreview("themestatsdiv")'
+                                onclick='togglePreview("themestatsdiv")'
+                            >theme</span><div style="position:relative;">
+                                <div id="themestatsdiv" class="panel panel-default statsbox">
+                                    <div>
+                                        <dl id="statslist" class="row small"></dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </H4></div>
                         <H4><?php echo $THEME; ?></H4>
                     </div>
                     <div class="panel-body"><div id="div_description"></div></div>

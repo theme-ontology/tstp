@@ -1,3 +1,4 @@
+import json
 import lib.dataparse
 from lib.func import memoize
 from collections import defaultdict, deque
@@ -105,23 +106,24 @@ def get_theme_stats(theme):
     parents = []
     children = []
     descriptions = {}
-
+    metas = {}
     for th in lib.dataparse.read_themes_from_db():
-        thp = [ x.strip() for x in th.parents.split(",") ]
+        thp = [x.strip() for x in th.parents.split(",")]
         if th.name == theme:
             parents = filter(None, thp)
             descriptions[th.name] = th.description
+            metas[th.name] = json.loads(th.meta)
         elif theme in thp:
             children.append(th.name)
             descriptions[th.name] = th.description
-
+            metas[th.name] = json.loads(th.meta)
     parents.sort()
     children.sort()
-    
     return {
         "parents": parents,
         "children": children,
         "descriptions": descriptions,
+        "metas": metas,
     }
 
 

@@ -529,6 +529,7 @@ class TSTPConnection(TSTPObject):
 class Story(TSTPObject):
     category = "story"
     collections = ""
+    meta = ""
     fields = (
         "name",
         "category",
@@ -536,6 +537,7 @@ class Story(TSTPObject):
         "date",
         "description",
         "collections",
+        "meta",
     )
     preforder = {
         "tos" : 1,
@@ -553,7 +555,11 @@ class Story(TSTPObject):
     def make_json(cls, objs, fields = (), limit = 10000):
         objs.sort(key = lambda x: cls.prefix_sort(x))
         rows = list(cls.iter_rows(objs, fields = fields, limit = limit))
-
+        if "meta" in fields:
+            idx = fields.index("meta")
+            for ii, row in enumerate(rows):
+                if row[idx]:
+                    row[idx] = json.loads(row[idx])
         return json.dumps({"data" : rows})
 
 
@@ -564,11 +570,13 @@ class Story(TSTPObject):
 ##################################################################
 class Theme(TSTPObject):
     category = "theme"
+    meta = ""
     fields = (
         "name",
         "category",
         "description",
         "parents",
+        "meta",
     )
 
     def list_parents(self):
@@ -579,6 +587,16 @@ class Theme(TSTPObject):
         """
         parents = [t.strip() for t in self.parents.split(",")]
         return parents
+
+    @classmethod
+    def make_json(cls, objs, fields = (), limit = 10000):
+        rows = list(cls.iter_rows(objs, fields = fields, limit = limit))
+        if "meta" in fields:
+            idx = fields.index("meta")
+            for ii, row in enumerate(rows):
+                if row[idx]:
+                    row[idx] = json.loads(row[idx])
+        return json.dumps({"data" : rows})
 
 
 ##################################################################

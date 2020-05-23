@@ -1,6 +1,7 @@
 import re
 import codecs
 from collections import defaultdict
+import json
 
 import webobject
 import lib.xls
@@ -292,15 +293,16 @@ def read_themes_from_txt(filename, verbose = True):
         "related themes",
         "other parents",
     }
+    meta = {
+        "source": filename,
+    }
 
     for notice in notices:
         lib.log.warn("%s: %s", filename, notice)
 
     for theme, field, data in themestuff:
         if theme not in out_themes:
-            out_themes[theme] = webobject.Theme(
-                name = theme,
-            )
+            out_themes[theme] = webobject.Theme(name=theme, meta=json.dumps(meta))
 
         themeobj = out_themes[theme]
         lfield = field.strip().lower()
@@ -395,6 +397,9 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
         "transports",
     ] + composite_fields.keys() + field_map.keys())
     global_collections = []
+    meta = {
+        "source": filename,
+    }
 
     for notice in notices:
         lib.log.warn("%s: %s", filename, notice)
@@ -407,9 +412,7 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
                     global_collections.append(d)
 
         if item not in out:
-            out[item] = webobject.Story(
-                name = item,
-            )
+            out[item] = webobject.Story(name=item, meta=json.dumps(meta))
 
         obj = out[item]
         lfield = field.strip().lower()

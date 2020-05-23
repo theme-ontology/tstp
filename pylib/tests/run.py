@@ -52,4 +52,6 @@ def runall():
 def main():
     if any(x != 0 for x, _, _ in runall().values()):
         raise RuntimeError("One or more tests failed. See log for more info.")
+    else:
+        lib.log.debug("All tests passed.")
 

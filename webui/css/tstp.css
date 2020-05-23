@@ -252,12 +252,14 @@ span.label-theme {
   opacity: 0.5;
   background: #ffccee;
   color: #774466;
+  cursor: default;
 }
 
 span.label-story {
   opacity: 0.5;
   background: #6677aa;
   color: #ddeeff;
+  cursor: default;
 }
 
 input.search-theme {
@@ -294,3 +296,20 @@ input.search-story {
     pointer-events: none;
 }
 
+.statsbox {
+    display:none;
+    position:absolute;
+    top: 5px;
+    right: 2px;
+    z-index: 9999;
+    border:0px solid #000;
+    background: white;
+    width:200%;
+    min-width: 400px;
+    max-width: 800px;
+    box-shadow: 0 0 10px;
+}
+
+.statsbox div {
+  padding: 10px;
+}

@@ -1,4 +1,5 @@
 var g_objStats;
+var g_stickyPreview = new Object();
 
 
 $(document).ready(function () {
@@ -88,6 +89,22 @@ function firstParagraphText(txt)
 }
 
 
+// create suitable description list items for showing a json object's 
+// key=>value pairs
+function makeObjectStats(stats)
+{
+    html = "";
+    for (var prop in stats) {
+        if (Object.prototype.hasOwnProperty.call(stats, prop)) {
+            html += '<dt class="col-sm-3 text-right">' + prop + '</dt>';
+            html += '<dd class="col-sm-9"><small>' + stats[prop] + '</small></dd>';
+        }
+    }
+    $("#statslist" + name).html(html);
+}
+
+
+
 // handle result of ajax query from loadObjInfoDataOnReady
 function receivedThemeInfoData(result)
 {
@@ -153,6 +170,7 @@ function receivedThemeInfoData(result)
             table.rows.add(childtable);
             table.draw();
     
+            makeObjectStats(g_objStats.metas[g_objName]);
         }
     }
 
@@ -186,6 +204,8 @@ function receivedStoryInfoData(result)
             $("#obj_title").html(title_html);
             $("#obj_date").html(date_html);
             $("#div_description").html(description_html);
+
+            makeObjectStats(g_objStats[4]);
         }
     }
 
@@ -206,7 +226,21 @@ function showPreview(name) {
 
 
 function hidePreview(name) {
+    if (g_stickyPreview[name])
+        return
     $("#" + name).hide();
+}
+
+
+function togglePreview(name) {
+    if (g_stickyPreview[name]) {
+        g_stickyPreview[name] = false;
+        hidePreview(name);
+    }
+    else {
+        g_stickyPreview[name] = true;
+        showPreview(name)
+    }
 }
 
 
@@ -242,4 +276,5 @@ function makeStoryLink(data, color = null)
     return "<div style=\"position:relative;\"><A " 
         + jstags + href + ">" + data + iframe + "</A></div>";
 }
+
 
