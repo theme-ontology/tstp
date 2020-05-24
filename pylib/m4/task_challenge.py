@@ -11,7 +11,7 @@ import datetime
 import m4.tasks
 
 
-DEBUG = True
+DEBUG = False
 
 
 def rchoice(ramp):
