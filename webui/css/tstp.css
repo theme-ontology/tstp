@@ -313,3 +313,7 @@ input.search-story {
 .statsbox div {
   padding: 10px;
 }
+
+.statsbox dl {
+  margin: 2px;
+}

@@ -95,6 +95,19 @@ def split(path):
     return allparts
 
 
+def abspath2relpath(root, path):
+    """
+    Convert absolute path to path relative to root.
+    Args:
+        root: string
+        path: string
+    Returns: string
+    """
+    rr = split(root)
+    pp = split(path)
+    return '/' + '/'.join(pp[len(rr):])
+
+
 def pyrun(module):
     pass
 

@@ -93,11 +93,16 @@ function firstParagraphText(txt)
 // key=>value pairs
 function makeObjectStats(stats)
 {
-    html = "";
+    var html = "";
     for (var prop in stats) {
         if (Object.prototype.hasOwnProperty.call(stats, prop)) {
+            var val = stats[prop];
+            if (prop == "source" && val.startsWith("/notes")) {
+                url = "https://github.com/theme-ontology/theming/blob/master" + val;
+                val = '<A href="' + url + '">' + val + '</A>';
+            }
             html += '<dt class="col-sm-3 text-right">' + prop + '</dt>';
-            html += '<dd class="col-sm-9"><small>' + stats[prop] + '</small></dd>';
+            html += '<dd class="col-sm-9"><small>' + val + '</small></dd>';
         }
     }
     $("#statslist" + name).html(html);
@@ -262,6 +267,7 @@ function makeThemeLink(data, color = null)
     return "<div style=\"position:relative;\"><A " 
         + jstags + href + ">" + data + iframe + "</A></div>";
 }
+
 
 function makeStoryLink(data, color = null)
 {
