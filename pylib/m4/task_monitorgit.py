@@ -47,7 +47,11 @@ NAUGHTY = ['2g1c', '2 girls 1 cup', 'anal', 'anus', 'arse', 'ass', 'asshole', 'a
            'tits', 'titties', 'titty', 'titfuck', 'tittiefucker', 'titties', 'tittyfuck', 'tittywank', 'titwank',
            'threesome', 'three some', 'throating', 'twat', 'twathead', 'twatty', 'twunt', 'viagra', 'vagina',
            'vulva', 'wank', 'wanker', 'wanky', 'whore', 'whoar', 'xxx', 'xx', 'yaoi', 'yury']
-NAUGHTYSTEMS = []
+FOWL = [
+    "Crow", "Peacock", "Dove", "Sparrow", "Goose", "Ostrich", "Pigeon", "Tit", "Turkey", "Hawk", "Bald eagle", "Raven",
+    "Parrot", "Flamingo", "Seagull", "Swallow", "Blackbird", "Penguin", "Robin", "Swan", "Owl" "Stork", "Woodpecker",
+]
+NAUGHTYSTEMS = {}
 
 
 def profanities(text):
@@ -67,7 +71,8 @@ def profanities(text):
         return suspicious
     ps = PorterStemmer()
     if not NAUGHTYSTEMS:
-        NAUGHTYSTEMS = set(ps.stem(w) for w in NAUGHTY)
+        NAUGHTYSTEMS = {ps.stem(w.lower()): (w, "naughty") for w in NAUGHTY}
+        NAUGHTYSTEMS.update({ps.stem(w.lower()): (w, "fowl") for w in FOWL})
     for line in text.split("\n"):
         wline = line.strip().lower()
         if wline.startswith("+"):
@@ -77,8 +82,9 @@ def profanities(text):
             except LookupError:
                 lib.log.error("Failed to tokenize with NLTK, foul language detection disabled")
                 return suspicious
-            if stems.intersection(NAUGHTYSTEMS):
-                suspicious.append(line)
+            matches = [(k,) + NAUGHTYSTEMS[k] for k in stems if k in NAUGHTYSTEMS]
+            if matches:
+                suspicious.append((line, matches))
     return suspicious
 
 
@@ -124,11 +130,20 @@ def makemail(entries, txtdiff):
             subjectline = "M-4 Double Red Alert!"
         else:
             subjectline = "M-4 Red Alert!"
+        badlines = "\n".join(x[0] for x in naughtylines)
+        badtypes, badexplain = [], []
+        for _line, matches in naughtylines:
+            badtypes.extend(x[2].capitalize() for x in matches)
+            badexplain.extend((x[0], x[1]) for x in matches)
+        badtypes = " and ".join(sorted(set(badtypes), reverse=True))
+        badexplain = ', '.join('"%s" => "%s"' % x for x in sorted(set(badexplain)))
         naughtyblock = """
     <DIV style="background:#ff8888; padding: .1em .5em; margin: 1em 0em;">
-        <H4>Potentially Foul Language Detected in the Vicinity of M-4:</H4>
-        <PRE>%s</PRE></DIV>
-""" % "\n".join(naughtylines)
+        <H4>Potentially %s Language Detected in the Vicinity of M-4:</H4>
+        <PRE>%s</PRE>
+        <i style="font-size: xx-small;">%s</i>
+    </DIV>
+""" % (badtypes, badlines, badexplain)
 
     style = lib.email.ST_BASE + lib.email.ST_REAL_RAINBOW_DASH
     htmldiff = """
@@ -194,6 +209,7 @@ def react_to_commit():
         if DEBUG:
             txtdiff += """+ and some profane shit\n"""
             txtdiff += """+ you Dick\n"""
+            txtdiff += """+ look, a Tit\n"""
             pass
         maildef = makemail(entries, txtdiff)
         lib.email.sendmail(maildef)
