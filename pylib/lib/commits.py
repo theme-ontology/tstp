@@ -219,7 +219,6 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
                 print("SKIPPING EARLIER COMMIT:", (commit, author, date))
         else:
             try:
-                # res = subprocess.check_output(['git', 'checkout', commit], stderr=open(os.devnull, 'wb')).decode("utf-8")
                 res = subprocess.check_output(['git', 'checkout', '-f', commit]).decode("utf-8")
             except Exception as e:
                 print("GIT ERROR", repr(e))
@@ -231,6 +230,7 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
                 continue
             except Exception as e:
                 print("UNKNOWN ERROR", repr(e))
+                continue
             data = json.dumps(datapoint)
             row = (commit, date.strftime('%Y-%m-%d %H:%M:%S'), author, data)
             db.do("""REPLACE INTO commits_stats VALUES(%s, %s, %s, %s)""", values=[row])
@@ -249,7 +249,6 @@ def main():
     else:
         fromdate = None if "-a" in sys.argv else "<latest>"
         recreate = '-x' not in sys.argv
-        #import datetime; fromdate = datetime.datetime(2020, 5, 15, 0, 0, 0)
         dbstore_commit_data(fromdate=fromdate, recreate=recreate)
 
 
