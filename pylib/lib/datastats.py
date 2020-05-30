@@ -200,39 +200,36 @@ def get_metathemes_by_level():
 
 def construct_metathemes_by_level(parents, children, bfs, withLeaves=False, allRoots=False):
     """
-    Return all themes that are parents as:
-    [
-        [root1, root2, ...],
-        [l1theme1, l2theme2, ...],
-        [l2theme1, ...],
-        ...
-    ]
+    Return [ [L0 themes], [L1 themes], ...]
     """
-    roots = ROOTS
-    level = {}
-    result = []
-
     if allRoots:
-        roots = [theme for theme in children if not parents.get(theme ,[])]
-        print(roots)
+        roots = [theme for theme in children if not parents.get(theme, [])]
+    else:
+        roots = ROOTS
+    level = {t: 0 for t in roots}
+    pending = roots
+    changed = set()
+    visited = set()  # guard against cycles
 
-    for theme in reversed(bfs):
-        if children[theme] or withLeaves:
-            ps = parents[theme]
-            pl = max(level.get(t, -1) for t in ps) if ps else -1
-            nn = max(level.get(theme, 0), pl + 1)
+    while pending:
+        for theme in pending:
+            if theme not in visited:
+                visited.add(theme)
+                depth = level[theme] + 1
+                for child in children[theme]:
+                    level[child] = min(depth, level.get(child, depth))
+                    changed.add(child)
+        pending = list(sorted(changed))
+        changed = set()
 
-            if nn > 0 or theme in roots:
-                level[theme] = nn
-
-    themes = sorted(level.items(), key=lambda x: (x[1], x[0]))
-    for theme, nn in themes:
-        while len(result) <= nn:
-            result.append([])
-        result[nn].append(theme)
+    result = []
+    for theme, nn in level.items():
+        if withLeaves or children.get(theme, []):
+            while len(result) <= nn:
+                result.append([])
+            result[nn].append(theme)
 
     return result
-
 
 
 def walk_children(theme, children, path):

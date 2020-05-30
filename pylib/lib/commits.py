@@ -94,6 +94,10 @@ def get_datapoint(basepath):
     levels = lib.datastats.construct_metathemes_by_level(parents, children, bfs, withLeaves=True, allRoots=True)
     for nn in range(6):
         data["themesL%s" % nn] = len(levels[nn]) if nn < len(levels) else 0
+    if DEBUG:
+        for ii, level in enumerate(levels):
+            ellipses = "..." if len(level) > 10 else ""
+            print("LEVEL-%s: %s%s" % (ii, ', '.join(level[:10]), ellipses))
     data["themesLP"] = sum(len(level) for level in levels[6:])
     data["themes"] = len(counts["themes"])
     data["stories"] = len(counts["stories"])
@@ -240,9 +244,11 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
 
 
 def main():
+    global DEBUG
     basepath = GIT_THEMING_PATH_HIST
     notespath = os.path.join(basepath, "notes")
     if '--test' in sys.argv:
+        DEBUG = True
         data = get_datapoint(notespath)
         from pprint import pprint
         pprint(data)
