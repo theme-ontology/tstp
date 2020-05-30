@@ -68,6 +68,7 @@ def cache_visualizations():
         "stories_by_year": ("all_stories_by_year.svg",),
         "themeusage_timelines": ("startrek", "metathemes_by_episode.svg"),
         "commit_history": ("commit_history.svg",),
+        "commit_history_bylevel": ("commit_history_bylevel.svg",),
     }
     for name, fname in names.items():
         mod = importlib.import_module("viz." + name)

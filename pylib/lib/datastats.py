@@ -136,12 +136,24 @@ def get_theme_tree():
         [ t1, t2, ...],
     ) where t1, t2 is a reversed BFS.
     """
+    return construct_theme_tree(lib.dataparse.read_themes_from_db())
+
+
+def construct_theme_tree(themeobjects):
+    """
+    Given a list of theme objects:
+    return (parents, children, lforder) as (
+        { theme => [ parent1, parent2, ... ] },
+        { theme => [ child1, child2, ... ] },
+        [ t1, t2, ...],
+    ) where t1, t2 is a reversed BFS.
+    """
     parents = {}
     children = defaultdict(set)
 
-    for thobj in lib.dataparse.read_themes_from_db():
+    for thobj in themeobjects:
         theme = thobj.name
-        thp = filter(None, [ x.strip() for x in thobj.parents.split(",") ])
+        thp = filter(None, [x.strip() for x in thobj.parents.split(",")])
         parents[theme] = sorted(set(thp))
 
         if theme not in children:
@@ -152,9 +164,9 @@ def get_theme_tree():
             if parent not in parents:
                 parents[parent] = []
 
-    children = { k : sorted(v) for k, v in children.iteritems() }
+    children = {k: sorted(v) for k, v in children.items()}
 
-    leafs = [ th for th, thc in children.iteritems() if len(thc) == 0 ]
+    leafs = [th for th, thc in children.items() if len(thc) == 0]
     lforder = []
     qq = deque(leafs)
     ss = set()
@@ -162,7 +174,7 @@ def get_theme_tree():
     while qq:
         theme = qq.popleft()
         lforder.append(theme)
-        
+
         for parent in parents[theme]:
             if parent not in ss:
                 qq.append(parent)
@@ -183,20 +195,37 @@ def get_metathemes_by_level():
     ]
     """
     parents, children, bfs = get_theme_tree()
+    return construct_metathemes_by_level(parents, children, bfs)
+
+
+def construct_metathemes_by_level(parents, children, bfs, withLeaves=False, allRoots=False):
+    """
+    Return all themes that are parents as:
+    [
+        [root1, root2, ...],
+        [l1theme1, l2theme2, ...],
+        [l2theme1, ...],
+        ...
+    ]
+    """
+    roots = ROOTS
     level = {}
     result = []
 
+    if allRoots:
+        roots = [theme for theme in children if not parents.get(theme ,[])]
+        print(roots)
+
     for theme in reversed(bfs):
-        if children[theme]:
+        if children[theme] or withLeaves:
             ps = parents[theme]
             pl = max(level.get(t, -1) for t in ps) if ps else -1
             nn = max(level.get(theme, 0), pl + 1)
 
-            if nn > 0 or theme in ROOTS:
+            if nn > 0 or theme in roots:
                 level[theme] = nn
 
-    themes = sorted(level.iteritems(), key = lambda x: (x[1], x[0]))
-
+    themes = sorted(level.items(), key=lambda x: (x[1], x[0]))
     for theme, nn in themes:
         while len(result) <= nn:
             result.append([])

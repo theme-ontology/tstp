@@ -12,6 +12,7 @@ import dbdefine
 import db
 import json
 import sys
+import lib.datastats
 
 DEBUG = False
 
@@ -72,14 +73,16 @@ def get_datapoint(basepath):
     """
     prefixes = get_story_prefixes(basepath)
     counts = defaultdict(set)
-    data = defaultdict(float)
+    data = {}
+    themes = []
 
     for k, v in prefixes.items():
-        data["prefix:"+k] = v
+        data["prefix:"+k] = dict(v)
 
     for path in lib.files.walk(basepath, ".*\.(st|th)\.txt$", 0):
         if path.endswith(".th.txt"):
             objs = list(lib.dataparse.read_themes_from_txt(path, False))
+            themes.extend(objs)
             counts["themes"].update(o.name for o in objs)
         if path.endswith(".st.txt"):
             tobjs = lib.dataparse.read_storythemes_from_txt(path, False)
@@ -87,10 +90,15 @@ def get_datapoint(basepath):
             counts["stories"].update(o.name for o in objs)
             counts["themedstories"].update(o.name1 for o in tobjs)
 
+    parents, children, bfs = lib.datastats.construct_theme_tree(themes)
+    levels = lib.datastats.construct_metathemes_by_level(parents, children, bfs, withLeaves=True, allRoots=True)
+    for nn in range(6):
+        data["themesL%s" % nn] = len(levels[nn]) if nn < len(levels) else 0
+    data["themesLP"] = sum(len(level) for level in levels[6:])
     data["themes"] = len(counts["themes"])
     data["stories"] = len(counts["stories"])
     data["themedstories"] = len(counts["themedstories"])
-    return data
+    return dict(data)
 
 
 def list_commits(basepath):
@@ -183,7 +191,6 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
         fromdate = None
     if fromdate == "<latest>":
         fromdate = max(x[1] for x in commits)
-
     basepath = GIT_THEMING_PATH_HIST
     notespath = os.path.join(basepath, "notes")
     os.chdir(basepath)
@@ -224,16 +231,26 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
                 continue
             except Exception as e:
                 print("UNKNOWN ERROR", repr(e))
-                continue
             data = json.dumps(datapoint)
             row = (commit, date.strftime('%Y-%m-%d %H:%M:%S'), author, data)
-            db.do("""INSERT INTO commits_stats VALUES(%s, %s, %s, %s)""", values=[row])
+            db.do("""REPLACE INTO commits_stats VALUES(%s, %s, %s, %s)""", values=[row])
             if not quieter:
                 print("INSERTED: ", str(row)[:120], "...")
+                print(dict(datapoint))
 
 
 def main():
-    dbstore_commit_data(fromdate="<latest>", recreate=("-x" not in sys.argv))
+    basepath = GIT_THEMING_PATH_HIST
+    notespath = os.path.join(basepath, "notes")
+    if '--test' in sys.argv:
+        data = get_datapoint(notespath)
+        from pprint import pprint
+        pprint(data)
+    else:
+        fromdate = None if "-a" in sys.argv else "<latest>"
+        recreate = '-x' not in sys.argv
+        #import datetime; fromdate = datetime.datetime(2020, 5, 15, 0, 0, 0)
+        dbstore_commit_data(fromdate=fromdate, recreate=recreate)
 
 
 

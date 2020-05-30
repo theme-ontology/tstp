@@ -509,7 +509,7 @@ class SVGPlot(SVG):
 
         n = "." + self.name
         p = n + " "
-        return { (p + k if k else n) : v for k, v in dd.items() }
+        return {(p + k if k else n) : v for k, v in dd.items()}
 
     def finalize(self):
         """
