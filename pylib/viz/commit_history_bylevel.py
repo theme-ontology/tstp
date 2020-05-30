@@ -25,12 +25,19 @@ def draw_story_leveltheme_relation():
     for nn in range(6):
         ysByLevel.append([p['themesL%s' % nn] for _, p in data])
     ysDeepLevel = [p['themesLP'] for _, p in data]
-
+    curves = ysByLevel + [ysDeepLevel]
+    names = ["Level:%s"%i for i, _ in enumerate(ysByLevel)] + ["Level:6+"]
+    levelcolors = [
+        "#726abd", "#8ad745", "#9f45d8", "#d4bc53", "#5b7181",
+        "#d0533a", "#96c8ca", "#a47453", "#cd9ec0", "#5e8143",
+    ]
+    cutoff = 150
+    midn = len(xs2) / 2
     nx1, ny1, nx2, ny2 = 50, 40, 950, 380
     ny3, ny4 = 400, 660
     x1, x2 = min(xs2), max(xs)
-    y1, y2 = 0, max(max(ys) for ys in ysByLevel)
-    y3 = max(y for y in [max(ys) for ys in ysByLevel] if y < 200)
+    y1, y2 = 0, max(max(ys[-midn:]) for ys in curves)
+    y3 = max(y for y in [max(ys[-midn:]) for ys in curves] if y < cutoff)
     dx = xs[-1] - xs[0]
     dy = y2 - y1
     x1, x2 = x1 - dx*0.05, x2 + dx*0.05
@@ -41,37 +48,26 @@ def draw_story_leveltheme_relation():
     svg = story_theme_base()
     plot1 = svg["chart"].xychart(nx1, ny1, nx2, ny2,  x1, x2, y1, y2).config({'xtype': 'scalar'})
     plot2 = svg["chart"].xychart(nx1, ny3, nx2, ny4,  x1, x2, y1, y3).config({'xtype': 'scalar'})
+    plotassign = {nn: plot1 if max(ys[-midn:]) >= cutoff else plot2 for nn, ys in enumerate(curves)}
     lx0, ly0, ldx, lmaxx = nx1 + 10, ny1 + 10, 80, 320
     lx, ly = lx0, ly0
     svg['annotation'].text(nx1 + 10, ny1 - 10, "themes-count", cls="annotation")
     svg['annotation'].text((nx1 + nx2) / 2, ny4 + 25, "stories-count", cls="annotation")
     svg['annotation'].text((nx1 + nx2) / 2, 20, "Themes By Level vs. Stories, over time", cls="title")
-    levelcolors = [
-        "#726abd", "#8ad745", "#9f45d8", "#d4bc53", "#5b7181",
-        "#d0533a", "#96c8ca", "#a47453", "#cd9ec0", "#5e8143",
-    ]
-    for nn in range(6):
+    for nn, ys in enumerate(curves):
+        plotassign[nn].plot([xs, ys], shape="line", cls='story-leveltheme', style={'stroke': '#cccccc'})
+    for nn, ys in enumerate(curves):
         color = levelcolors[nn]
-        target = plot1 if max(ysByLevel[nn]) > 200 else plot2
-        target.plot([xs, ysByLevel[nn]], shape="line", cls='story-leveltheme', style={'stroke':'#cccccc'})
-    plot2.plot([xs, ysDeepLevel], shape="line", cls='story-leveltheme', style={'stroke':'#cccccc'})
-    for nn in range(6):
-        color = levelcolors[nn]
-        target = plot1 if max(ysByLevel[nn]) > 200 else plot2
-        target.plot([xs2, ysByLevel[nn]], shape="line", cls='story-leveltheme', style={'stroke': color})
-    plot2.plot([xs2, ysDeepLevel], shape="line", cls='story-leveltheme', style={'stroke': levelcolors[6]})
-    plot1.plot([xs2, ysByLevel[3], labels], shape="line", cls='date-labels', style={})
+        plotassign[nn].plot([xs2, ys], shape="line", cls='story-leveltheme', style={'stroke': color})
+    plotassign[3].plot([xs2, curves[3], labels], shape="line", cls='date-labels', style={})
     plot1.plotarea()
     plot2.plotarea()
     annotate_storytheme(svg, plot1, data, ny1, ny2, texty=100)
     annotate_storytheme(svg, plot2, data, ny3, ny4, texty=-1)
 
-    curves = ysByLevel + [ysDeepLevel]
-    names = ["Level:%s"%i for i, _ in enumerate(ysByLevel)] + ["Level:6+"]
     crowding = defaultdict(int)
     for nn, (curve, name) in enumerate(zip(curves, names)):
-        target = plot1 if max(curve) > 200 else plot2
-        yy = target.v2y(curve[-1]) - 10
+        yy = plotassign[nn].v2y(curve[-1]) - 10
         ybin = yy // 6
         cwd = max(crowding[ybin], crowding[ybin - 1])
         if cwd % 2 == 0:
@@ -90,7 +86,6 @@ def draw_story_leveltheme_relation():
         "fill": "white", "stroke": "rgba(0,0,0,0.5)"})
     svg['annotation'].rect(nx1 + 15, ny3 + 11, 8, 8, style={"fill": "#cccccc"})
     svg['annotation'].text(nx1 + 25, ny3 + 19, "includes unthemed stories")
-
     return svg, nx2 + nx1, ny4 + ny1
 
 
