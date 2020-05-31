@@ -53,13 +53,17 @@
         div.headingbox {
             background: black;
             color: white;
-            padding: 1em;
+            padding: 0.5em;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
         }
 
     </style>
 </head>
 
-<body>
+<body style="padding:0px;">
 
 <div class="container main-body headingbox">
     <div class="row">
