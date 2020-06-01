@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>TSTP Theme Hierarchy</title>
+    <title>Theme Hierarchy</title>
 
     <style>
         body {
@@ -67,7 +67,7 @@
 
 <div class="container main-body headingbox">
     <div class="row">
-        <H3>TSTP Theme Hierarchy Reference Sheet</H3>
+        <H3>Theme Hierarchy Reference Sheet</H3>
     </div>
 </div>
 
