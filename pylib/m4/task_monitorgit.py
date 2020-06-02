@@ -40,7 +40,7 @@ NAUGHTY = ['2g1c', '2 girls 1 cup', 'anal', 'anus', 'arse', 'ass', 'asshole', 'a
            'motherfuckka', 'motherfucks', 'milf', 'muff', 'nigga', 'nigger', 'nigg', 'nipple', 'nipples', 'nob',
            'nob jokey', 'nobhead', 'nobjocky', 'nobjokey', 'numbnuts', 'nutsack', 'nude', 'nudes', 'orgy', 'orgasm',
            'orgasms', 'panty', 'panties', 'penis', 'playboy', 'porn', 'porno', 'pornography', 'pron', 'pussy',
-           'pussies', 'rape', 'raping', 'rapist', 'rectum', 'retard', 'rimming', 'schlong',
+           'pussies', 'rape', 'raping', 'rapist', 'rectum', 'retard', 'schlong',
            'scrotum', 'sex', 'semen', 'shemale', 'she male', 'shibari', 'shibary', 'shit', 'shitdick', 'shitfuck',
            'shitfull', 'shithead', 'shiting', 'shitings', 'shits', 'shitted', 'shitters', 'shitting', 'shittings',
            'shitty', 'shota', 'skank', 'slut', 'sluts', 'smut', 'smegma', 'spunk', 'strip club', 'stripclub', 'tit',
