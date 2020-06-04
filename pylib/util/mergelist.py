@@ -38,9 +38,12 @@ def main():
         sid = sid.strip()
         oldtheme = t.strip()
         theme = rt.strip()
-        oldweight = FIELDNAMES[w.strip()]
-        weight = FIELDNAMES[rw.strip() or w.strip()]
+        oldweight = FIELDNAMES.get(w.strip(), "")
+        weight = FIELDNAMES.get(rw.strip() or w.strip(), "")
         comment = rc.strip() or c
+        if not weight:
+            lib.log.warn("MISSING WEIGHT IN ENTRY %s - SKIPPING", (sid, w, t, rt, rw))
+            continue
         if oldtheme:
             deletions[(sid, oldweight, oldtheme)] = True
             if theme:

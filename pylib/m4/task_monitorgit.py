@@ -7,7 +7,6 @@ import re
 from datetime import datetime, timedelta
 import lib.email
 import m4.tasks
-import tests
 
 
 DEBUG = False
@@ -111,7 +110,7 @@ def makemail(entries, txtdiff):
     for entry in entries:
         rev, ctime, author, msg = entry[:4]
         ctime = ctime.strftime('%Y-%m-%d %H:%M:%S')
-        arev = """<A href="https://github.com/theme-ontology/theming/commit/%s">%s</A>""" % (rev, rev)
+        arev = """<A href="https://github.com/theme-ontology/theming/commit/%s">%s..</A>""" % (rev, rev[:6])
         loglines.append("""<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>""" % (arev, ctime, author, msg))
 
     for line in txtdiff.split("\n"):
@@ -187,6 +186,9 @@ def react_to_commit():
     """
     M-4 will do a variety of things when there is a new commit.
     """
+    if "--debug" in sys.argv:
+        global DEBUG
+        DEBUG = True
     if DEBUG:
         ts = (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
         db.do("""DELETE FROM commits_log WHERE time > '%s'""" % ts)
