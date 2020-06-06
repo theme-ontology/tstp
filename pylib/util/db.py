@@ -57,18 +57,23 @@ def main():
         for thingdict in (themes, stories):
             for path in thingdict:
                 relpath = lib.files.abspath2relpath(root, path)
-                meta = {
+                tmeta = {
                     "source": relpath,
                     "timestamp": timestamp,
                 }
                 for obj in thingdict[path]:
+                    try:
+                        meta = json.loads(obj.meta)
+                        meta.update(tmeta)
+                    except (AttributeError, ValueError):
+                        meta = tmeta
                     obj.meta = json.dumps(meta)
 
         rthemes = defaultdict(list)
         rstories = defaultdict(list)
         rstorythemes = defaultdict(list)
-        rmatch = [ (themes, rthemes), (stories, rstories), (storythemes, rstorythemes) ]
-        rorder = [ ("theme", rthemes), ("story", rstories), ("storytheme", rstorythemes) ]
+        rmatch = [(themes, rthemes), (stories, rstories), (storythemes, rstorythemes)]
+        rorder = [("theme", rthemes), ("story", rstories), ("storytheme", rstorythemes)]
         events = []
         undefined = []
 
@@ -87,8 +92,6 @@ def main():
                 parents = filter(None, [ x.strip() for x in theme.parents.split(",") ])
                 if not parents:
                     log.info('Top Level Theme "%s" in %s', key, path)
-                elif key == "fictional gadget":
-                    print theme, "::", theme.parents
                 for parent in parents:
                     if parent not in rthemes:
                         log.info('Undefined parent theme "%s" for "%s" in %s', parent, key, path)
@@ -96,17 +99,17 @@ def main():
 
         # drop any themes with only undefined parents
         changed = True
-        while (changed):
+        while changed:
             changed = False
             for key in rthemes.keys():
                 ll = rthemes[key]
                 for path, theme in ll:
-                    parents = filter(None, [ x.strip() for x in theme.parents.split(",") ])
+                    parents = filter(None, [x.strip() for x in theme.parents.split(",")])
                     if parents and all(p not in rthemes for p in parents):
                         log.info('Dropping theme with undefined parents: "%s": "%s"', key, parents)
                         changed = True
                         del rthemes[key]
-                        break;
+                        break
 
         # drop story-themes for which either story or theme is not defined
         for theme in sorted(set(x[1] for x in rstorythemes.keys())):

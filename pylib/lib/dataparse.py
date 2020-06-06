@@ -433,11 +433,9 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
             if count > 0:
                 mean = sum(numbers) / count
                 stddev = (sum((x - mean)**2 for x in numbers) / count)**0.5
-                obj.meta['rating average'] = '%.2f' % mean
-                obj.meta['rating stddev'] = '%.2f' % stddev
+                obj.meta['rating'] = u'%.2f \u00B1 %.2f' % (mean, stddev)
             else:
-                obj.meta['rating average'] = 'n/a'
-                obj.meta['rating stddev'] = 'n/a'
+                obj.meta['rating'] = 'n/a'
         elif lfield in recognized_fields:
             # recognized so don't warn even if we're not adding them
             pass

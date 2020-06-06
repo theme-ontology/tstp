@@ -94,15 +94,24 @@ function firstParagraphText(txt)
 function makeObjectStats(stats)
 {
     var html = "";
+    var keys = new Array();
     for (var prop in stats) {
+        keys.push(prop);
+    }
+    keys.sort();
+    keys.reverse();
+
+    for (var i=0; i<keys.length; i++) {
+        var prop = keys[i];
         if (Object.prototype.hasOwnProperty.call(stats, prop)) {
             var val = stats[prop];
+            prop = prop.substr(0, 15);
             if (prop == "source" && val.startsWith("/notes")) {
                 url = "https://github.com/theme-ontology/theming/blob/master" + val;
                 val = '<A href="' + url + '">' + val + '</A>';
             }
-            html += '<dt class="col-sm-3 text-right">' + prop + '</dt>';
-            html += '<dd class="col-sm-9"><small>' + val + '</small></dd>';
+            html += '<dt class="col-sm-4 text-right">' + prop + '</dt>';
+            html += '<dd class="col-sm-8"><small>' + val + '</small></dd>';
         }
     }
     $("#statslist" + name).html(html);

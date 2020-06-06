@@ -317,3 +317,10 @@ input.search-story {
 .statsbox dl {
   margin: 2px;
 }
+
+dl#statslist dt {
+  white-space: nowrap;
+}
+
+
+
