@@ -430,10 +430,14 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
             numbers = [int(s) for s in re.findall("\d+", ' '.join(data), re.DOTALL)]
             numbers = [min(5, max(0, n)) for n in numbers]
             count = float(len(numbers))
-            mean = sum(numbers) / count
-            stddev = (sum((x - mean)**2 for x in numbers) / count)**0.5
-            obj.meta['rating average'] = '%.2f' % mean
-            obj.meta['rating stddev'] = '%.2f' % stddev
+            if count > 0:
+                mean = sum(numbers) / count
+                stddev = (sum((x - mean)**2 for x in numbers) / count)**0.5
+                obj.meta['rating average'] = '%.2f' % mean
+                obj.meta['rating stddev'] = '%.2f' % stddev
+            else:
+                obj.meta['rating average'] = 'n/a'
+                obj.meta['rating stddev'] = 'n/a'
         elif lfield in recognized_fields:
             # recognized so don't warn even if we're not adding them
             pass
@@ -458,7 +462,7 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
         for c in collections.split("\n"):
             if c and c not in clist:
                 clist.append(c)
-        clist = [ c.strip() for c in clist if c.strip() ]
+        clist = [c.strip() for c in clist if c.strip()]
 
         obj.description = description
         obj.collections = "\n".join(clist)
