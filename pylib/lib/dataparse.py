@@ -404,40 +404,48 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
     for notice in notices:
         lib.log.warn("%s: %s", filename, notice)
 
-    for item, field, data in stuff:
+    for sid, field, data in stuff:
         # is this is a "collection" for all stories in this file?
-        if field.lower() == "collections" and item in data:
+        if field.lower() == "collections" and sid in data:
             for d in data:
                 if d not in global_collections:
                     global_collections.append(d)
 
-        if item not in out:
-            out[item] = webobject.Story(name=item, meta=json.dumps(meta))
+        if sid not in out:
+            out[sid] = webobject.Story(name=sid, meta=dict(meta))
 
-        obj = out[item]
+        obj = out[sid]
         lfield = field.strip().lower()
         attr = field_map.get(lfield, "")
 
         if lfield in composite_fields:
-            out_composites[item][lfield] = '\n'.join(data)
+            out_composites[sid][lfield] = '\n'.join(data)
         if attr and attr in obj.fields:
             setattr(obj, attr, data[0])
         elif addextras:
             exattr = lfield.replace(" ", "")
             setattr(obj, exattr, data)
             obj.extra_fields += (exattr,)
+        elif lfield == "ratings":
+            numbers = [int(s) for s in re.findall("\d+", ' '.join(data), re.DOTALL)]
+            numbers = [min(5, max(0, n)) for n in numbers]
+            count = float(len(numbers))
+            mean = sum(numbers) / count
+            stddev = (sum((x - mean)**2 for x in numbers) / count)**0.5
+            obj.meta['rating average'] = '%.2f' % mean
+            obj.meta['rating stddev'] = '%.2f' % stddev
         elif lfield in recognized_fields:
             # recognized so don't warn even if we're not adding them
             pass
         else:
             if verbose:
-                lib.log.warn("%s: %s.%s - don't grok", filename, item, field)
+                lib.log.warn("%s: %s.%s - don't grok", filename, sid, field)
 
-    for key in sorted(out):
-        obj = out[key]
+    for sid in sorted(out):
+        obj = out[sid]
         description = getattr(obj, "description", "")
-        references = out_composites[key]["references"].strip()
-        collections = out_composites[key]["collections"].strip()
+        references = out_composites[sid]["references"].strip()
+        collections = out_composites[sid]["collections"].strip()
 
         if references:
             description += "\n\nReferences:\n"
@@ -454,13 +462,14 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
 
         obj.description = description
         obj.collections = "\n".join(clist)
+        obj.meta = json.dumps(obj.meta)
 
         try:
             obj.test_fields()
             yield obj
         except ValueError as e:
             if verbose:
-                lib.log.warn("%s: %s.%s - %s", filename, item, field, str(e))
+                lib.log.warn("%s: %s.%s - %s", filename, sid, field, str(e))
 
 
 def read_storythemes_from_txt(filename, verbose = True):
