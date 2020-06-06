@@ -12,6 +12,7 @@
 <script type="text/javascript" src="DataTables/datatables.js"></script>
 <script type="text/javascript" src="js/typeahead.bundle.js"></script>
 <script type="text/javascript" src="js/jquery.form.js"></script>
+<script type="text/javascript" src="js/tstp_util.js"></script>
 
 <script>
     String.prototype.hashCode = function() {

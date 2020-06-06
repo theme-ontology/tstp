@@ -15,8 +15,22 @@
         var prevsearch = "";
 
         $(document).ready(function () {
+            var collectionfilter = getQueryVariable("collectionfilter");
+            START_URL = getURL(collectionfilter);
             loadDataOnReady();
         });
+
+        window.onpopstate = function(event) {
+            var state = event.state;
+            clearSearchNoReload();
+            if (state && "collectionfilter" in state) {
+                loadCollectionData(state["collectionfilter"], false);
+            } else {
+                START_URL = getURL(false);
+                clearSearchNoReload();
+                reloadData(true);
+            }
+        };
 
         function loadDataOnReady() {
             $(document).ready(function() {
@@ -81,14 +95,37 @@
             $('#fieldFind').val("");
         }
 
-        function loadCollectionData(sid) {
+        function urlify(val) {
+            val = val.replace("&&&datatables-is-retarded-quote&&&", "'");
+            var urldata = encodeURIComponent(val);
+            return urldata;
+        }
+
+        function getURL(collectionfilter=false)
+        {
+            var url = BASE_URL + '&collapsecollections=on';
+            if (collectionfilter) {
+                var urldata = urlify(collectionfilter);
+                url = BASE_URL + "&collectionfilter=" + urldata;
+            }
+            return url;
+        }
+
+        function loadCollectionData(sid, addhistory=true) {
             var table = $('#stories_datatable').DataTable();
-            var urldata = encodeURIComponent(sid.replace("&&&datatables-is-retarded-quote&&&", "'"));
-            var url = BASE_URL + "&collectionfilter=" + urldata;
+            var url = getURL(sid);
             clearSearchNoReload();
             table.clear().draw();
             table.ajax.url(url).load();
             IN_COLLECTION = true;
+            if (addhistory) {
+                var urldata = urlify(sid);
+                history.pushState(
+                    {collectionfilter: sid},
+                    "title 1",
+                    "?collectionfilter=" + urldata
+                );
+            }
         }
 
         function reloadData(force=false)
