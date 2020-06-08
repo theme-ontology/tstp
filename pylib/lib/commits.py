@@ -112,11 +112,11 @@ def list_commits(basepath):
     subprocess.check_output('git fetch origin'.split()).decode("utf-8")
     subprocess.check_output('git reset --hard origin/master'.split()).decode("utf-8")
     gitlog = subprocess.check_output(
-        'git log --no-merges --all --date=local'.split(),
+        'git log --all --date=local'.split(),
         env=dict(os.environ, TZ="UTC")
     ).decode("utf-8")
     entries = []
-    commit, author, date = None, None, None
+    commit, author, date, committype = None, None, None, "normal"
 
     for ii, line in enumerate(gitlog.split("\n")):
         if line.startswith("commit ") and not commit:
@@ -130,9 +130,11 @@ def list_commits(basepath):
                 author = line.strip().split()[1]
         if line.startswith("Date: "):
             date = line[5:].strip()
+        if line.startswith("Merge: "):
+            committype = "merge"
         if not line.strip() and commit:
-            entries.append([commit, author, parse(date, ignoretz=True), ""])
-            commit, author, date = None, None, None
+            entries.append([commit, author, parse(date, ignoretz=True), committype, ""])
+            commit, author, date, committype = None, None, None, "normal"
 
         if not commit and line.startswith("    ") and entries:
             entries[-1][-1] += line[4:] + "\n"
@@ -201,17 +203,16 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
     entries = list_commits(basepath)
     bydate = defaultdict(list)
     latestcommits = set()
-    logrows = [ (commit, date, author, msg) for commit, author, date, msg in entries ]
+    logrows = [(commit, date, author, committype, msg) for commit, author, date, committype, msg in entries]
+    db.do("""REPLACE INTO commits_log VALUES(%s, %s, %s, %s, %s)""", values=logrows)
 
-    db.do("""REPLACE INTO commits_log VALUES(%s, %s, %s, %s)""", values=logrows)
-
-    for commit, _, date, _ in entries:
+    for commit, _, date, _, _ in entries:
         bydate[date.date()].append((date, commit))
     for datelist in bydate.values():
         date, commit = max(datelist)
         latestcommits.add(commit)
 
-    for idx, (commit, author, date, _) in enumerate(entries):
+    for idx, (commit, author, date, _, _) in enumerate(entries):
         if fromdate and date <= fromdate:
             if not quieter:
                 print("EARLIER:", (commit, author, date), "...SKIPPING")

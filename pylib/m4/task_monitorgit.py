@@ -1,3 +1,4 @@
+from __future__ import print_function
 import lib.log
 import sys
 import lib.commits
@@ -108,10 +109,11 @@ def makemail(entries, txtdiff):
     subjectline = "M-4 Yellow Alert!"
 
     for entry in entries:
-        rev, ctime, author, msg = entry[:4]
-        ctime = ctime.strftime('%Y-%m-%d %H:%M:%S')
-        arev = """<A href="https://github.com/theme-ontology/theming/commit/%s">%s..</A>""" % (rev, rev[:6])
-        loglines.append("""<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>""" % (arev, ctime, author, msg))
+        rev, ctime, author, committype, msg = entry[:5]
+        if committype != "merge":
+            ctime = ctime.strftime('%Y-%m-%d %H:%M:%S')
+            arev = """<A href="https://github.com/theme-ontology/theming/commit/%s">%s..</A>""" % (rev, rev[:6])
+            loglines.append("""<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>""" % (arev, ctime, author, msg))
 
     for line in txtdiff.split("\n"):
         match = re.match("^diff --git a/(.+?) b/(.+?)$", line)
@@ -190,14 +192,16 @@ def react_to_commit():
         global DEBUG
         DEBUG = True
     if DEBUG:
-        ts = (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
+        args = [x for x in sys.argv if x.startswith("--dt")]
+        hours = int(args[-1][4:]) if args else 24
+        ts = (datetime.utcnow() - timedelta(hours=hours)).strftime('%Y-%m-%d %H:%M:%S')
         db.do("""DELETE FROM commits_log WHERE time > '%s'""" % ts)
     fromid, fromtime = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))[0]
     sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
     lib.log.debug("last previously known commit is %s at %s", fromid, sfromtime)
     lib.commits.dbstore_commit_data(fromdate=fromtime, recreate=False, quieter=True)
     entries = list(db.do("""
-        SELECT id, time, author, message FROM commits_log
+        SELECT id, time, author, committype, message FROM commits_log
         WHERE time > '%s' ORDER BY time ASC""" % sfromtime
     ))
     if not entries:

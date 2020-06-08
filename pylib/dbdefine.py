@@ -108,6 +108,7 @@ TABLES = {
         `id` VARCHAR(80) NOT NULL,
         `time` DATETIME,
         `author` VARCHAR(20),
+        `committype` VARCHAR(20),
         `message` TEXT,
         PRIMARY KEY (`id`)
     ) 
