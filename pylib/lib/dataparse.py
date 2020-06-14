@@ -175,6 +175,7 @@ SUBJECTS_PARSE_THEMES = {
     "Minor Themes": parse_themes,
     "References": simple_line_collection,
     "Collections": simple_line_collection,
+    "Component Stories": simple_line_collection,
 }
 
 
@@ -202,7 +203,7 @@ def parse(file, subjects=None, default_parser=None):
     if subjects is None:
         subjects = SUBJECTS
     if default_parser is None:
-        default_parser = lambda lines: [ blockjoin(lines) ]
+        default_parser = lambda lines: [blockjoin(lines)]
     if default_parser == 'NOOP':
         default_parser = lambda lines: lines
 
@@ -362,6 +363,7 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
         "description": "description",
         "date": "date",
         "collections": "collections",
+        "component stories": "components",
     }
     composite_fields = {
         "description": "description",
@@ -406,10 +408,11 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
 
     for sid, field, data in stuff:
         # is this is a "collection" for all stories in this file?
-        if field.lower() == "collections" and sid in data:
-            for d in data:
-                if d not in global_collections:
-                    global_collections.append(d)
+        if not filename.endswith("_collections.st.txt"):
+            if field.lower() == "collections" and sid in data:
+                for d in data:
+                    if d not in global_collections:
+                        global_collections.append(d)
 
         if sid not in out:
             out[sid] = webobject.Story(name=sid, meta=dict(meta))

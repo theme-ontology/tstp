@@ -7,6 +7,7 @@ import lib.log
 from collections import defaultdict
 import lib.files
 from unidecode import unidecode
+from pprint import pprint
 
 
 HEADERS = [
@@ -29,6 +30,9 @@ def read(filename):
 
 
 def main():
+    """
+    pyrun util.mergelist mydata.xlsx ./notes
+    """
     themelist = defaultdict(list)
     newentries = defaultdict(lambda: defaultdict(list))
     replacements = defaultdict(list)
@@ -41,6 +45,8 @@ def main():
         oldweight = FIELDNAMES.get(w.strip(), "")
         weight = FIELDNAMES.get(rw.strip() or w.strip(), "")
         comment = rc.strip() or c
+        if not sid:
+            continue  ## blank rows at end, maybe
         if not weight:
             lib.log.warn("MISSING WEIGHT IN ENTRY %s - SKIPPING", (sid, w, t, rt, rw))
             continue
@@ -53,6 +59,17 @@ def main():
                     newentries[sid][weight].append([theme, comment])
         elif theme:
             newentries[sid][weight].append([theme, comment])
+
+    if '--test' in sys.argv:
+        print("NEW")
+        for sid in newentries:
+            print(sid)
+            pprint(dict(newentries[sid]))
+        print("REPLACEMENT")
+        pprint(dict(replacements))
+        print("DELETION")
+        pprint(dict(deletions))
+        return
 
     for path in lib.files.walk(sys.argv[3]):
         if path.endswith(".st.txt"):
@@ -81,16 +98,26 @@ def main():
                                 newcomment = unidecode(nc)
                                 themelist[(cursid, newtheme)].append(curfield)
                                 lines.append("%s [%s],\n" % (newtheme, newcomment))
+                            replacements[key] = []
                         else:
                             themelist[(cursid, theme)].append(curfield)
 
                     # add new themes at end of field
                     if not line.strip() and cursid and curfield and not curfielddone:
+                        curfielddone = True  # mustn't do this more than once
+                        for key in replacements:
+                            if key[:2] == (cursid, curfield):
+                                for nw, nt, nc in replacements[key]:
+                                    lib.log.warn("REPLACEMENT TARGET MISSING, APPENDING: %s -> %s", key, nt)
+                                    newtheme = unidecode(nt)
+                                    newcomment = unidecode(nc)
+                                    themelist[(cursid, newtheme)].append(curfield)
+                                    lines.append("%s [%s],\n" % (newtheme, newcomment))
+                                    changed = True
                         for theme, comment in newentries[cursid][curfield]:
                             theme = unidecode(theme)
                             themelist[(cursid, theme)].append(curfield)
                             lines.append("%s [%s],\n" % (theme, comment))
-                            curfielddone = True  # mustn't add it again
                             changed = True
 
                     # unless explicitly deleted, add back just as it was

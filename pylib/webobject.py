@@ -529,6 +529,7 @@ class TSTPConnection(TSTPObject):
 class Story(TSTPObject):
     category = "story"
     collections = ""
+    components = ""
     meta = ""
     fields = (
         "name",
@@ -537,6 +538,7 @@ class Story(TSTPObject):
         "date",
         "description",
         "collections",
+        "components",
         "meta",
     )
     preforder = {
