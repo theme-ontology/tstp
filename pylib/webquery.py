@@ -92,13 +92,14 @@ def handle_response(obj_type, variant = None):
         )
 
     ## collections may list their component stories, in which case we add them on the stories here
-    objmap = {obj.name: obj for obj in objs}
-    for obj in objs:
-        if obj.name.lower().startswith("collection:"):
-            for line in obj.components.split("\n"):
-                cname = line.strip()
-                if cname in objmap:
-                    objmap[cname].collections += "\n%s" % cname
+    if issubclass(obj_type, webobject.Story):
+        objmap = {obj.name: obj for obj in objs}
+        for obj in objs:
+            if obj.name.lower().startswith("collection:"):
+                for line in obj.components.split("\n"):
+                    cname = line.strip()
+                    if cname in objmap:
+                        objmap[cname].collections += "\n%s" % cname
 
     ## order items according to a search string and "fuzzy" string matching heuristics
     if isinstance(fuzzysearch, basestring) and fuzzysearch.strip():
@@ -192,7 +193,7 @@ def handle_query():
 
 if __name__ == '__main__':
     try:
-        print handle_query()
+        print(handle_query())
 
     except:
         raise # TODO remove in prod
