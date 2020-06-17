@@ -191,60 +191,87 @@ SUBJECTS = {
 }
 
 
-def parse(file, subjects=None, default_parser=None):
+def parse_section_gen(linegen):
     """
-    Parse a file of themes and related info.
+    Takes a generator of lines (such a file handle) and yields lists of lines, grouped into
+    logical blocks.
     """
-    sections = []
     lines = []
+    for line in linegen:
+        if line.startswith("===") and len(lines) > 1:
+            yield lines[:-1]
+            lines = [lines.pop()]
+        lines.append(line.strip())
+    yield lines
+
+
+def parse_section(section, subjects=None, default_parser=None):
+    """
+    Take a list of lines that constitute a single section in TO format
+    (first line is objects name underlined with "===", then follows "fields"
+    like ":: Field Name") and output structured information.
+    """
+    # subjects begin with "::", content may be parsed in different ways
+    identifier = section[0] if section else None
+    subject = None
+    lineacc = []
     notices = []
     stuff = []
 
+    for idx, line in enumerate(section):
+        # hack to handle EOF
+        if idx == len(section) - 1:
+            lineacc.append(line)
+            line = ":: "
+
+        # parse previous subject when subject changes
+        if line.startswith(":: "):
+            if subject:
+                parser = subjects.get(subject, default_parser)
+                try:
+                    stuff.append((identifier, subject, list(parser(lineacc))))
+                except Exception:
+                    notices.append('Failed to parse data for "%s" in "%s"' % (subject, identifier))
+                    raise  # vestigial: we no longer tolerate any errors here
+            subject = line[3:].strip()
+            lineacc = []
+
+        # accumulate lines of subject
+        else:
+            lineacc.append(line)
+
+    return stuff, notices
+
+
+def iter_parse(file, subjects=None, default_parser=None):
+    """
+    Parse a file of themes and related info.
+    Returns:
+        yields (stuff, notices) for each object defined
+        stuff: list of tuples like (object name, field name, data). object name will be constant in each list.
+        notices: (deprecated) list of parse errors, if any.
+    """
     if subjects is None:
         subjects = SUBJECTS
     if default_parser is None:
         default_parser = lambda lines: [blockjoin(lines)]
     if default_parser == 'NOOP':
         default_parser = lambda lines: lines
-
-    # sections are delimeted by identifier underlined with ===
     with codecs.open(file, "r", encoding='utf-8') as fh:
-        for line in fh.readlines():
-            if line.startswith("===") and len(lines) > 1:
-                sections.append(lines)
-                lines = [ lines.pop() ]
-            lines.append(line.strip())
-    sections.append(lines)
+        for section in parse_section_gen(fh):
+            stuff, notices = parse_section(section, subjects=subjects, default_parser=default_parser)
+            yield (section, stuff, notices)
 
-    # subjects begin with "::", content may be parsed in different ways
-    for lines in sections:
-        identifier = lines[0] if lines else None
-        subject = None
-        lineacc = []
 
-        for idx, line in enumerate(lines):
-            # hack to handle EOF
-            if idx == len(lines) - 1:
-                lineacc.append(line)
-                line = ":: "
-
-            # parse previous subject when subject changes
-            if line.startswith(":: "):
-                if subject:
-                    parser = subjects.get(subject, default_parser)
-                    try:
-                        stuff.append((identifier, subject, list(parser(lineacc))))
-                    except Exception:
-                        notices.append('Failed to parse data for "%s" in "%s"' % (subject, identifier))
-                        raise
-
-                subject = line[3:].strip()
-                lineacc = []
-
-            # accumulate lines of subject
-            else:
-                lineacc.append(line)
-
+def parse(file, subjects=None, default_parser=None):
+    """
+    Parse a file of themes and related info.
+    """
+    notices = []
+    stuff = []
+    for _section, ss, nn in iter_parse(file, subjects=subjects, default_parser=default_parser):
+        stuff.extend(ss)
+        notices.extend(nn)
     return stuff, notices
 
 
@@ -350,11 +377,39 @@ def read_themes_from_txt(filename, verbose = True):
                 lib.log.warn("%s: %s.%s - %s", filename, theme, field, str(e))
 
 
+def iter_stories_from_txt(filename):
+    """
+    Iterate over stories in a file, turn them into storyu objects but also
+    stamp each object with the blob of verbatim lines specifying it in
+    the text file.
+    """
+    for section, stuff, _notices in iter_parse(filename):
+        for obj in read_stories_from_fieldcollection(stuff):
+            obj.blob = "\n".join(section)
+            yield obj
+
+
 def read_stories_from_txt(filename, verbose=True, addextras=False):
+    """
+    Stories in special TO text file format as handled by "parse".
+    """
+    stuff, notices = parse(filename)
+    for notice in notices:
+        lib.log.warn("%s: %s", filename, notice)
+    meta = {"source": filename}
+    globcollection = not filename.endswith("_collections.st.txt")
+    for obj in read_stories_from_fieldcollection(stuff,
+        verbose=(verbose and filename), addextras=addextras, globcollection=globcollection
+    ):
+        obj.meta.update(meta)
+        obj.meta = json.dumps(obj.meta)
+        yield obj
+
+
+def read_stories_from_fieldcollection(fieldcollection, verbose=True, addextras=False, globcollection=False):
     """
     Stories in our special text file format.
     """
-    stuff, notices = parse(filename)
     out = {}
     out_composites = defaultdict(lambda: defaultdict(str))
     field_map = {
@@ -371,51 +426,30 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
         "collections": "collections",
     }
     recognized_fields = set([
-        "aliens",
-        "altercations",
-        "associations",
         "authors",
         "choice themes",
-        "deaths",
-        "errors",
         "genre",
-        "humorous situations",
-        "injuries",
-        "locations",
-        "main characters",
         "major themes",
-        "medical complications",
-        "mind complications",
         "minor themes",
         "not themes",
         "notes",
         "other keywords",
-        "plot devices",
         "ratings",
-        "settings",
-        "supporting cast",
-        "technobabble",
-        "theatrics",
-        "transports",
-    ] + composite_fields.keys() + field_map.keys())
+        "related stories",
+        "aliases",
+    ] + list(composite_fields) + list(field_map))
     global_collections = []
-    meta = {
-        "source": filename,
-    }
 
-    for notice in notices:
-        lib.log.warn("%s: %s", filename, notice)
-
-    for sid, field, data in stuff:
+    for sid, field, data in fieldcollection:
         # is this is a "collection" for all stories in this file?
-        if not filename.endswith("_collections.st.txt"):
+        if globcollection:
             if field.lower() == "collections" and sid in data:
                 for d in data:
                     if d not in global_collections:
                         global_collections.append(d)
 
         if sid not in out:
-            out[sid] = webobject.Story(name=sid, meta=dict(meta))
+            out[sid] = webobject.Story(name=sid, meta={})
 
         obj = out[sid]
         lfield = field.strip().lower()
@@ -444,7 +478,7 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
             pass
         else:
             if verbose:
-                lib.log.warn("%s: %s.%s - don't grok", filename, sid, field)
+                lib.log.warn("%s: %s.%s - don't grok", verbose, sid, field)
 
     for sid in sorted(out):
         obj = out[sid]
@@ -467,14 +501,13 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
 
         obj.description = description
         obj.collections = "\n".join(clist)
-        obj.meta = json.dumps(obj.meta)
 
         try:
             obj.test_fields()
             yield obj
         except ValueError as e:
             if verbose:
-                lib.log.warn("%s: %s.%s - %s", filename, sid, field, str(e))
+                lib.log.warn("%s: %s.%s - %s", verbose, sid, field, str(e))
 
 
 def read_storythemes_from_txt(filename, verbose = True):
