@@ -575,7 +575,7 @@ def dataframe(source="txt", debug=False):
         from credentials import GIT_THEMING_PATH
         basepath = GIT_THEMING_PATH
         notespath = os.path.join(basepath, "notes")
-        for path in lib.files.walk(notespath, ".*\.(st|th)\.txt$", 0):
+        for path in lib.files.walk(notespath, ".*\.(st|th)\.txt$"):
             if debug:
                 print(path)
             if path.endswith(".th.txt"):

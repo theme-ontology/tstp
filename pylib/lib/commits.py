@@ -28,12 +28,12 @@ def get_story_prefixes(basepath, verbose=False):
     badsids = set()
     counted = set()
 
-    for path in lib.files.walk(basepath, ".*\.(st)\.txt$", 0):
+    for path in lib.files.walk(basepath, ".*\.(st)\.txt$"):
         if path.endswith(".st.txt"):
             for story in lib.dataparse.read_stories_from_txt(path, False):
                 dates[story.name.strip()] = story.date
 
-    for path in lib.files.walk(basepath, ".*\.(st)\.txt$", 0):
+    for path in lib.files.walk(basepath, ".*\.(st)\.txt$"):
         if path.endswith(".st.txt"):
             for story in lib.dataparse.read_storythemes_from_txt(path, False):
                 if story.name1 not in counted:
@@ -79,7 +79,7 @@ def get_datapoint(basepath):
     for k, v in prefixes.items():
         data["prefix:"+k] = dict(v)
 
-    for path in lib.files.walk(basepath, ".*\.(st|th)\.txt$", 0):
+    for path in lib.files.walk(basepath, ".*\.(st|th)\.txt$"):
         if path.endswith(".th.txt"):
             objs = list(lib.dataparse.read_themes_from_txt(path, False))
             themes.extend(objs)

@@ -8,6 +8,7 @@ from collections import defaultdict
 from webobject import TSTPEvent
 import json
 import os
+import os.path
 import subprocess
 
 
@@ -33,7 +34,7 @@ def main():
         stories = defaultdict(list)
         storythemes = defaultdict(list)
 
-        for path in lib.files.walk(args[1], ".*\.(st|th)\.txt$", 0):
+        for path in lib.files.walk(".", ".*\.(st|th)\.txt$"):
             log.info("READING: %s", path)
 
             if path.endswith(".th.txt"):

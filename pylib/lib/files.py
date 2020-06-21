@@ -15,7 +15,7 @@ def safe_filename(unsafe):
     return "".join(c for c in unsafe if c.isalnum() or c in keepcharacters).rstrip()[:maxlength].strip("_")
 
 
-def walk(path, pattern = ".*", levels = -1):
+def walk(path, pattern=".*", levels=-1):
     """
     Find files whose name matches a pattern up to a given depth.
     """

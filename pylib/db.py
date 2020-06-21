@@ -8,28 +8,25 @@ DB_HANDLE = None
 DB_HANDLES = {}
 
 
-def connect(name = 'tstp'):
-    ''' 
-	Establish and cache connection to a named database.
-	'''
+def connect(name='tstp'):
+    """
+    Establish and cache connection to a named database.
+    """
     global DB_HANDLE
-
     try:
         if not name in DB_HANDLES:
             db = DBS[name]
             DB_HANDLES[name] = sql.connect(
-				host = db['host'], 
-				user = db['user'], 
-				passwd = db['password'], 
-				db = db['db'], 
-				use_unicode = True, 
-				charset = "utf8",
-			)
-
-    except Exception, ex:
+                host=db['host'],
+                user=db['user'],
+                passwd=db['password'],
+                db=db['db'],
+                use_unicode=True,
+                charset="utf8",
+            )
+    except Exception as ex:
         log.error("ERROR: Unable to connect to \"%s\":\n%s" % (name, str(ex)))
-        raise
-
+        raise ex
     DB_HANDLE = DB_HANDLES[name]
 
 
@@ -38,13 +35,10 @@ def handle():
     Handle to currently selected db.
     """
     global DB_HANDLE
-
     if DB_HANDLE is None:
         connect()
-
     if DB_HANDLE is None:
-        raise RuntimeError, "Failed to establish db connection"
-
+        raise RuntimeError("Failed to establish db connection")
     return DB_HANDLE
 
 
@@ -65,35 +59,30 @@ def esc(*args):
     return handle().escape_string(args[0].encode("utf-8")).decode("utf-8")
 
 
-def do(query, values = None, dofetch = True, quietish = False):
-    '''
-	Perform sql query and return result.
-	'''
+def do(query, values=None, dofetch=True, quietish=False):
+    """
+    Perform sql query and return result.
+    """
     con = cursor()
-
     if not quietish:
         log.info( 'Executing: %s...' % query )
-
     with log.Timer() as tt:
         if not values:
             res = con.execute( query )
         else:
             res = con.executemany( query, values )
-
         DB_HANDLE.commit()
-
     if not quietish:
         log.info( '...Done in %.4s seconds with result %s' % ( tt.elapsed / 1000.0, res ) )
-
     if dofetch and not values:
         return con.fetchall()
-
     return None
 
 
 def uuid(name):
-    """Get unique int in named wheel."""
-    con = cursor()
+    """
+    Get unique int in named wheel.
+    """
     do("""
         UPDATE web_counters SET value=last_insert_id(value+1) WHERE id="%s"
     """ % name)
@@ -102,11 +91,10 @@ def uuid(name):
 
 def test():
     query = '''SELECT * FROM aliens_tos'''
-
     for row in do(query):
         log.debug('%s' % str(row))
 
 
 if __name__ == '__main__':
-    print uuid("event")
+    print(uuid("event"))
     #test()

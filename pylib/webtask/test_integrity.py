@@ -18,7 +18,7 @@ class Tests(object):
         Check that all theme definitions can be read.
         """
         lu = defaultdict(list)
-        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$", 0):
+        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
             for th in lib.dataparse.read_themes_from_txt(path, verbose=True):
                 lu[th.name].append(path)
         for name in lu:
@@ -30,7 +30,7 @@ class Tests(object):
         Check that all story definitions can be read.
         """
         lu = defaultdict(list)
-        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$", 0):
+        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$"):
             for st in lib.dataparse.read_stories_from_txt(path, verbose=True):
                 lu[st.name].append(path)
         for name in lu:
@@ -42,7 +42,7 @@ class Tests(object):
         Test that all themes as assigned to stories can be read from story files.
         """
         lu = defaultdict(list)
-        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$", 0):
+        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$"):
             for st in lib.dataparse.read_storythemes_from_txt(path, verbose=True):
                 lu[(st.name1, st.name2)].append(path)
         for name in lu:
@@ -55,7 +55,7 @@ class Tests(object):
         """
         import networkx as nx  # may not be present in which case test simply fails
         graph = nx.DiGraph()
-        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$", 0):
+        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
             objs = list(lib.dataparse.read_themes_from_txt(path, False))
             for theme in objs:
                 for parent in theme.parents.split(","):
@@ -80,7 +80,7 @@ class Tests(object):
 
         allfields = defaultdict(int)
         allstats = {}
-        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$", 0):
+        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
             objs = list(lib.dataparse.read_themes_from_txt(path, verbose=False))
             fields = defaultdict(int)
             for obj in objs:
@@ -101,7 +101,7 @@ class Tests(object):
 
         allfields = defaultdict(int)
         allstats = {}
-        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$", 0):
+        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$"):
             objs = list(lib.dataparse.read_stories_from_txt(path, verbose=False, addextras=True))
             fields = defaultdict(int)
             for obj in objs:

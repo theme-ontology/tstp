@@ -21,7 +21,7 @@ def get_raw_stories():
     if not CACHED_STORIES:
         path = os.path.join(GIT_THEMING_PATH, "notes")
         cs = CACHED_STORIES
-        for path in lib.files.walk(path, ".*\.(st|th)\.txt$", 0):
+        for path in lib.files.walk(path, ".*\.(st|th)\.txt$"):
             log.info("READING: %s", path)
             if path.endswith(".st.txt"):
                 for obj in lib.dataparse.read_stories_from_txt(path, addextras=True):
