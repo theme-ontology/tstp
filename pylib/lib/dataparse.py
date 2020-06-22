@@ -397,7 +397,7 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
     for notice in notices:
         lib.log.warn("%s: %s", filename, notice)
     meta = {"source": filename}
-    globcollection = not filename.endswith("_collections.st.txt")
+    globcollection = not filename.endswith("-collections.st.txt")
     for obj in read_stories_from_fieldcollection(stuff,
         verbose=(verbose and filename), addextras=addextras, globcollection=globcollection
     ):
