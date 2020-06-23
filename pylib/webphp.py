@@ -12,14 +12,17 @@ POST = {}
 FILES = {}
 
 
-if len(sys.argv) >= 2:
-    with open(sys.argv[1], "r") as fh:
-        data = fh.read()
-        payload = json.loads(data)
-        POST = payload["POST"]
-        GET = payload["GET"]
-        FILES = payload["FILES"]
-        PHP_SESSION_ID = payload["PHP_SESSION_ID"]
+try:
+    if len(sys.argv) >= 2:
+        with open(sys.argv[1], "r") as fh:
+            data = fh.read()
+            payload = json.loads(data)
+            POST = payload["POST"]
+            GET = payload["GET"]
+            FILES = payload["FILES"]
+            PHP_SESSION_ID = payload["PHP_SESSION_ID"]
+except IOError:
+    pass
 
 
 if not POST and not GET:

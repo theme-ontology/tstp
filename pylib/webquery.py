@@ -1,4 +1,4 @@
-import cgitb; cgitb.enable()
+#import cgitb; cgitb.enable()
 import log
 log.set_level('SILENT')
 log.set_templog("web.log")
@@ -55,7 +55,15 @@ def handle_response(obj_type, variant = None):
     regexpnamefilter = get('regexpnamefilter', None)
     collectionfilter = get('collectionfilter', None)
     version = get('version', "latest")
+    return get_response(obj_type, fields=fields, fuzzysearch=fuzzysearch, variant=variant,
+                        string_limit=string_limit, row_limit=row_limit, collapsecollections=collapsecollections,
+                        regexpnamefilter=regexpnamefilter, collectionfilter=collectionfilter, version='latest')
 
+
+def get_response(obj_type, fields='', fuzzysearch=None, variant=None, string_limit=100, row_limit=10000,
+                 collapsecollections=None, regexpnamefilter=None, collectionfilter=None, version='latest'):
+    """
+    """
     if variant == "proposedevents":
         # a list of events session user has proposed for insertion,
         # not yet stored in database
@@ -99,7 +107,7 @@ def handle_response(obj_type, variant = None):
                 for line in obj.components.split("\n"):
                     cname = line.strip()
                     if cname in objmap:
-                        objmap[cname].collections += "\n%s" % cname
+                        objmap[cname].collections += "\n%s" % obj.name
 
     ## order items according to a search string and "fuzzy" string matching heuristics
     if isinstance(fuzzysearch, basestring) and fuzzysearch.strip():
@@ -148,11 +156,7 @@ def handle_response(obj_type, variant = None):
     elif collectionfilter is not None:
         objs = [o for o in objs if collectionfilter in o.collections.split("\n")]
 
-    return obj_type.make_json(
-        objs, 
-        fields = fields, 
-        limit = string_limit,
-    )
+    return obj_type.make_json(objs,  fields=fields, limit=string_limit)
 
 
 def handle_query():
@@ -199,4 +203,9 @@ if __name__ == '__main__':
         raise # TODO remove in prod
         pass
 
+
+def main():
+    get_response(webobject.Story,
+                     fields="score,name,title,date,description", fuzzysearch=None, variant=None, string_limit=200, row_limit=10000,
+                     collapsecollections=None, regexpnamefilter=None, collectionfilter="Collection: Critters", version='latest')
 

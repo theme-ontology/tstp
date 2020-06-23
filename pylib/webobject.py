@@ -770,7 +770,7 @@ class TSTPEvent(TSTPObject):
                 klass.commit_updates(updates)
 
     @classmethod
-    def write_many(cls, events, chunksize = 5000):
+    def write_many(cls, events, chunksize=5000):
         """
         Write many events to db. 
         This will not affect any other objects.

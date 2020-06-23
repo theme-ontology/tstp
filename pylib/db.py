@@ -65,15 +65,15 @@ def do(query, values=None, dofetch=True, quietish=False):
     """
     con = cursor()
     if not quietish:
-        log.info( 'Executing: %s...' % query )
+        log.info('Executing: %s...' % query)
     with log.Timer() as tt:
         if not values:
-            res = con.execute( query )
+            res = con.execute(query)
         else:
-            res = con.executemany( query, values )
+            res = con.executemany(query, values)
         DB_HANDLE.commit()
     if not quietish:
-        log.info( '...Done in %.4s seconds with result %s' % ( tt.elapsed / 1000.0, res ) )
+        log.info('...Done in %.4s seconds with result %s' % (tt.elapsed / 1000.0, res))
     if dofetch and not values:
         return con.fetchall()
     return None

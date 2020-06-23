@@ -34,7 +34,7 @@ def main():
         stories = defaultdict(list)
         storythemes = defaultdict(list)
 
-        for path in lib.files.walk(".", ".*\.(st|th)\.txt$"):
+        for path in lib.files.walk(".", ".*\\.(st|th)\\.txt$"):
             log.info("READING: %s", path)
 
             if path.endswith(".th.txt"):
@@ -57,7 +57,11 @@ def main():
         # add/update meta info
         for thingdict in (themes, stories):
             for path in thingdict:
-                relpath = lib.files.abspath2relpath(root, path)
+                if path.startswith("."):
+                    relpath = path
+                else:
+                    relpath = lib.files.abspath2relpath(root, path)
+                relpath.replace("\\", "/")
                 tmeta = {
                     "source": relpath,
                     "timestamp": timestamp,
