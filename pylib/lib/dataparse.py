@@ -167,6 +167,9 @@ def simple_keywordjoin(lines):
     return [ themejoin(lines) ]
 
 
+def simple_fieldclean(lines):
+    return ['\n'.join(a for a in [x.strip() for x in lines] if a)]
+
 
 SUBJECTS_PARSE_THEMES = {
     "Ratings": simple_line_collection,
@@ -175,7 +178,7 @@ SUBJECTS_PARSE_THEMES = {
     "Minor Themes": parse_themes,
     "References": simple_line_collection,
     "Collections": simple_line_collection,
-    "Component Stories": simple_line_collection,
+    "Component Stories": simple_fieldclean,
 }
 
 
@@ -187,6 +190,7 @@ SUBJECTS = {
     "Other Keywords": simple_themejoin,
     "References": simple_line_collection,
     "Collections": simple_line_collection,
+    "Component Stories": simple_fieldclean,
     "Description": simple_blockfill,
 }
 
