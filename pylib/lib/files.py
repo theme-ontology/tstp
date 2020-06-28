@@ -2,7 +2,7 @@ import os
 import os.path
 import re
 import credentials
-import subprocess
+import shutil
 
 
 def safe_filename(unsafe):
@@ -15,24 +15,36 @@ def safe_filename(unsafe):
     return "".join(c for c in unsafe if c.isalnum() or c in keepcharacters).rstrip()[:maxlength].strip("_")
 
 
-def walk(path, pattern=".*", levels=-1):
+def walk(path, pattern=".*", levels=-1, onlyfiles=True):
     """
     Find files whose name matches a pattern up to a given depth.
     """
     r = re.compile(pattern)
-
     # yield matching files
     for item in os.listdir(path):
         spath = os.path.join(path, item)
-        if os.path.isfile(spath) and r.match(item):
-            yield spath
-
+        if r.match(item):
+            if os.path.isfile(spath):
+                yield spath
     # recurse
     for item in os.listdir(path):
         spath = os.path.join(path, item)
         if os.path.isdir(spath) and levels != 0:
             for res in walk(spath, pattern, levels - 1):
                 yield res
+
+
+def remove(path, pattern=".*", levels=-1, onlyfiles=False):
+    """
+    Delete matching files and folders underneath path.
+    """
+    paths = list(walk(path, pattern=pattern, levels=-levels, onlyfiles=False))
+    for path in paths:
+        if os.path.isfile(path):
+            os.remove(path)
+    for path in paths:
+        if os.path.isdir(path):
+            shutil.rmtree(path)
 
 
 def mkdirs(path):

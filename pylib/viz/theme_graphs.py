@@ -1,12 +1,11 @@
-import lib.dataparse
+from __future__ import print_function
+import lib.datastats
 import lib.log
 import lib.mosvg
-import re
-from collections import defaultdict
-import numpy as np
 import sys
 import tempfile
 import os.path
+import lib.files
 
 
 lib.log.redirect()
@@ -21,20 +20,28 @@ def main():
 def write_to_path(path):
     graph = lib.datastats.get_theme_graph()
     roots = graph.findRoots()
-    l2 = []
+    l2, l3 = [], []
+    lib.files.remove(path)
 
     for root in roots:
         for child in graph.findNeighbours(root):
             l2.append(child)
-
-    for root in roots + l2:
-        tmppath = tempfile.gettempdir()
-        fname = root.replace(" ", "_")
-        dotfile = graph.make_dot_graph(tmppath, fname, roots=[root])
-        pdffile = os.path.join(path, fname + '.pdf')
-        CMD_DOT = r'""%s"" -Tpdf -o%%s %%s' % DOT_CMD
-        os.system(CMD_DOT % (pdffile, dotfile))
-        lib.log.info(CMD_DOT % (pdffile, dotfile))
+    for root in l2:
+        for child in graph.findNeighbours(root):
+            nodecount = len(graph.restrict(roots=[child]).nodes)
+            levels = len(set(graph.top_sort(roots=[child]).values()))
+            if levels > 2 and nodecount > 4:
+                l3.append(child)
+    for pref, tlist in [("", roots), ("Level-2", l2), ("Level-3", l3)]:
+        lib.files.mkdirs(os.path.join(path, pref))
+        for root in tlist:
+            tmppath = tempfile.gettempdir()
+            fname = root.replace(" ", "_").encode("ascii", "ignore")
+            dotfile = graph.make_dot_graph(tmppath, fname, roots=[root])
+            pdffile = os.path.join(path, pref, fname + '.pdf')
+            CMD_DOT = r'""%s"" -Tpdf -o%%s %%s' % DOT_CMD
+            os.system(CMD_DOT % (pdffile, dotfile))
+            lib.log.info(CMD_DOT % (pdffile, dotfile))
 
 
 def iter_colors():
@@ -48,3 +55,4 @@ def iter_colors():
     while True:
         for c in colors:
             yield c
+
