@@ -16,13 +16,18 @@ DEBUG = False
 
 def rchoice(ramp):
     """
+    Args:
+        ramp: list of (p, object) where p are cumulative probabilities  normalized
+        so that the las p is always 1.0.
     Returns:
-    An object picked randomly from the ramp.
+    An object picked uniformely at randomly from the ramp.
     """
     r = rnd()
     for p, obj in ramp:
-        if r < p:
+        if r <= p:
             return obj
+    if ramp:
+        return ramp[-1][-1]  # should never happen
 
 
 def build_theme_ramp():
@@ -158,9 +163,9 @@ def create_challenge():
     themes = lib.datastats.themes_with_usage()
     tobj = picktheme(themes.values())
     stlist = [[None, tobj]]
-    for _ in range(2):
-        extend_list(stlist)
     for _ in range(3):
+        extend_list(stlist)
+    for _ in range(2):
         extend_list(stlist, minorleap=True)
     for sobj, tobj in stlist:
         print("%50s: %s" % (sobj.name[:45] if sobj else "", tobj.name))
