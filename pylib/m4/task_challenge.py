@@ -9,6 +9,7 @@ import os
 import os.path
 import datetime
 import m4.tasks
+import sys
 
 
 DEBUG = False
@@ -98,7 +99,7 @@ def extend_list(stlist, minorleap=False):
     usedstories = {x[0].name for x in stlist if x[0]}
     usedthemes = {x[1].name for x in stlist if x[1]}
     tobj = stlist[-1][-1]
-    stobj = pickstory(tobj.stories.values(), excluding=usedstories, minorleap=True)
+    stobj = pickstory(tobj.stories.values(), excluding=usedstories, minorleap=minorleap)
     sobjs = stories[stobj.name1]
     tobjlist = [to for to in themes.values() if to.name in sobjs.themes]
     tobj2 = picktheme(tobjlist, excluding=usedthemes)
@@ -169,10 +170,13 @@ def create_challenge():
         extend_list(stlist, minorleap=True)
     for sobj, tobj in stlist:
         print("%50s: %s" % (sobj.name[:45] if sobj else "", tobj.name))
-    return makemail(stlist, cutoff=3)
+    return makemail(stlist, cutoff=4)
 
 
 def main():
+    if "--debug" in sys.argv:
+        global DEBUG
+        DEBUG = True
     with m4.tasks.ctx():
         td = datetime.date.today()
         if td.weekday() == 5 or DEBUG:  # only run on Saturdays
