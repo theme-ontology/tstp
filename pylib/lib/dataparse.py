@@ -600,7 +600,7 @@ def dataframe(source="txt", debug=False):
         for obj in olist:
             if fields != obj.fields:
                 raise RuntimeError("Expected all %s objects to have same field definition" % type(obj))
-        fields = [f for f in fields if not f.startswith("category")]
+        fields = [f for f in fields if not f.startswith("category") and not f=="meta"]
         data = [[getattr(obj, f) for f in fields] for obj in olist]
         dfs.append(pd.DataFrame(columns=fields, data=data))
 

@@ -63,6 +63,26 @@ def picktheme(tobjs, cutoffs=(2, 20), excluding=()):
     return tobj
 
 
+def pickstorytheme(stobjs, cutoffs=(2, 20), excluding=(), minorleap=False):
+    """
+    Choose a theme object that is used in some, but not too many, stories.
+    """
+    themes = lib.datastats.themes_with_usage()
+    ww = {'choice': 10, 'major': 10, 'minor': 1}
+    if minorleap:
+        ww["minor"] = 10
+    ramp = []
+    sumw = 0.0
+    for stobj in stobjs:
+        tobj = themes[stobj.name2]
+        if cutoffs[0] <= len(tobj.stories) < cutoffs[1] and tobj.name not in excluding:
+            sumw += ww[stobj.weight]
+            ramp.append([sumw, tobj])
+    for item in ramp:
+        item[0] /= sumw
+    return rchoice(ramp)
+
+
 def pickstory(stobjs, excluding=(), minorleap=False):
     """
     Choose a story, with high preference for those with stronger weight.
@@ -95,15 +115,13 @@ def extend_list(stlist, minorleap=False):
     same list as input but with an added item
     """
     stories = lib.datastats.stories_with_themes()
-    themes = lib.datastats.themes_with_usage()
     usedstories = {x[0].name for x in stlist if x[0]}
     usedthemes = {x[1].name for x in stlist if x[1]}
     tobj = stlist[-1][-1]
     stobj = pickstory(tobj.stories.values(), excluding=usedstories, minorleap=minorleap)
-    sobjs = stories[stobj.name1]
-    tobjlist = [to for to in themes.values() if to.name in sobjs.themes]
-    tobj2 = picktheme(tobjlist, excluding=usedthemes)
-    stlist.append((sobjs, tobj2))
+    sobj = stories[stobj.name1]
+    tobj2 = pickstorytheme(sobj.themes.values(), excluding=usedthemes, minorleap=minorleap)
+    stlist.append((sobj, tobj2))
     return stlist
 
 
@@ -165,7 +183,7 @@ def create_challenge():
     tobj = picktheme(themes.values())
     stlist = [[None, tobj]]
     for _ in range(3):
-        extend_list(stlist)
+        extend_list(stlist, minorleap=False)
     for _ in range(2):
         extend_list(stlist, minorleap=True)
     for sobj, tobj in stlist:
@@ -189,7 +207,7 @@ def main():
                 lib.email.publish(html,
                     mailsubject="M-4 Creative Challenge",
                     filepath=path,
-                    slackmessage="Beep beep, I have a new challenge for you here:",
+                    slackmessage="" if DEBUG else "Beep beep, I have a new challenge for you here:",
                 )
             else:
                 lib.log.info("Challenge for today already created.")
