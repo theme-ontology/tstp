@@ -66,6 +66,25 @@ class Tests(object):
                 log.debug("cycle: %s" % repr(cycle))
             return "found %d cycles" % len(cycles)
 
+    def test_unused_themes(self):
+        """
+        List all unused themes that are defined, but do not fail.
+        """
+        counts = defaultdict(int)
+        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$"):
+            for st in lib.dataparse.read_storythemes_from_txt(path, verbose=True):
+                counts[st.name2] += 1
+        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
+            objs = list(lib.dataparse.read_themes_from_txt(path, False))
+            for theme in objs:
+                for parent in theme.parents.split(","):
+                    counts[parent.strip()] += 1
+        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
+            objs = list(lib.dataparse.read_themes_from_txt(path, False))
+            for theme in objs:
+                if counts[theme.name] == 0:
+                    log.warn("Found unused theme '%s' in: %s", theme.name, path)
+
     def test_statistics(self):
         """
         Report a count of various objects defined.
