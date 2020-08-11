@@ -4,7 +4,10 @@ import log
 try:
     import MySQLdb as sql
 except ImportError:
-    log.warn("ERROR: Unable to import MySQLdb bindings - database access will not work")
+    try:
+        import pymysql as sql
+    except ImportError:
+        log.warn("ERROR: Unable to import MySQLdb bindings - database access will not work")
 
 
 DB_HANDLE = None
