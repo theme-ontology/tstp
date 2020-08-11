@@ -9,7 +9,6 @@ from git import Repo
 #' preliminaries
 basepath = GIT_THEMING_PATH_HIST
 notespath = os.path.join(basepath, "notes")
-print(notespath)
 os.chdir(basepath)
 
 #' checkout git repo at a given commid id or version tag
@@ -21,7 +20,7 @@ repo.git.checkout(version_tag)
 
 #' read theme files
 deprecated_themes_file = 'deprecated-themes.txt'
-theme_files = list(lib.files.walk(basepath, ".*\.(th)\.txt$"))
+theme_files = list(lib.files.walk(basepath, ".*\.th\.txt$"))
 print("\n".join(theme_files))
 #print(theme_files)
 
