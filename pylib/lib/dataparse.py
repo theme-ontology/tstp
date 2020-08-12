@@ -303,7 +303,7 @@ def read_storythemes_from_db(limit = 1000000):
         yield obj   
 
 
-def read_themes_from_txt(filename, verbose = True):
+def read_themes_from_txt(filename, verbose=True, addextras=False, combinedescription=True):
     """
     Themes in our special text file format.
     """
@@ -345,6 +345,10 @@ def read_themes_from_txt(filename, verbose = True):
 
         if attr in themeobj.fields:
             setattr(themeobj, attr, data[0])
+        elif addextras:
+            exattr = lfield.replace(" ", "")
+            setattr(themeobj, exattr, data)
+            themeobj.extra_fields += (exattr,)
         else:
             if verbose:
                 if lfield not in composite_fields and lfield not in unused_fieldnames:
@@ -352,26 +356,26 @@ def read_themes_from_txt(filename, verbose = True):
 
     for key in sorted(out_themes):
         themeobj = out_themes[key]
-        description = getattr(themeobj, "description")
-        examples = out_composites[key]["examples"].strip()
-        aliases = out_composites[key]["aliases"].strip()
-        notes = out_composites[key]["notes"].strip()
-        references = out_composites[key]["references"].strip()
 
-        if notes:
-            description += "\n\nNotes:\n" + notes
-        if examples:
-            description += "\n\nExamples:\n" + examples
-        if aliases:
-            description += "\n\nAliases:\n" + aliases
-        if references:
-            description += "\n\nReferences:\n"
-            for line in references.split("\n"):
-                line = line.strip()
-                if line:
-                    description += line + "\n"
-
-        themeobj.description = description
+        if combinedescription:
+            description = getattr(themeobj, "description")
+            examples = out_composites[key]["examples"].strip()
+            aliases = out_composites[key]["aliases"].strip()
+            notes = out_composites[key]["notes"].strip()
+            references = out_composites[key]["references"].strip()
+            if notes:
+                description += "\n\nNotes:\n" + notes
+            if examples:
+                description += "\n\nExamples:\n" + examples
+            if aliases:
+                description += "\n\nAliases:\n" + aliases
+            if references:
+                description += "\n\nReferences:\n"
+                for line in references.split("\n"):
+                    line = line.strip()
+                    if line:
+                        description += line + "\n"
+            themeobj.description = description
 
         try:
             themeobj.test_fields()

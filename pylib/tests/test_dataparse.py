@@ -5,20 +5,9 @@ import os
 import lib.dataparse
 import lib.log
 import logging
-import credentials
 
 logging.basicConfig(level = logging.DEBUG)
 lib.log.printfunc = logging.debug
-
-
-class TestCollection(unittest.TestCase):
-    def setUp(self):
-        self.voyager_path = os.path.join(
-            credentials.GIT_THEMING_PATH, "notes", "stories", "television", "tv-startrek-voyager.st.txt")
-
-    def test_voyager(self):
-        stories = list(lib.dataparse.read_stories_from_txt(self.voyager_path))
-        lib.log.debug("read %s stories  from %s", len(stories), self.voyager_path)
 
 
 class TestThemes(unittest.TestCase):
