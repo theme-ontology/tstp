@@ -61,8 +61,9 @@ def main():
     #print(type(fields[0]))
     #theme_dict = { 'name': {}, 'description': {}, 'parents': {} }
 
-    #id = 388
-    id = 379
+    id = 25
+    #id = 388 # two examples
+    #id = 379 # two space separated references
     fields = sorted(set(themeobjs[id].fields + themeobjs[id].extra_fields))
     print(fields)
     theme_od = OrderedDict()
@@ -71,8 +72,8 @@ def main():
     theme_od['parents'] = {}
     #print(theme_od)
 
-    print(type(themeobjs[id].name))
-    print(type(themeobjs[id].examples[0].split('\n\n')))
+    print(themeobjs[id].name)
+    print(themeobjs[id].meta)
 
 
     for field in fields:
@@ -89,12 +90,19 @@ def main():
         if field == 'notes':
             theme_od['notes'] = themeobjs[id].notes.rstrip().replace(' \n','').replace('\n ','').replace('\n','')
         if field == 'aliases':
-            theme_od['aliases'] = themeobjs[id].aliases
+            aliases = themeobjs[id].aliases
+            if aliases[0] != "":
+                if len(aliases) == 1:
+                    theme_od['aliases'] = ''.join(aliases)
+                elif len(aliases) > 1:
+                    theme_od['aliases'] = aliases
         if field == 'references':
             references = filter(None, themeobjs[id].references)
-            print(references)
             if len(references) == 1:
-                theme_od['references'] = ''.join(references)
+                if ' ' in references[0]:
+                    theme_od['references'] = references[0].split(' ')
+                else:
+                    theme_od['references'] = ''.join(references)
             elif len(references) > 1:
                 theme_od['references'] = references
         if field == 'examples':
@@ -103,7 +111,19 @@ def main():
             if raw_examples[0] != "":
                 for example in raw_examples:
                     examples.append(example.rstrip().replace(' \n','').replace('\n ','').replace('\n',''))
+            if len(examples) == 1:
+                theme_od['examples'] = ''.join(examples)
+            elif len(examples) > 1:
                 theme_od['examples'] = examples
+        if field == 'relatedthemes':
+            relatedthemes = themeobjs[id].relatedthemes
+            if relatedthemes[0] != "":
+                if len(relatedthemes) == 1:
+                    theme_od['relatedthemes'] = ''.join(relatedthemes)
+                elif len(relatedthemes) > 1:
+                    theme_od['relatedthemes'] = relatedthemes
+        if field == 'meta':
+            theme_od['source'] = themeobjs[id].meta
 
     print(json.dumps(theme_od, indent=4))
 
