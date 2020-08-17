@@ -10,6 +10,7 @@ from git import Repo
 import json
 import io
 from collections import OrderedDict
+import pytz
 
 def main():
     #' preliminaries
@@ -27,7 +28,8 @@ def main():
         print(version_tag)
         repo.git.checkout(version_tag)
         commit_id = repo.head.object.hexsha
-        timestamp = repo.head.object.committed_datetime
+        dt = repo.head.object.committed_datetime.astimezone(pytz.UTC)
+        timestamp = dt.strftime("%Y-%m-%d %H:%M:%S (UTC)")
         lto_od = OrderedDict()
         metadata_od = OrderedDict()
         metadata_od['version'] = str(version_tag)
@@ -179,4 +181,4 @@ def main():
         with io.open(output_dir + '/' + output_file, 'w', encoding='utf-8') as f:
             f.write(json.dumps(lto_od, ensure_ascii=False, indent=4))
 
-main()
+
