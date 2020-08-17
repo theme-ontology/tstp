@@ -90,7 +90,8 @@ def block_fill(lines):
     lines = []
 
     for txt in paragraphs.split("\n\n"):
-        lines.append(textwrap.fill(txt, 78))
+        for line in textwrap.fill(txt, 78).split("\n"):
+            lines.append(line.strip())
         lines.append("")
 
     return "\n".join(lines)
