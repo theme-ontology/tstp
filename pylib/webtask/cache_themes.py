@@ -55,9 +55,9 @@ def main():
                         elif len(aliases) > 1:
                             theme_od['aliases'] = aliases
                 if 'description' in fields:
-                    theme_od['description'] = themeobj.description.rstrip().replace(' \n', '').replace('\n ', '').replace('\n', ' ')
+                    theme_od['description'] = themeobj.description.rstrip()
                 if 'notes' in fields:
-                    theme_od['notes'] = themeobj.notes[0].rstrip().replace(' \n', '').replace('\n ', '').replace('\n', ' ')
+                    theme_od['notes'] = themeobj.notes[0].rstrip()
                 if 'parents' in fields:
                     parents = themeobj.parents.split(', ')
                     if len(parents) == 1:
@@ -78,7 +78,7 @@ def main():
                     examples = list()
                     if raw_examples[0] != "":
                         for example in raw_examples:
-                            examples.append(example.rstrip().replace(' \n', '').replace('\n ', '').replace('\n', ''))
+                            examples.append(example.rstrip())
                     if len(examples) == 1:
                         theme_od['examples'] = ''.join(examples)
                     elif len(examples) > 1:
@@ -91,8 +91,8 @@ def main():
                         elif len(relatedthemes) > 1:
                             theme_od['relatedthemes'] = relatedthemes
                 if 'meta' in fields:
-                    source_raw = themeobj.meta.replace('{\"source\": \"', '').replace('\"}', '').split('/')
-                    theme_od['source'] = './' + '/'.join(source_raw[source_raw.index('theming'):])
+                    source_path = themeobj.meta.replace('{\"source\": \"', '').replace('\"}', '')
+                    theme_od['source'] = '.' +  lib.files.abspath2relpath(basepath, source_path)
                 themes_list.append(theme_od)
 
         print(len(themes_list))
@@ -103,11 +103,13 @@ def main():
             with io.open(output_dir + '/' + output_file, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(lto_od, ensure_ascii=False, indent=4))
 
+
     # ' construct jsonification of current lto themes and write to file
     print('master')
     repo.git.checkout('master')
     commit_id = repo.head.object.hexsha
-    timestamp = repo.head.object.committed_datetime
+    dt = repo.head.object.committed_datetime.astimezone(pytz.UTC)
+    timestamp = dt.strftime("%Y-%m-%d %H:%M:%S (UTC)")
     lto_od = OrderedDict()
     metadata_od = OrderedDict()
     metadata_od['version'] = 'developmental'
@@ -132,10 +134,9 @@ def main():
                     elif len(aliases) > 1:
                         theme_od['aliases'] = aliases
             if 'description' in fields:
-                theme_od['description'] = themeobj.description.rstrip().replace(' \n', '').replace('\n ', '').replace(
-                    '\n', ' ')
+                theme_od['description'] = themeobj.description.rstrip()
             if 'notes' in fields:
-                theme_od['notes'] = themeobj.notes[0].rstrip().replace(' \n', '').replace('\n ', '').replace('\n', ' ')
+                theme_od['notes'] = themeobj.notes[0].rstrip()
             if 'parents' in fields:
                 parents = themeobj.parents.split(', ')
                 if len(parents) == 1:
@@ -156,7 +157,7 @@ def main():
                 examples = list()
                 if raw_examples[0] != "":
                     for example in raw_examples:
-                        examples.append(example.rstrip().replace(' \n', '').replace('\n ', '').replace('\n', ''))
+                        examples.append(example.rstrip())
                 if len(examples) == 1:
                     theme_od['examples'] = ''.join(examples)
                 elif len(examples) > 1:
@@ -169,8 +170,8 @@ def main():
                     elif len(relatedthemes) > 1:
                         theme_od['relatedthemes'] = relatedthemes
             if 'meta' in fields:
-                source_raw = themeobj.meta.replace('{\"source\": \"', '').replace('\"}', '').split('/')
-                theme_od['source'] = './' + '/'.join(source_raw[source_raw.index('theming'):])
+                source_path = themeobj.meta.replace('{\"source\": \"', '').replace('\"}', '')
+                theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, source_path)
             themes_list.append(theme_od)
 
     print(len(themes_list))
