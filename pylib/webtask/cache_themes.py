@@ -95,6 +95,7 @@ def main():
                     theme_od['source'] = '.' +  lib.files.abspath2relpath(basepath, source_path)
                 themes_list.append(theme_od)
 
+        themes_list = sorted(themes_list, key=lambda i: i['name'])
         print(len(themes_list))
         lto_od['themes'] = themes_list
 
@@ -174,6 +175,7 @@ def main():
                 theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, source_path)
             themes_list.append(theme_od)
 
+    themes_list = sorted(themes_list, key=lambda i: i['name'])
     print(len(themes_list))
     lto_od['themes'] = themes_list
 
