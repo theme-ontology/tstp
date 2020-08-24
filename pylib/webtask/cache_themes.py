@@ -52,7 +52,7 @@ def main():
                     aliases = themeobj.aliases
                     if aliases[0] != "":
                         if len(aliases) == 1:
-                            theme_od['aliases'] = ''.join(aliases)
+                            theme_od['aliases'] = [''.join(aliases)]
                         elif len(aliases) > 1:
                             theme_od['aliases'] = aliases
                 if 'notes' in fields:
@@ -60,7 +60,7 @@ def main():
                 if 'parents' in fields:
                     parents = themeobj.parents.split(', ')
                     if len(parents) == 1:
-                        theme_od['parents'] = ''.join(parents)
+                        theme_od['parents'] = [''.join(parents)]
                     elif len(parents) > 1:
                         theme_od['parents'] = parents
                 if 'references' in fields:
@@ -69,7 +69,7 @@ def main():
                         if ' ' in references[0]:
                             theme_od['references'] = references[0].split(' ')
                         else:
-                            theme_od['references'] = ''.join(references)
+                            theme_od['references'] = [''.join(references)]
                     elif len(references) > 1:
                         theme_od['references'] = references
                 if 'examples' in fields:
@@ -79,14 +79,14 @@ def main():
                         for example in raw_examples:
                             examples.append(example.rstrip())
                     if len(examples) == 1:
-                        theme_od['examples'] = ''.join(examples)
+                        theme_od['examples'] = [''.join(examples)]
                     elif len(examples) > 1:
                         theme_od['examples'] = examples
                 if 'relatedthemes' in fields:
                     relatedthemes = themeobj.relatedthemes
                     if relatedthemes[0] != "":
                         if len(relatedthemes) == 1:
-                            theme_od['relatedthemes'] = ''.join(relatedthemes)
+                            theme_od['relatedthemes'] = [''.join(relatedthemes)]
                         elif len(relatedthemes) > 1:
                             theme_od['relatedthemes'] = relatedthemes
                 if 'meta' in fields:
@@ -149,7 +149,7 @@ def main():
                 references = filter(None, themeobj.references)
                 if len(references) == 1:
                     if ' ' in references[0]:
-                        theme_od['references'] = [references[0].split(' ')]
+                        theme_od['references'] = references[0].split(' ')
                     else:
                         theme_od['references'] = [''.join(references)]
                 elif len(references) > 1:
