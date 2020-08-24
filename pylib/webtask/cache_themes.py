@@ -15,8 +15,9 @@ import pytz
 def main():
     #' preliminaries
     basepath = GIT_THEMING_PATH_HIST
-    output_dir = PUBLIC_DIR
+    output_dir = os.path.join(PUBLIC_DIR,"data")
     print(output_dir)
+    lib.files.mkdirs(output_dir)
     os.chdir(basepath)
 
     #' construct jsonification of lto themes for each version and write to file
@@ -35,8 +36,6 @@ def main():
         metadata_od['version'] = str(version_tag)
         metadata_od['timestamp'] = str(timestamp)
         metadata_od['git-commit-id'] = str(commit_id)
-        lto_od['lto'] = metadata_od
-        #print(json.dumps(lto_od, indent=4))
 
         # ' read theme files
         themes_list = list()
@@ -47,6 +46,8 @@ def main():
                 theme_od = OrderedDict()
                 if 'name' in fields:
                     theme_od['name'] = themeobj.name
+                if 'description' in fields:
+                    theme_od['description'] = themeobj.description.rstrip()
                 if 'aliases' in fields:
                     aliases = themeobj.aliases
                     if aliases[0] != "":
@@ -54,8 +55,6 @@ def main():
                             theme_od['aliases'] = ''.join(aliases)
                         elif len(aliases) > 1:
                             theme_od['aliases'] = aliases
-                if 'description' in fields:
-                    theme_od['description'] = themeobj.description.rstrip()
                 if 'notes' in fields:
                     theme_od['notes'] = themeobj.notes[0].rstrip()
                 if 'parents' in fields:
@@ -91,12 +90,15 @@ def main():
                         elif len(relatedthemes) > 1:
                             theme_od['relatedthemes'] = relatedthemes
                 if 'meta' in fields:
-                    source_path = themeobj.meta.replace('{\"source\": \"', '').replace('\"}', '')
-                    theme_od['source'] = '.' +  lib.files.abspath2relpath(basepath, source_path)
+                    meta = json.loads(themeobj.meta)
+                    source_path = meta['source']
+                    theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, source_path)
                 themes_list.append(theme_od)
 
         themes_list = sorted(themes_list, key=lambda i: i['name'].lower())
         print(len(themes_list))
+        metadata_od['theme-count'] = len(themes_list)
+        lto_od['lto'] = metadata_od
         lto_od['themes'] = themes_list
 
         if len(themes_list) > 0:
@@ -106,8 +108,8 @@ def main():
 
 
     # ' construct jsonification of current lto themes and write to file
-    print('master')
-    repo.git.checkout('master')
+    print('dev')
+    repo.git.pull('origin','master')
     commit_id = repo.head.object.hexsha
     dt = repo.head.object.committed_datetime.astimezone(pytz.UTC)
     timestamp = dt.strftime("%Y-%m-%d %H:%M:%S (UTC)")
@@ -116,7 +118,6 @@ def main():
     metadata_od['version'] = 'developmental'
     metadata_od['timestamp'] = str(timestamp)
     metadata_od['git-commit-id'] = str(commit_id)
-    lto_od['lto'] = metadata_od
 
     # ' read theme files
     themes_list = list()
@@ -127,30 +128,30 @@ def main():
             theme_od = OrderedDict()
             if 'name' in fields:
                 theme_od['name'] = themeobj.name
+            if 'description' in fields:
+                theme_od['description'] = themeobj.description.rstrip()
             if 'aliases' in fields:
                 aliases = themeobj.aliases
                 if aliases[0] != "":
                     if len(aliases) == 1:
-                        theme_od['aliases'] = ''.join(aliases)
+                        theme_od['aliases'] = [''.join(aliases)]
                     elif len(aliases) > 1:
                         theme_od['aliases'] = aliases
-            if 'description' in fields:
-                theme_od['description'] = themeobj.description.rstrip()
             if 'notes' in fields:
                 theme_od['notes'] = themeobj.notes[0].rstrip()
             if 'parents' in fields:
                 parents = themeobj.parents.split(', ')
                 if len(parents) == 1:
-                    theme_od['parents'] = ''.join(parents)
+                    theme_od['parents'] = [''.join(parents)]
                 elif len(parents) > 1:
                     theme_od['parents'] = parents
             if 'references' in fields:
                 references = filter(None, themeobj.references)
                 if len(references) == 1:
                     if ' ' in references[0]:
-                        theme_od['references'] = references[0].split(' ')
+                        theme_od['references'] = [references[0].split(' ')]
                     else:
-                        theme_od['references'] = ''.join(references)
+                        theme_od['references'] = [''.join(references)]
                 elif len(references) > 1:
                     theme_od['references'] = references
             if 'examples' in fields:
@@ -160,23 +161,27 @@ def main():
                     for example in raw_examples:
                         examples.append(example.rstrip())
                 if len(examples) == 1:
-                    theme_od['examples'] = ''.join(examples)
+                    theme_od['examples'] = [''.join(examples)]
                 elif len(examples) > 1:
                     theme_od['examples'] = examples
             if 'relatedthemes' in fields:
                 relatedthemes = themeobj.relatedthemes
                 if relatedthemes[0] != "":
                     if len(relatedthemes) == 1:
-                        theme_od['relatedthemes'] = ''.join(relatedthemes)
+                        theme_od['relatedthemes'] = [''.join(relatedthemes)]
                     elif len(relatedthemes) > 1:
                         theme_od['relatedthemes'] = relatedthemes
             if 'meta' in fields:
-                source_path = themeobj.meta.replace('{\"source\": \"', '').replace('\"}', '')
+                meta = json.loads(themeobj.meta)
+                source_path = meta['source']
                 theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, source_path)
             themes_list.append(theme_od)
 
-    themes_list = sorted(themes_list, key=lambda i: i['name'].lower())
+    themes_list = sorted(themes_list, key=lambda i: i['name'][0].lower())
     print(len(themes_list))
+
+    metadata_od['theme-count'] = len(themes_list)
+    lto_od['lto'] = metadata_od
     lto_od['themes'] = themes_list
 
     if len(themes_list) > 0:
