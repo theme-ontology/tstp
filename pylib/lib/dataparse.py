@@ -348,7 +348,7 @@ def read_themes_from_txt(filename, verbose=True, addextras=False, combinedescrip
             setattr(themeobj, attr, data[0])
         elif addextras:
             exattr = lfield.replace(" ", "")
-            setattr(themeobj, exattr, data)
+            setattr(themeobj, exattr, '\n'.join(data))
             themeobj.extra_fields += (exattr,)
         else:
             if verbose:
@@ -470,7 +470,7 @@ def read_stories_from_fieldcollection(fieldcollection, verbose=True, addextras=F
             setattr(obj, attr, data[0])
         elif addextras:
             exattr = lfield.replace(" ", "")
-            setattr(obj, exattr, data)
+            setattr(obj, exattr, '\n'.join(data))
             obj.extra_fields += (exattr,)
         elif lfield == "ratings":
             numbers = [int(s) for s in re.findall("\d+", ' '.join(data), re.DOTALL)]
