@@ -29,7 +29,14 @@
     if($submit == "commit") {
         require_once("pythonlib.php");
 
-        if ($action == "importgit")
+        if ($action == "runtests")
+        {
+            $out = tstp_pyrun('webtask.test_formatting 2>&1');
+            echo "<h1>webtask.test_formatting</h1><pre>" . htmlentities($out) . "</pre>\n";
+            $out = tstp_pyrun('webtask.test_integrity 2>&1');
+            echo "<h1>webtask.test_integrity</h1><pre>" . htmlentities($out) . "</pre>\n";
+        }
+        elseif ($action == "importgit")
         {
             $out = tstp_pyrun('webtask.importgit 2>&1');
             echo "<h1>webtask.importgit</h1><pre>" . htmlentities($out) . "</pre>\n";
@@ -58,6 +65,7 @@
                         <select id="action" name="action">
                             <option value="nothing">&lt;nothing selected&gt;</option>
                             <option value="importgit">Import data from GIT repository "theming/notes".</option>
+                            <option value="runtests">Run tests on GIT repository "theming/notes".</option>
                         </select>
                     </fieldset>
 

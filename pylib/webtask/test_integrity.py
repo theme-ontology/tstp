@@ -1,3 +1,9 @@
+"""
+Name:           test_integrity.py
+Description:    The purpose of this file is to test the integrity of data in the (MySQL) DB
+                after the data has been imported from GIT repository. It may also read from
+                various cached resources that may have been refreshed.
+"""
 import log
 from credentials import GIT_THEMING_PATH
 import os
@@ -6,6 +12,7 @@ import traceback
 import lib.dataparse
 from collections import defaultdict
 import sys
+import lib.tests
 
 
 NOTESPATH = os.path.join(GIT_THEMING_PATH, "notes")
@@ -13,42 +20,6 @@ STATSLEVEL = 1
 
 
 class Tests(object):
-    def test_read_themes(self):
-        """
-        Check that all theme definitions can be read.
-        """
-        lu = defaultdict(list)
-        for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
-            for th in lib.dataparse.read_themes_from_txt(path, verbose=True):
-                lu[th.name].append(path)
-        for name in lu:
-            if len(lu[name]) > 1:
-                log.debug("multiple theme definitions for '%s' in: %s" % (name, lu[name]))
-
-    def test_read_stories(self):
-        """
-        Check that all story definitions can be read.
-        """
-        lu = defaultdict(list)
-        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$"):
-            for st in lib.dataparse.read_stories_from_txt(path, verbose=True):
-                lu[st.name].append(path)
-        for name in lu:
-            if len(lu[name]) > 1:
-                log.debug("multiple story definitions for '%s' in: %s" % (name, lu[name]))
-
-    def test_read_storythemes(self):
-        """
-        Test that all themes as assigned to stories can be read from story files.
-        """
-        lu = defaultdict(list)
-        for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$"):
-            for st in lib.dataparse.read_storythemes_from_txt(path, verbose=True):
-                lu[(st.name1, st.name2)].append(path)
-        for name in lu:
-            if len(lu[name]) > 1:
-                log.debug("multiple story themes for '%s' in: %s" % (name, lu[name]))
-
     def test_theme_cycles(self):
         """
         Check that there are no circular theme definitions.
@@ -141,37 +112,9 @@ class Tests(object):
         histogram(allfields, refwidth, refval)
 
 
-
 def main():
     log.debug("START test_integrity")
-    tests = Tests()
-    exitcode = 0
-    failedcount = 0
-    successcount = 0
-
-    for name in dir(tests):
-        if name.startswith("test_"):
-            meth = getattr(tests, name)
-            res = None
-            log.debug("RUNNING %s..." % name)
-            try:
-                res = meth()
-            except:
-                log.debug("ERROR in %s!" % name)
-                exitcode = max(exitcode, 2)
-                res = "test raised exception"
-                traceback.print_exc()
-            if res:
-                log.debug("FAIL in %s!" % name)
-                exitcode = max(exitcode, 1)
-                failedcount += 1
-                log.debug(res)
-            else:
-                log.debug("SUCCESS")
-                successcount += 1
-
-    log.debug("DONE Running tests. %d Failed, %d Succeeded." % (failedcount, successcount))
-
+    exitcode = lib.tests.run_data_tests(Tests())
     if exitcode != 0:
         log.error("some tests Failed, setting exit code %d" % exitcode)
         sys.exit(exitcode)
