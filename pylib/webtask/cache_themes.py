@@ -132,7 +132,7 @@ def main():
 
         # ' write to JSON file
         #' set overwrite to True to force existing files to be overwritten
-        write_lto_data_to_json_file(lto_od, version, output_dir, overwrite=True)
+        write_lto_data_to_json_file(lto_od, version, output_dir, overwrite=False)
 
     # ' create a JSON file for the latest version of LTO in the repository
     version = 'developmental'
