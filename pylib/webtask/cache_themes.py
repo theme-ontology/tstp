@@ -106,14 +106,14 @@ def main():
     #' create a JSON file for each named version of LTO catalogued in the repository
     for version_tag in version_tags:
         version = str(version_tag)
-        print(version)
+        #print(version)
         repo.git.checkout(version_tag)
         commit_id = str(repo.head.object.hexsha)
-        timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime("%Y-%m-%d %H:%M:%S (UTC)")
+        timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
 
         # ' read theme files
         themes_list = list()
-        for path in lib.files.walk(basepath, ".*\.th\.txt$"):
+        for path in lib.files.walk(os.path.join(basepath, 'notes'), '.*\.th\.txt$'):
             themeobjs = list(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
             for themeobj in themeobjs:
                 theme_od = init_theme_od(themeobj, basepath)
@@ -132,15 +132,15 @@ def main():
 
         # ' write to JSON file
         #' set overwrite to True to force existing files to be overwritten
-        write_lto_data_to_json_file(lto_od, version, output_dir, overwrite=False)
+        write_lto_data_to_json_file(lto_od, version, output_dir, overwrite=True)
 
     # ' create a JSON file for the latest version of LTO in the repository
     version = 'developmental'
     version_short = 'dev'
-    print(version_short)
+    #print(version_short)
     repo.git.pull('origin','master')
     commit_id = repo.head.object.hexsha
-    timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime("%Y-%m-%d %H:%M:%S (UTC)")
+    timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
 
     # ' prepare LTO themes to be written to JSON file
     themes_list = list()
