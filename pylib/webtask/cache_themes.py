@@ -195,7 +195,7 @@ def main():
 
         #' write LTO JSON object to file
         #' set overwrite to True to force existing files to be overwritten
-        #' the developmental file only should be written to file by default
+        #' only the developmental version should be written to file by default
         if version == 'dev':
             write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=True)
         else:
