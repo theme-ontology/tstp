@@ -103,19 +103,64 @@ def add_root_theme(themes_list):
     #' return updated theme list
     return themes_list
 
-def write_lto_data_to_json_file(lto_od, version, output_dir, overwrite=False):
+def init_themes_list(version, repo, basepath):
+    """
+    Create a list of themes, where each theme is represented by an ordered dictionary, for a given
+    version of the repository. The list of themes is returned along with the timestamp and commit
+    hash of the given version.
+    Args:
+        version: string
+        repo: git.repo.base.Repo
+        basepath: string
+    Returns: list, string, string
+    """
+
+    if version == 'dev':
+        repo.git.pull('origin', 'master')
+    else:
+        repo.git.checkout(version)
+    timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
+    commit_id = str(repo.head.object.hexsha)
+
+    # ' read theme files
+    themes_list = list()
+    for path in lib.files.walk(os.path.join(basepath, 'notes'), '.*\.th\.txt$'):
+        themeobjs = list(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
+        for themeobj in themeobjs:
+            theme_od = init_theme_od(themeobj, basepath)
+            themes_list.append(theme_od)
+
+    # ' add literary thematic entity as root theme
+    themes_list = add_root_theme(themes_list)
+
+    # ' sort themes in alphabetical order of the 'name' field
+    themes_list = sorted(themes_list, key=lambda i: i['name'].lower())
+
+    return themes_list, timestamp, commit_id
+
+def lto_od_to_json(lto_od):
+    """
+    Convert an LTO ordered dictionary object to JSON format.
+    Args:
+        lto_od: OrderedDict
+    Returns: unicode
+    """
+    lto_json = json.dumps(lto_od, ensure_ascii=False, indent=4)
+    return lto_json
+
+def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
     """
     Write LTO information to JSON file. Set 'overwrite' to 'True' to regenerate a non-developmental
     version file.
     Args:
-        lto_od: OrderedDict
+        lto_json: unicode
         version: string
         overwrite: boolean
     """
     path = output_dir + '/' + 'lto-' + version + '.json'
     if not os.path.exists(path) or overwrite:
         with io.open(path, 'w', encoding='utf-8') as f:
-            f.write(json.dumps(lto_od, ensure_ascii=False, indent=4))
+            f.write(lto_json)
 
 def main():
     #' preliminaries
@@ -128,25 +173,14 @@ def main():
     repo = Repo(GIT_THEMING_PATH_HIST)
     #' The first two versions (i.e. v0.1.0 and v0.1.1) are skipped on account that neither contains
     #' any themes. The tags exist for historical reasons that are uminportant here.
-    version_tags = repo.tags[2:]
+    versions = repo.tags[2:]
+    versions = [str(version) for version in versions]
+    versions.append('dev')
 
     #' create a JSON file for each named version of LTO catalogued in the repository
-    for version_tag in version_tags:
-        version = str(version_tag)
-        repo.git.checkout(version_tag)
-        commit_id = str(repo.head.object.hexsha)
-        timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
-
-        # ' read theme files
-        themes_list = list()
-        for path in lib.files.walk(os.path.join(basepath, 'notes'), '.*\.th\.txt$'):
-            themeobjs = list(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
-            for themeobj in themeobjs:
-                theme_od = init_theme_od(themeobj, basepath)
-                themes_list.append(theme_od)
-
-        # ' sort themes in alphabetical order of the 'name' field
-        themes_list = sorted(themes_list, key=lambda i: i['name'].lower())
+    for version in versions:
+        #' create list of themes for given version of LTO
+        themes_list, timestamp, commit_id = init_themes_list(version, repo, basepath)
 
         # ' prepare LTO metadata to be written to JSON file
         metadata_od = init_metadata_od(version, timestamp, commit_id, theme_count=len(themes_list))
@@ -156,38 +190,14 @@ def main():
         lto_od['lto'] = metadata_od
         lto_od['themes'] = themes_list
 
-        # ' write to JSON file
+        # ' convert LTO ordered dictionary to JSON format
+        lto_json = lto_od_to_json(lto_od)
+
+        #' write LTO JSON object to file
         #' set overwrite to True to force existing files to be overwritten
-        write_lto_data_to_json_file(lto_od, version, output_dir, overwrite=False)
+        #' the developmental file only should be written to file by default
+        if version == 'dev':
+            write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=True)
+        else:
+            write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False)
 
-    # ' create a JSON file for the latest version of LTO in the repository
-    version = 'developmental'
-    version_short = 'dev'
-    repo.git.pull('origin','master')
-    commit_id = repo.head.object.hexsha
-    timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
-
-    # ' prepare LTO themes to be written to JSON file
-    themes_list = list()
-    for path in lib.files.walk(basepath, ".*\.th\.txt$"):
-        themeobjs = list(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
-        for themeobj in themeobjs:
-            theme_od = init_theme_od(themeobj, basepath)
-            themes_list.append(theme_od)
-
-    #' add literary thematic entity as root theme
-    themes_list = add_root_theme(themes_list)
-
-    # ' sort themes in alphabetical order of the 'name' field
-    themes_list = sorted(themes_list, key=lambda i: i['name'].lower())
-
-    #' prepare LTO metadata to be written to JSON file
-    metadata_od = init_metadata_od(version, timestamp, commit_id, theme_count = len(themes_list))
-
-    #' store LTO themes and metadata in an ordered dictionary
-    lto_od = OrderedDict()
-    lto_od['lto'] = metadata_od
-    lto_od['themes'] = themes_list
-
-    #' write to JSON file
-    write_lto_data_to_json_file(lto_od, version_short, output_dir, overwrite=True)
