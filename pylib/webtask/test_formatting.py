@@ -66,7 +66,7 @@ class Tests(object):
         faults = 0
         for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
             for th in lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False):
-                for line in getattr(th, "examples", "").split("\n"):
+                for line in getattr(th, "references", "").split("\n"):
                     line = line.strip()
                     if any(line.startswith(x) for x in ['http://', 'https://']):
                         if ' ' in line or line.endswith(","):
