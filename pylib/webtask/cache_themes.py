@@ -103,7 +103,7 @@ def add_root_theme(themes_list):
     #' return updated theme list
     return themes_list
 
-def init_themes_list(version, repo, basepath):
+def init_themes_list(themeobjs_list, basepath):
     """
     Create a list of themes, where each theme is represented by an ordered dictionary, for a given
     version of the repository. The list of themes is returned along with the timestamp and commit
@@ -114,21 +114,11 @@ def init_themes_list(version, repo, basepath):
         basepath: string
     Returns: list, string, string
     """
-
-    if version == 'dev':
-        repo.git.pull('origin', 'master')
-    else:
-        repo.git.checkout(version)
-    timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
-    commit_id = str(repo.head.object.hexsha)
-
     # ' read theme files
     themes_list = list()
-    for path in lib.files.walk(os.path.join(basepath, 'notes'), '.*\.th\.txt$'):
-        themeobjs = list(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
-        for themeobj in themeobjs:
-            theme_od = init_theme_od(themeobj, basepath)
-            themes_list.append(theme_od)
+    for themeobj in themeobjs_list:
+        theme_od = init_theme_od(themeobj, basepath)
+        themes_list.append(theme_od)
 
     # ' add literary thematic entity as root theme
     themes_list = add_root_theme(themes_list)
@@ -136,7 +126,7 @@ def init_themes_list(version, repo, basepath):
     # ' sort themes in alphabetical order of the 'name' field
     themes_list = sorted(themes_list, key=lambda i: i['name'].lower())
 
-    return themes_list, timestamp, commit_id
+    return themes_list
 
 def lto_od_to_json(lto_od):
     """
@@ -162,6 +152,30 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
         with io.open(path, 'w', encoding='utf-8') as f:
             f.write(lto_json)
 
+
+def get_theme_objs(version, repo, basepath):
+    """
+
+    Args:
+        version:
+        repo:
+        basepath:
+
+    Returns:
+
+    """
+    if version == 'dev':
+        repo.git.pull('origin', 'master')
+    else:
+        repo.git.checkout(version)
+    timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
+    commit_id = str(repo.head.object.hexsha)
+    themeobjs_list = list()
+    for path in lib.files.walk(os.path.join(basepath, 'notes'), '.*\.th\.txt$'):
+        themeobjs_list.extend(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
+    return themeobjs_list, timestamp, commit_id
+
+
 def main():
     #' preliminaries
     basepath = GIT_THEMING_PATH_HIST
@@ -180,7 +194,8 @@ def main():
     #' create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:
         #' create list of themes for given version of LTO
-        themes_list, timestamp, commit_id = init_themes_list(version, repo, basepath)
+        themeobjs_list, timestamp, commit_id = get_theme_objs(version, repo, basepath)
+        themes_list = init_themes_list(themeobjs_list, basepath)
 
         # ' prepare LTO metadata to be written to JSON file
         metadata_od = init_metadata_od(version, timestamp, commit_id, theme_count=len(themes_list))
