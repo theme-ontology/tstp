@@ -26,7 +26,7 @@ def init_metadata_od(version, timestamp, commit_id, theme_count):
     Args:
         version: string
         timestamp: string
-        git_commit_id: string
+        commit_id: string
         theme_count: integer
     Returns: OrderedDict
     """
@@ -112,7 +112,7 @@ def init_themes_list(themeobjs_list, basepath):
         version: string
         repo: git.repo.base.Repo
         basepath: string
-    Returns: list, string, string
+    Returns: list
     """
     # ' read theme files
     themes_list = list()
@@ -155,14 +155,12 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
 
 def get_theme_objs(version, repo, basepath):
     """
-
+    Store themes for a given version of LTO in a big list.
     Args:
-        version:
-        repo:
-        basepath:
-
-    Returns:
-
+        version: string
+        repo: git.repo.base.Repo
+        basepath: string
+    Returns: list, string, string
     """
     if version == 'dev':
         repo.git.pull('origin', 'master')
@@ -194,7 +192,10 @@ def main():
     #' create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:
         #' create list of themes for given version of LTO
+        lib.log.info("Processing LTO %s themes...", version)
         themeobjs_list, timestamp, commit_id = get_theme_objs(version, repo, basepath)
+        print(themeobjs_list[0].name)
+        exit()
         themes_list = init_themes_list(themeobjs_list, basepath)
 
         # ' prepare LTO metadata to be written to JSON file
