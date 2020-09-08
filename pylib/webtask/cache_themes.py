@@ -194,8 +194,6 @@ def main():
         #' create list of themes for given version of LTO
         lib.log.info("Processing LTO %s themes...", version)
         themeobjs_list, timestamp, commit_id = get_theme_objs(version, repo, basepath)
-        print(themeobjs_list[0].name)
-        exit()
         themes_list = init_themes_list(themeobjs_list, basepath)
 
         # ' prepare LTO metadata to be written to JSON file
