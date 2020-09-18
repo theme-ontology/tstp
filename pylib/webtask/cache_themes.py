@@ -128,16 +128,6 @@ def init_themes_list(themeobjs_list, basepath):
 
     return themes_list
 
-def lto_od_to_json(lto_od):
-    """
-    Convert an LTO ordered dictionary object to JSON format.
-    Args:
-        lto_od: OrderedDict
-    Returns: unicode
-    """
-    lto_json = json.dumps(lto_od, ensure_ascii=False, indent=4)
-    return lto_json
-
 def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
     """
     Write LTO information to JSON file. Set 'overwrite' to 'True' to regenerate a non-developmental
@@ -147,7 +137,7 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
         version: string
         overwrite: boolean
     """
-    path = output_dir + '/' + 'lto-' + version + '.json'
+    path = output_dir + '/' + 'lto-' + version + '-themes.json'
     if not os.path.exists(path) or overwrite:
         with io.open(path, 'w', encoding='utf-8') as f:
             f.write(lto_json)
@@ -205,7 +195,7 @@ def main():
         lto_od['themes'] = themes_list
 
         # ' convert LTO ordered dictionary to JSON format
-        lto_json = lto_od_to_json(lto_od)
+        lto_json = json.dumps(lto_od, ensure_ascii=False, indent=4)
 
         #' write LTO JSON object to file
         #' set overwrite to True to force existing files to be overwritten
