@@ -2,6 +2,7 @@ from collections import defaultdict
 import webobject
 import textwrap
 import log
+from natsort import natsorted
 
 
 SUPPORTED_OBJECTS = {
@@ -89,13 +90,13 @@ def get_metatheme_data():
                         visited.add(parent)
 
 
-    for key, items in meta_data.iteritems():
+    for key, items in meta_data.items():
         ret_meta_data[key] = sorted(items)
 
-    for key, items in leaf_data.iteritems():
+    for key, items in leaf_data.items():
         ret_leaf_data[key] = sorted(items)
 
-    for key, items in child_lu.iteritems():
+    for key, items in child_lu.items():
         ret_child_lu[key] = sorted(items)
 
     toplevel = sorted(toplevel)
@@ -140,13 +141,15 @@ def get_defenitions_text(target):
     return get_defenitions_text_for_objects(objs)
 
 
-def get_defenitions_text_for_objects(objs, empty_storythemes_headers = False, skip_fields = (), add_fields = ()):
+def get_defenitions_text_for_objects(objs, empty_storythemes_headers=False, skip_fields=(), add_fields=()):
     if not objs:
         return ""
 
     o0 = objs[0]
-    target, klass = next((k, v) for k, v in SUPPORTED_OBJECTS.iteritems() if isinstance(o0, v))
-    headers = [ f for f in klass.fields if "category" not in f and f not in skip_fields]
+    target, klass = next((k, v) for k, v in SUPPORTED_OBJECTS.items() if isinstance(o0, v))
+    skip_fields = set(("category", "meta", "components") + skip_fields) - set(add_fields)
+    add_fields = tuple(f for f in add_fields if f not in klass.fields)
+    headers = [f for f in klass.fields if f not in skip_fields]
     grouped = defaultdict(list)
     lines = []
 
@@ -154,7 +157,7 @@ def get_defenitions_text_for_objects(objs, empty_storythemes_headers = False, sk
         obj_name = getattr(obj, headers[0])
         grouped[obj_name].append(obj)
 
-    for obj_name in sorted(grouped):
+    for obj_name in natsorted(grouped):
         lines.append(obj_name)
         lines.append("=" * len(obj_name))
         lines.append("")
@@ -163,7 +166,7 @@ def get_defenitions_text_for_objects(objs, empty_storythemes_headers = False, sk
             for obj in grouped[obj_name]:
                 for field in headers[1:]:
                     lines.append(":: " + field.capitalize())
-                    for txt in getattr(obj, field).split("\n\n"):
+                    for txt in (getattr(obj, field) or "n/a").split("\n\n"):
                         lines.append(textwrap.fill(txt, 78))
                         lines.append("")
                 for field in add_fields:
@@ -171,7 +174,7 @@ def get_defenitions_text_for_objects(objs, empty_storythemes_headers = False, sk
                     lines.append("")
 
         if target == "storythemes" or empty_storythemes_headers:
-            for field in [ "choice", "major", "minor" ]:
+            for field in ["choice", "major", "minor"]:
                 lines.append(":: " + field.capitalize() + " Themes")
                 items = []
 
