@@ -14,23 +14,33 @@ lib.log.redirect()
 
 
 def get_data_from_head():
+    """
+    Get latest data about stories from db.
+    Returns:
+
+    """
     fromyear = 1890
     untilyear = 2020
     nn = untilyear - fromyear + 1
-    xs = [ fromyear + i for i in xrange(nn) ]
+    xs = [fromyear + i for i in range(nn)]
     data = defaultdict(lambda: np.zeros(nn))
+    themed = set()
+
+    for storytheme in lib.dataparse.read_storythemes_from_db():
+        themed.add(storytheme.name1)
 
     for story in lib.dataparse.read_stories_from_db():
         name = story.name
         date = story.date
-        if 'collection' in name.lower() or re.match(r"\d{4}-\d{4}", date):
-            continue
-        if not re.match(r"\d{4}", date):
-            continue
-        year = int(date[:4])
-        cat = re.match(r"([A-Za-z]+)", name).group(1)
-        if fromyear <= year <= untilyear:
-            data[cat][year - fromyear] += 1
+        if name in themed:
+            if 'collection' in name.lower() or re.match(r"\d{4}-\d{4}", date):
+                continue
+            if not re.match(r"\d{4}", date):
+                continue
+            year = int(date[:4])
+            cat = re.match(r"([A-Za-z]+)", name).group(1)
+            if fromyear <= year <= untilyear:
+                data[cat][year - fromyear] += 1
 
     data = [ (np.sum(a), k, a) for k, a in data.items() ]
     data.sort(reverse=True)
