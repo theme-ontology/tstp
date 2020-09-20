@@ -246,13 +246,34 @@ def make_viz():
     return draw_story_theme_relation()
 
 
+def write_data(filename):
+    """
+    Write the data as xls to a file.
+    """
+    data = get_data()
+    xs = [ p['themedstories'] for _, p in data ]
+    ys = [ p['themes'] for _, p in data ]
+    labels = [x.date().isoformat() for idx, (x, _) in enumerate(data)]
+    import pandas as pd
+    df = pd.DataFrame({
+        "themed_stories": xs,
+        "defined_themes": ys,
+    }, columns=["themed_stories", "defined_themes"], index=labels)
+    print(df)
+    df.to_excel(filename)
+    return
+
+
 def main():
     """
     Entry point.
     """
-    imgpath = sys.argv[-1] if len(sys.argv) > 2 else 'test.svg'
-    svg, width, height = draw_story_theme_relation()
-    svg.write(imgpath, width, height)
+    filename = sys.argv[-1] if len(sys.argv) > 2 else 'test.svg'
+    if filename.endswith(".xlsx"):
+        write_data(filename)
+    else:
+        svg, width, height = draw_story_theme_relation()
+        svg.write(filename, width, height)
 
 
 

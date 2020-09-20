@@ -76,7 +76,7 @@ def get_descriptions(descfield):
     return descs
 
 
-def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", cols = (1, 3, 4, 6), isterse = False):
+def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=(1, 3, 4, 6), isterse=False, table_offset=0):
     """
 
     :param url:
@@ -95,6 +95,8 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
     sidcounter = defaultdict(int)
 
     for idx, table in enumerate(soup.find_all("table", class_ = tableclass)):
+        if idx < table_offset:
+            continue
         sids = []
         description = None
         titlestack = deque()
@@ -146,7 +148,7 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass = "wikitable", col
 
                 for match in re.findall("(\d+)([a-z]*)", epfield):
                     nepid, sepid = int(match[0]), match[1]
-                    sid = prefix + "%sx%02d%s" % (idx + season_offsset, nepid, sepid)
+                    sid = prefix + "%sx%02d%s" % (idx - table_offset + season_offsset, nepid, sepid)
                     sids.append(sid)
 
                 if isterse and title_link:
