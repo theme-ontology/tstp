@@ -226,7 +226,7 @@ def main():
         stories_list = populate_stories_with_themes(stories_list, storythemeobjs_list)
 
         #' filter empty stories
-        story_list = filter_empty_stories(stories_list)
+        stories_list = filter_empty_stories(stories_list)
 
         # ' prepare LTO metadata to be written to JSON file
         metadata_od = init_metadata_od(version, timestamp, commit_id, story_count=len(stories_list))
