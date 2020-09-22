@@ -25,10 +25,14 @@ class TSTPObject(object):
     )
 
     def __init__(self, *args, **kwargs):
+        extra_fields = []
         for field, value in zip(self.fields, args):
             setattr(self, field, value)
         for field, value in kwargs.iteritems():
             setattr(self, field, value)
+            if field not in self.fields:
+                extra_fields.append(field)
+        self.extra_fields = tuple(extra_fields)
             
     @classmethod
     def create(cls, **kwargs):
