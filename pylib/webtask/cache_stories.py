@@ -101,10 +101,9 @@ def init_story_od(storyobj, basepath):
         story_od['description'] = storyobj.description.rstrip().split('\n\n\n')[0]
         story_od['collections'] = filter(None, storyobj.collections.split('\n'))
         story_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
-        extra_fields = set(storyobj.extra_fields)
-        if 'genre' in extra_fields:
+        if hasattr(storyobj, 'genre'):
             story_od['genres'] = filter(None, [genre.strip() for genre in storyobj.genre.split(',')])
-        if 'references' in extra_fields:
+        if hasattr(storyobj, 'references'):
             story_od['references'] = filter(None, storyobj.references.split('\n'))
 
     return story_od
