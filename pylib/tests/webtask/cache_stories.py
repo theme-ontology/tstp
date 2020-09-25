@@ -226,5 +226,43 @@ class TestCacheStories(unittest.TestCase):
         updated_stories_list = webtask.cache_stories.filter_empty_stories(stories_list)
         self.assertEqual(len(updated_stories_list), expected_story_count)
 
+    def test_populate_stories_with_collection_info(self):
+        # ' initialize a collection object and put it in a list
+        component_story_names = [
+            'movie: Alien (1979)',
+            'movie: Aliens (1986)',
+            'movie: Alien 3 (1992)',
+            'movie: Alien Resurrection (1997)',
+            'movie: Prometheus (2012)',
+            'movie: Alien: Covenant (2017)']
+        storyobj = webobject.Story(
+            name='Collection: Alien',
+            title='Alien',
+            date='1979-2017',
+            description='A classic film franchise.',
+            components='\n'.join(component_story_names),
+            meta=json.dumps({'source': './a/token/path'}))
+        storyobjs_list = [storyobj]
+
+        #' initialize a story OrderedDict object and put it in a list
+        story_od = OrderedDict()
+        story_od['storyid'] = 'movie: Alien (1979)'
+        story_od['title'] = 'Alien'
+        story_od['date'] = '1979-05-25'
+        story_od['description'] = 'A classic film.'
+        story_od['source'] = json.dumps({'source': './a/token/path'})
+        story_od['collections'] = []
+        stories_list = [story_od]
+
+        #' test that collection info is correctly added to story entry
+        expected_collections = ['Collection: Alien']
+        expected_collection_count = len(expected_collections)
+        updated_stories_list = webtask.cache_stories.populate_stories_with_collection_info(storyobjs_list, stories_list)
+        self.assertEqual(len(updated_stories_list[0]['collections']), expected_collection_count)
+        self.assertEqual(updated_stories_list[0]['collections'], expected_collections)
+
+    def test_main(self):
+        webtask.cache_stories.main(dry_run=True)
+
 def main():
     unittest.main(verbosity=2)
