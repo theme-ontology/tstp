@@ -187,6 +187,18 @@ def init_stories_list(storyobjs_list, basepath):
 
     return stories_list
 
+def populate_stories_with_collection_info(storyobjs_list, stories_list):
+    story_ids = [story_od['storyid'] for i, story_od in enumerate(stories_list)]
+
+    for storyobj in storyobjs_list:
+        if storyobj.name.startswith('Collection:'):
+            component_story_names = filter(None, storyobj.components.split('\n'))
+            for component_story_name in component_story_names:
+                if component_story_name in story_ids:
+                    stories_list[story_ids.index(component_story_name)]['collections'].append(storyobj.name)
+
+    return stories_list
+
 def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
     """
     Write LTO information to JSON file. Set 'overwrite' to 'True' to regenerate a non-developmental
@@ -201,7 +213,7 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
         with io.open(path, 'w', encoding='utf-8') as f:
             f.write(lto_json)
 
-def main():
+def main(dry_run=False):
     #' preliminaries
     basepath = GIT_THEMING_PATH_HIST
     output_dir = os.path.join(PUBLIC_DIR, 'data')
@@ -216,23 +228,28 @@ def main():
     versions = [str(version) for version in versions]
     versions.append('dev')
 
+    if dry_run:
+        versions = [str(repo.tags[7])]
+
     #' create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:
-        #' create list of themes for given version of LTO
+        #' create ordered dictionary consisting of 1) LTO metadata and 2) a long list of
+        #' thematically annotated stories
         lib.log.info("Processing LTO %s stories...", version)
         storyobjs_list, storythemeobjs_list, timestamp, commit_id = get_story_objs(version, repo, basepath)
 
-        #' convert story objects to list of story ordered dictionaries
+        # ' convert story objects to list of story ordered dictionaries
         stories_list = init_stories_list(storyobjs_list, basepath)
+        stories_list = populate_stories_with_collection_info(storyobjs_list, stories_list)
         stories_list = populate_stories_with_themes(stories_list, storythemeobjs_list)
 
-        #' filter empty stories
+        # ' filter empty stories
         stories_list = filter_empty_stories(stories_list)
 
         # ' prepare LTO metadata to be written to JSON file
         metadata_od = init_metadata_od(version, timestamp, commit_id, story_count=len(stories_list))
 
-        # ' store LTO themes and metadata in an ordered dictionary
+        # ' store LTO stories and metadata in an ordered dictionary
         lto_od = OrderedDict()
         lto_od['lto'] = metadata_od
         lto_od['stories'] = stories_list
@@ -243,8 +260,9 @@ def main():
         #' write LTO JSON object to file
         #' set overwrite to True to force existing files to be overwritten
         #' only the developmental version should be written to file by default
-        if version == 'dev':
-            write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=True)
-        else:
-            write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False)
+        if not dry_run:
+            if version == 'dev':
+                write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=True)
+            else:
+                write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False)
 
