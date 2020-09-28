@@ -131,39 +131,6 @@ def init_collection_od(storyobj, basepath):
 
     return collection_od
 
-def filter_empty_stories(storyobjs_list, keeper_story_ids):
-    """
-    Excise any stories without themes from the list of Story objects.
-    Args:
-        storyobjs_list: list
-        keeper_story_ids: list
-    Returns: list
-    """
-    revised_storyobjs_list = []
-    for storyobj in storyobjs_list:
-        if storyobj.name in keeper_story_ids or storyobj.name.startswith('Collection:'):
-            revised_storyobjs_list.append(storyobj)
-
-    return revised_storyobjs_list
-
-def filter_empty_collections(collections_list):
-    """
-    Excise those collections lacking component stories.
-    Args:
-        collections_list: list
-    Returns: list
-    """
-    empty_collections = []
-    for collection_od in collections_list:
-        if collection_od['component-story-ids'] == []:
-            empty_collections.append(collection_od['collection-id'])
-    result = []
-    for collection_od in collections_list:
-        if collection_od['collection-id'] not in empty_collections:
-            result.append(collection_od)
-
-    return result
-
 def init_stories_list(storyobjs_list, basepath):
     """
     Create a list of stories, where each story is represented by an ordered dictionary, for a given
@@ -281,23 +248,6 @@ def init_thematic_annotation_od(storythemeobj):
     thematic_annotation_od['motivation'] = storythemeobj.motivation
     return thematic_annotation_od
 
-def get_nonempty_stories(storyobjs_list, storythemeobjs_list):
-    """
-    Return a list of all story ids for stories containing at least one theme.
-    Args:
-        stories_list: list
-        storythemeobjs_list: list
-    Returns: list
-    """
-    story_ids = [storyobj.name for i, storyobj in enumerate(storyobjs_list)]
-    keeper_story_ids = set()
-
-    for storythemeobj in storythemeobjs_list:
-        if not storythemeobj.name1.startswith('Collection:') and storythemeobj.name1 in story_ids:
-            keeper_story_ids.add(storythemeobj.name1)
-
-    return list(keeper_story_ids)
-
 def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
     """
     Write LTO information to JSON file. Set 'overwrite' to 'True' to regenerate a non-developmental
@@ -337,10 +287,6 @@ def main(dry_run=False):
         lib.log.info("Processing LTO %s collections...", version)
         storyobjs_list, storythemeobjs_list, timestamp, commit_id = get_story_objs(version, repo, basepath)
 
-        #' excise those stories lacking any themes
-        keeper_story_ids = get_nonempty_stories(storyobjs_list, storythemeobjs_list)
-        storyobjs_list = filter_empty_stories(storyobjs_list, keeper_story_ids)
-
         #' gather up all the story objects of the 'collection' variety into a list
         collections_list = init_collections_list(storyobjs_list, basepath)
 
@@ -348,9 +294,6 @@ def main(dry_run=False):
         collections_list = populate_collections_with_component_stories_1(collections_list, storyobjs_list)
         collections_list = populate_collections_with_component_stories_2(collections_list, storyobjs_list)
         collections_list = populate_collections_with_themes(collections_list, storythemeobjs_list)
-
-        # ' filter empty collections
-        collections_list = filter_empty_collections(collections_list)
 
         # ' prepare LTO metadata to be written to JSON file
         metadata_od = init_metadata_od(version, timestamp, commit_id, collection_count=len(collections_list))
