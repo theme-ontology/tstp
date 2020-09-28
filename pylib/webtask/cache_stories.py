@@ -142,7 +142,7 @@ def populate_stories_with_themes(stories_list, storythemeobjs_list):
     story_ids = [story_od['storyid'] for i, story_od in enumerate(stories_list)]
 
     for storythemeobj in storythemeobjs_list:
-        if storythemeobj.name1.startswith('Collection:') == False and storythemeobj.name1 in story_ids:
+        if not storythemeobj.name1.startswith('Collection:') and storythemeobj.name1 in story_ids:
             thematic_annotation_od = init_thematic_annotation_od(storythemeobj)
             stories_list[story_ids.index(storythemeobj.name1)]['themes'].append(thematic_annotation_od)
 
@@ -178,7 +178,7 @@ def init_stories_list(storyobjs_list, basepath):
     # ' create ordered dictionary entry for each story in list
     stories_list = list()
     for storyobj in storyobjs_list:
-        if storyobj.name.startswith('Collection:') == False:
+        if not storyobj.name.startswith('Collection:'):
             story_od = init_story_od(storyobj, basepath)
             stories_list.append(story_od)
 
@@ -188,6 +188,14 @@ def init_stories_list(storyobjs_list, basepath):
     return stories_list
 
 def populate_stories_with_collection_info(storyobjs_list, stories_list):
+    """
+    Add collection info to stories for any collections defined in the ./notes/collections/ folder
+    files.
+    Args:
+        storyobjs_list: list
+        stories_list: list
+    Returns: list
+    """
     story_ids = [story_od['storyid'] for i, story_od in enumerate(stories_list)]
 
     for storyobj in storyobjs_list:
