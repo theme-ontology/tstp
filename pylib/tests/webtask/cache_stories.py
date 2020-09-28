@@ -190,42 +190,6 @@ class TestCacheStories(unittest.TestCase):
         self.assertEqual(updated_stories_list[2]['themes'][0]['level'], storythemeobj_1.weight)
         self.assertEqual(updated_stories_list[2]['themes'][0]['motivation'], storythemeobj_1.motivation)
 
-    def test_filter_empty_stories(self):
-        # ' initialize a list of two story OrderedDict objects only one of which has themes
-        story_ids = [
-            'movie: A Trip to the Moon (1902)',
-            'movie: Robot Monster (1953)']
-        story_titles = [
-            'A Trip to the Moon (1902)',
-            'Robot Monster (1953)']
-        story_dates = ['1902-10-4', '1953-06-24']
-        story_description = 'A classic film.'
-        source_path = json.dumps({'source': './a/token/path'})
-        story_od_1 = OrderedDict()
-        story_od_1['storyid'] = story_ids[0]
-        story_od_1['title'] = story_titles[0]
-        story_od_1['date'] = story_dates[0]
-        story_od_1['source'] = source_path
-        story_od_1['themes'] = []
-        thematic_annotation_od = OrderedDict()
-        thematic_annotation_od['name'] = 'the desire for vengeance'
-        thematic_annotation_od['level'] = 'major'
-        thematic_annotation_od['motivation'] = 'So-and-so sought to make so-and-so pay for this or that.'
-        story_od_1['themes'].append(thematic_annotation_od)
-        story_od_2 = OrderedDict()
-        story_od_2['storyid'] = story_ids[1]
-        story_od_2['title'] = story_titles[1]
-        story_od_2['date'] = story_dates[1]
-        story_od_1['description'] = story_od_2['description'] = story_description
-        story_od_1['source'] = story_od_2['source'] = source_path
-        story_od_2['themes'] = []
-        stories_list = [story_od_1, story_od_2]
-
-        #' test that the story without themes gets filtered out from the list of stories
-        expected_story_count = 1
-        updated_stories_list = webtask.cache_stories.filter_empty_stories(stories_list)
-        self.assertEqual(len(updated_stories_list), expected_story_count)
-
     def test_populate_stories_with_collection_info(self):
         # ' initialize a collection object and put it in a list
         component_story_names = [

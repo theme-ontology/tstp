@@ -148,24 +148,6 @@ def populate_stories_with_themes(stories_list, storythemeobjs_list):
 
     return stories_list
 
-def filter_empty_stories(stories_list):
-    """
-    Excise any stories without themes from the list of stories.
-    Args:
-        stories_list: list
-    Returns: list
-    """
-    empty_stories = []
-    for story in stories_list:
-        if story['themes'] == []:
-            empty_stories.append(story['storyid'])
-    result = []
-    for story in stories_list:
-        if story['storyid'] not in empty_stories:
-            result.append(story)
-
-    return result
-
 def init_stories_list(storyobjs_list, basepath):
     """
     Create a list of stories, where each story is represented by an ordered dictionary, for a given
@@ -250,9 +232,6 @@ def main(dry_run=False):
         stories_list = init_stories_list(storyobjs_list, basepath)
         stories_list = populate_stories_with_collection_info(storyobjs_list, stories_list)
         stories_list = populate_stories_with_themes(stories_list, storythemeobjs_list)
-
-        # ' filter empty stories
-        stories_list = filter_empty_stories(stories_list)
 
         # ' prepare LTO metadata to be written to JSON file
         metadata_od = init_metadata_od(version, timestamp, commit_id, story_count=len(stories_list))
