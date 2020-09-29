@@ -80,7 +80,7 @@ def init_story_od(storyobj, basepath):
         story_od = None
     else:
         fields = [
-            'storyid',
+            'story-id',
             'title',
             'date',
             'genres',
@@ -93,7 +93,7 @@ def init_story_od(storyobj, basepath):
         story_od = OrderedDict()
         for field in fields:
             story_od[field] = []
-        story_od['storyid'] = storyobj.name
+        story_od['story-id'] = storyobj.name
         story_od['title'] = storyobj.title
         story_od['date'] = storyobj.date
         #' the split on three newlines is needed to get rid of the story references which are
@@ -139,7 +139,7 @@ def populate_stories_with_themes(stories_list, storythemeobjs_list):
         storythemeobjs_list: list
     Returns: list
     """
-    story_ids = [story_od['storyid'] for i, story_od in enumerate(stories_list)]
+    story_ids = [story_od['story-id'] for i, story_od in enumerate(stories_list)]
 
     for storythemeobj in storythemeobjs_list:
         if not storythemeobj.name1.startswith('Collection:') and storythemeobj.name1 in story_ids:
@@ -178,7 +178,7 @@ def populate_stories_with_collection_info(storyobjs_list, stories_list):
         stories_list: list
     Returns: list
     """
-    story_ids = [story_od['storyid'] for i, story_od in enumerate(stories_list)]
+    story_ids = [story_od['story-id'] for i, story_od in enumerate(stories_list)]
 
     for storyobj in storyobjs_list:
         if storyobj.name.startswith('Collection:'):

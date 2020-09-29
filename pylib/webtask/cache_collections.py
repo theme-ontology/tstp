@@ -80,14 +80,14 @@ def init_story_od(storyobj, basepath):
         story_od = None
     else:
         fields = [
-            'storyid',
-            'collections'
+            'story-id',
+            'collection-ids'
         ]
         story_od = OrderedDict()
         for field in fields:
             story_od[field] = []
-        story_od['storyid'] = storyobj.name
-        story_od['collections'] = filter(None, storyobj.collections.split('\n'))
+        story_od['story-id'] = storyobj.name
+        story_od['collection-ids'] = filter(None, storyobj.collections.split('\n'))
 
     return story_od
 
@@ -171,7 +171,7 @@ def init_collections_list(storyobjs_list, basepath):
 
 def populate_collections_with_component_stories_1(collections_list, storyobjs_list):
     """
-    Add component stories to any collections defined directly in ./notes/stories/*/ folder files.
+    Add component stories to any collections defined directly in ./notes/collections/ folder files.
     Args:
         collections_list: list
         storyobjs_list: list
@@ -191,7 +191,7 @@ def populate_collections_with_component_stories_1(collections_list, storyobjs_li
 
 def populate_collections_with_component_stories_2(collections_list, storyobjs_list):
     """
-    Add component stories to any collections defined directly in ./notes/collections/ folder files.
+    Add component stories to any collections defined directly in ./notes/stories/*/ folder files.
     Args:
         collections_list: list
         storyobjs_list: list

@@ -49,7 +49,7 @@ class TestCacheStories(unittest.TestCase):
         storyobj_3 = webobject.Story(
             name='movie: A Trip to the Moon (1902)',
             title='A Trip to the Moon',
-            date='1902-10-4',
+            date='1902-10-04',
             description='Yet another classic film.',
             meta=json.dumps({'source': './yet/another/token/path'}))
         storyobjs_list = [storyobj_1, storyobj_2, storyobj_3]
@@ -63,9 +63,9 @@ class TestCacheStories(unittest.TestCase):
         expected_first_story_id = storyobj_3.name
         expected_second_story_id = storyobj_2.name
         expected_third_story_id = storyobj_1.name
-        self.assertEqual(stories_list[0]['storyid'], expected_first_story_id)
-        self.assertEqual(stories_list[1]['storyid'], expected_second_story_id)
-        self.assertEqual(stories_list[2]['storyid'], expected_third_story_id)
+        self.assertEqual(stories_list[0]['story-id'], expected_first_story_id)
+        self.assertEqual(stories_list[1]['story-id'], expected_second_story_id)
+        self.assertEqual(stories_list[2]['story-id'], expected_third_story_id)
 
     def test_init_story_od(self):
         basepath = GIT_THEMING_PATH_HIST
@@ -151,19 +151,19 @@ class TestCacheStories(unittest.TestCase):
             'A Trip to the Moon (1902)',
             'The Wizard of Oz (1939)',
             'Robot Monster (1953)']
-        story_dates = ['1902-10-4', '1939-08-25', '1953-06-24']
+        story_dates = ['1902-10-04', '1939-08-25', '1953-06-24']
         story_description = 'A classic film.'
         source_path = json.dumps({'source': './a/token/path'})
         story_od_1 = OrderedDict()
-        story_od_1['storyid'] = story_ids[0]
+        story_od_1['story-id'] = story_ids[0]
         story_od_1['title'] = story_titles[0]
         story_od_1['date'] = story_dates[0]
         story_od_2 = OrderedDict()
-        story_od_2['storyid'] = story_ids[1]
+        story_od_2['story-id'] = story_ids[1]
         story_od_2['title'] = story_titles[1]
         story_od_2['date'] = story_dates[1]
         story_od_3 = OrderedDict()
-        story_od_3['storyid'] = story_ids[2]
+        story_od_3['story-id'] = story_ids[2]
         story_od_3['title'] = story_titles[2]
         story_od_3['date'] = story_dates[2]
         story_od_1['description'] = story_od_2['description'] = story_od_3['description'] = story_description
@@ -210,7 +210,7 @@ class TestCacheStories(unittest.TestCase):
 
         #' initialize a story OrderedDict object and put it in a list
         story_od = OrderedDict()
-        story_od['storyid'] = 'movie: Alien (1979)'
+        story_od['story-id'] = 'movie: Alien (1979)'
         story_od['title'] = 'Alien'
         story_od['date'] = '1979-05-25'
         story_od['description'] = 'A classic film.'
