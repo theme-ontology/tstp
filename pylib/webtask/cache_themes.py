@@ -54,8 +54,14 @@ def get_theme_objs(version, repo, basepath):
     commit_id = str(repo.head.object.hexsha)
     themeobjs_list = list()
 
+    #' suppress warnings for themes with missing parents fields in some older LTO versions
+    broken = True if version == 'v0.2.0' or version == 'v0.3.0' else False
+
     for path in lib.files.walk(os.path.join(basepath, 'notes'), '.*\.th\.txt$'):
-        themeobjs_list.extend(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
+        if broken:
+            themeobjs_list.extend(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False, strict=False))
+        else:
+            themeobjs_list.extend(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
 
     return themeobjs_list, timestamp, commit_id
 
@@ -84,7 +90,8 @@ def init_theme_od(themeobj, basepath):
         theme_od[field] = []
     theme_od['name'] = themeobj.name
     theme_od['description'] = themeobj.description.rstrip()
-    theme_od['parents'] = filter(None, [parent.strip() for parent in themeobj.parents.split(',')])
+    if hasattr(themeobj, 'parents'):
+        theme_od['parents'] = filter(None, [parent.strip() for parent in themeobj.parents.split(',')])
     if theme_od['parents'] == []:
         theme_od['parents'] = ['literary thematic entity']
     theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(themeobj.meta)['source'])

@@ -60,8 +60,15 @@ def get_story_objs(version, repo, basepath):
     #' doing so will lead to an error because of the presence of the testing file notes/mikael.onsjoe/test.st.txt
     levels = 0 if version == 'v0.1.2' or version == 'v0.1.3' or version == 'v0.2.0' else -1
 
+    #' suppress warnings for stories with missing necessary fields in some older LTO versions
+    broken = True if version == 'v0.1.2' or version == 'v0.1.3' else False
+
     for path in lib.files.walk(path=os.path.join(basepath, 'notes'), pattern='.*\.st\.txt$', levels=levels):
-        storyobjs_list.extend(lib.dataparse.read_stories_from_txt(path, addextras=True))
+        if broken:
+            storyobjs_list.extend(lib.dataparse.read_stories_from_txt(path, addextras=True, strict=False))
+        else:
+            storyobjs_list.extend(lib.dataparse.read_stories_from_txt(path, addextras=True))
+
         storythemeobjs_list.extend(lib.dataparse.read_storythemes_from_txt(path))
 
     return storyobjs_list, storythemeobjs_list, timestamp, commit_id
@@ -94,8 +101,14 @@ def init_story_od(storyobj, basepath):
         for field in fields:
             story_od[field] = []
         story_od['story-id'] = storyobj.name
-        story_od['title'] = storyobj.title
-        story_od['date'] = storyobj.date
+        if hasattr(storyobj, 'title'):
+            story_od['title'] = storyobj.title
+        else:
+            story_od['title'] = ''
+        if hasattr(storyobj, 'date'):
+            story_od['date'] = storyobj.date
+        else:
+            story_od['date'] = ''
         #' the split on three newlines is needed to get rid of the story references which are
         #' included at the end of the description
         story_od['description'] = storyobj.description.rstrip().split('\n\n\n')[0]
