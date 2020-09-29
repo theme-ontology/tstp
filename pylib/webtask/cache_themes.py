@@ -37,6 +37,28 @@ def init_metadata_od(version, timestamp, commit_id, theme_count):
     metadata_od['theme-count'] = theme_count
     return metadata_od
 
+def get_theme_objs(version, repo, basepath):
+    """
+    Store themes for a given version of LTO in a big list.
+    Args:
+        version: string
+        repo: git.repo.base.Repo
+        basepath: string
+    Returns: list, string, string
+    """
+    if version == 'dev':
+        repo.git.pull('origin', 'master')
+    else:
+        repo.git.checkout(version)
+    timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
+    commit_id = str(repo.head.object.hexsha)
+    themeobjs_list = list()
+
+    for path in lib.files.walk(os.path.join(basepath, 'notes'), '.*\.th\.txt$'):
+        themeobjs_list.extend(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
+
+    return themeobjs_list, timestamp, commit_id
+
 def init_theme_od(themeobj, basepath):
     """
     Initialize an ordered dictionary and populate its entries with the preprocessed fields of a
@@ -142,29 +164,7 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
         with io.open(path, 'w', encoding='utf-8') as f:
             f.write(lto_json)
 
-
-def get_theme_objs(version, repo, basepath):
-    """
-    Store themes for a given version of LTO in a big list.
-    Args:
-        version: string
-        repo: git.repo.base.Repo
-        basepath: string
-    Returns: list, string, string
-    """
-    if version == 'dev':
-        repo.git.pull('origin', 'master')
-    else:
-        repo.git.checkout(version)
-    timestamp = repo.head.object.committed_datetime.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S (UTC)')
-    commit_id = str(repo.head.object.hexsha)
-    themeobjs_list = list()
-    for path in lib.files.walk(os.path.join(basepath, 'notes'), '.*\.th\.txt$'):
-        themeobjs_list.extend(lib.dataparse.read_themes_from_txt(path, addextras=True, combinedescription=False))
-    return themeobjs_list, timestamp, commit_id
-
-
-def main():
+def main(dry_run=False):
     #' preliminaries
     basepath = GIT_THEMING_PATH_HIST
     output_dir = os.path.join(PUBLIC_DIR, 'data')
@@ -178,6 +178,9 @@ def main():
     versions = repo.tags[2:]
     versions = [str(version) for version in versions]
     versions.append('dev')
+
+    if dry_run:
+        versions = [str(repo.tags[7])]
 
     #' create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:
@@ -200,8 +203,9 @@ def main():
         #' write LTO JSON object to file
         #' set overwrite to True to force existing files to be overwritten
         #' only the developmental version should be written to file by default
-        if version == 'dev':
-            write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=True)
-        else:
-            write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False)
+        if not dry_run:
+            if version == 'dev':
+                write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=True)
+            else:
+                write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False)
 

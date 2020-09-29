@@ -15,7 +15,7 @@ from collections import OrderedDict
 class TestCacheStories(unittest.TestCase):
     def test_get_story_objs(self):
         # ' verify that LTO v0.3.2 checks out correctly
-        # ' it contains 1992 unique themes and 25728 thematic annotations (hard coded below)
+        # ' it contains 2068 unique stories and 25728 thematic annotations (hard coded below)
         basepath = GIT_THEMING_PATH_HIST
         os.chdir(basepath)
         repo = Repo(GIT_THEMING_PATH_HIST)
