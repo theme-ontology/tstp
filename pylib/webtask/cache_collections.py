@@ -258,6 +258,10 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, overwrite=False):
         overwrite: boolean
     """
     path = output_dir + '/' + 'lto-' + version + '-collections.json'
+
+    if isinstance(lto_json, str):
+        lto_json = unicode(lto_json, 'UTF-8')
+
     if not os.path.exists(path) or overwrite:
         with io.open(path, 'w', encoding='utf-8') as f:
             f.write(lto_json)
