@@ -304,7 +304,7 @@ def read_storythemes_from_db(limit = 1000000):
         yield obj   
 
 
-def read_themes_from_txt(filename, verbose=True, addextras=False, combinedescription=True):
+def read_themes_from_txt(filename, verbose=True, addextras=False, combinedescription=True, strict=True):
     """
     Themes in our special text file format.
     """
@@ -379,7 +379,8 @@ def read_themes_from_txt(filename, verbose=True, addextras=False, combinedescrip
             themeobj.description = description
 
         try:
-            themeobj.test_fields()
+            if strict:
+                themeobj.test_fields()
             yield themeobj
         except ValueError as e:
             if verbose:
@@ -398,7 +399,7 @@ def iter_stories_from_txt(filename):
             yield obj
 
 
-def read_stories_from_txt(filename, verbose=True, addextras=False):
+def read_stories_from_txt(filename, verbose=True, addextras=False, strict=True):
     """
     Stories in special TO text file format as handled by "parse".
     """
@@ -408,14 +409,14 @@ def read_stories_from_txt(filename, verbose=True, addextras=False):
     meta = {"source": filename}
     globcollection = not filename.endswith("-collections.st.txt")
     for obj in read_stories_from_fieldcollection(stuff,
-        verbose=(verbose and filename), addextras=addextras, globcollection=globcollection
+        verbose=(verbose and filename), addextras=addextras, globcollection=globcollection, strict=strict
     ):
         obj.meta.update(meta)
         obj.meta = json.dumps(obj.meta)
         yield obj
 
 
-def read_stories_from_fieldcollection(fieldcollection, verbose=True, addextras=False, globcollection=False):
+def read_stories_from_fieldcollection(fieldcollection, verbose=True, addextras=False, globcollection=False, strict=True):
     """
     Stories in our special text file format.
     """
@@ -512,7 +513,8 @@ def read_stories_from_fieldcollection(fieldcollection, verbose=True, addextras=F
         obj.collections = "\n".join(clist)
 
         try:
-            obj.test_fields()
+            if strict:
+                obj.test_fields()
             yield obj
         except ValueError as e:
             if verbose:

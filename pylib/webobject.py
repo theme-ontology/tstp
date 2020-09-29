@@ -40,6 +40,7 @@ class TSTPObject(object):
         Key error on missing field value in kwargs; unlike __init__, 
         all fields must be set.
         """
+        strict = True
         obj = cls()
         
         for kwarg in kwargs:
@@ -49,9 +50,9 @@ class TSTPObject(object):
         for field in cls.fields:
             value = kwargs.get(field, None) 
             value = value if value is not None else getattr(cls, field, None)
-            
-            if value is not None:
-                setattr(obj, field, value)
+
+            if value is not None or not strict:
+                setattr(obj, field, "" if value is None else value)
             else:
                 raise ValueError, "Missing value for %s" % field
             
