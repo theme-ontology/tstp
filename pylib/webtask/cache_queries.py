@@ -1,6 +1,9 @@
 import log
 import webquerylib
 import sys
+import webtask.cache_themes
+import webtask.cache_stories
+import webtask.cache_collections
 
 
 def main():
@@ -15,3 +18,11 @@ def main():
     webquerylib.cache_objects()
     log.debug("START cache_visualizations")
     webquerylib.cache_visualizations()
+
+    log.debug("START cache_themes")
+    webtask.cache_themes.main()
+    log.debug("START cache_stories")
+    webtask.cache_stories.main()
+    log.debug("START cache_collections")
+    webtask.cache_collections.main()
+
