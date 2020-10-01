@@ -35,6 +35,7 @@ def init_metadata_od(version, timestamp, commit_id, story_count):
     metadata_od['version'] = version
     metadata_od['timestamp'] = timestamp
     metadata_od['git-commit-id'] = commit_id
+    metadata_od['encoding'] = 'UTF-8'
     metadata_od['story-count'] = story_count
     return metadata_od
 
