@@ -71,6 +71,8 @@ def get_story_objs(version, repo, basepath):
         else:
             storyobjs_list.extend(lib.dataparse.read_stories_from_txt(path, addextras=True))
 
+        storythemeobjs_list.extend(lib.dataparse.read_storythemes_from_txt(path))
+
     return storyobjs_list, storythemeobjs_list, timestamp, commit_id
 
 def init_story_od(storyobj, basepath):
@@ -301,7 +303,7 @@ def main(dry_run=False):
     for version in versions:
         #' create ordered dictionary consisting of 1) LTO metadata and 2) a list of collections
         #' complete with component story ids
-        lib.log.info("Processing LTO %s collections...", version)
+        lib.log.info('Processing LTO %s collections...', version)
         storyobjs_list, storythemeobjs_list, timestamp, commit_id = get_story_objs(version, repo, basepath)
 
         #' gather up all the story objects of the 'collection' variety into a list
