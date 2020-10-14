@@ -166,6 +166,7 @@ def annotate_storytheme(svg, plot, data, ny1, ny2, texty=500):
         "2019-07-10": "series: Tales of the Unexpected",
         "2019-11-05": "series: The Twilight Zone (1985)",
         "2020-04-12": "series: The Twilight Zone (1959)",
+        "2020-09-18": "series: Alfred Hitchcock Presents",
     }
     done = set()
     ants = sorted((parse(k, ignoretz=True), v) for k, v in annotations.items())

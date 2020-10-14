@@ -76,6 +76,14 @@ def get_descriptions(descfield):
     return descs
 
 
+def fetch_info(wikipagename):
+    resturl = "https://en.wikipedia.org/api/rest_v1/page/summary/"
+    descurl = resturl + wikipagename
+    jsondata = urllib2.urlopen(descurl).read()
+    info = json.loads(jsondata)
+    return info
+
+
 def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=(1, 3, 4, 6), isterse=False, table_offset=0):
     """
 
@@ -84,6 +92,8 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
     :param prefix:
     :param tableclass:
     :param cols:
+        index of columns (title, director, author, date)
+        counts only <td> and not <th>
     :param isterse:
         By default we expect every other row in the list to contain a description that go along with the preceding
         row's information. If the description row is not present, set this flag.
@@ -153,9 +163,7 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
 
                 if isterse and title_link:
                     suffix = title_link.get("href").split("/")[-1].strip()
-                    descurl = resturl + suffix
-                    jsondata = urllib2.urlopen(descurl).read()
-                    info = json.loads(jsondata)
+                    info = fetch_info(suffix)
                     description = info['extract']
 
                 titlestack.append((sid, title, director, author, date))
