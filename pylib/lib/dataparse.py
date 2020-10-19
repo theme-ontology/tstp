@@ -193,6 +193,8 @@ SUBJECTS = {
     "Collections": simple_line_collection,
     "Component Stories": simple_fieldclean,
     "Description": simple_blockfill,
+    "Examples": simple_blockfill,
+    "Notes": simple_blockfill,
 }
 
 
