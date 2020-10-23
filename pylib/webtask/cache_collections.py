@@ -15,6 +15,7 @@ from credentials import PUBLIC_DIR
 import lib.commits
 import lib.files
 import lib.dataparse
+import lib.textformat
 from git import Repo
 import json
 import io
@@ -135,7 +136,7 @@ def init_collection_od(storyobj, basepath):
             collection_od['date'] = storyobj.date
         else:
             collection_od['date'] = ''
-        collection_od['description'] = storyobj.description.rstrip().split('\n\n\n')[0]
+        collection_od['description'] = lib.textformat.remove_wordwrap(storyobj.description.rstrip().split('\n\n\n')[0])
         collection_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
         collection_od['themes'] = []
         extra_fields = set(storyobj.extra_fields)

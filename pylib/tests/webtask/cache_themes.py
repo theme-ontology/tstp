@@ -58,7 +58,7 @@ class TestCacheThemes(unittest.TestCase):
     def test_init_themes_od(self):
         basepath = GIT_THEMING_PATH_HIST
         theme_name = 'romantic love'
-        theme_description = 'Featured is that peculiar sort of love between people so often associated with\nsexual attraction'
+        theme_description = 'Featured is that peculiar sort of love between people so often associated with sexual attraction'
         theme_parents = 'love'
         theme_references = 'https://en.wikipedia.org/wiki/Romance_(love)'
         source_path = '/notes/themes/primary-themes.th.txt'

@@ -14,6 +14,7 @@ from credentials import PUBLIC_DIR
 import lib.commits
 import lib.files
 import lib.dataparse
+import lib.textformat
 from git import Repo
 import json
 import io
@@ -112,7 +113,7 @@ def init_story_od(storyobj, basepath):
             story_od['date'] = ''
         #' the split on three newlines is needed to get rid of the story references which are
         #' included at the end of the description
-        story_od['description'] = storyobj.description.rstrip().split('\n\n\n')[0]
+        story_od['description'] = lib.textformat.remove_wordwrap(storyobj.description.rstrip().split('\n\n\n')[0])
         story_od['collections'] = filter(None, storyobj.collections.split('\n'))
         story_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
         extra_fields = set(storyobj.extra_fields)

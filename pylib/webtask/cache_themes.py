@@ -13,6 +13,7 @@ from credentials import PUBLIC_DIR
 import lib.commits
 import lib.files
 import lib.dataparse
+import lib.textformat
 from git import Repo
 import json
 import io
@@ -90,7 +91,7 @@ def init_theme_od(themeobj, basepath):
     for field in fields:
         theme_od[field] = []
     theme_od['name'] = themeobj.name
-    theme_od['description'] = themeobj.description.rstrip()
+    theme_od['description'] = lib.textformat.remove_wordwrap(themeobj.description)
     if hasattr(themeobj, 'parents'):
         theme_od['parents'] = filter(None, [parent.strip() for parent in themeobj.parents.split(',')])
     if theme_od['parents'] == []:
@@ -100,11 +101,11 @@ def init_theme_od(themeobj, basepath):
     if 'aliases' in extra_fields:
         theme_od['aliases'] = filter(None, [alias.strip() for alias in themeobj.aliases.split(',')])
     if 'notes' in extra_fields:
-        theme_od['notes'] = themeobj.notes.rstrip()
+        theme_od['notes'] = filter(None, lib.textformat.remove_wordwrap(themeobj.notes).split('\n\n'))
     if 'references' in extra_fields:
         theme_od['references'] = filter(None, themeobj.references.split('\n'))
     if 'examples' in extra_fields:
-        theme_od['examples'] = filter(None, themeobj.examples.split('\n'))
+        theme_od['examples'] = filter(None, lib.textformat.remove_wordwrap(themeobj.examples).split('\n\n'))
     if 'relatedthemes' in extra_fields:
         theme_od['relatedthemes'] = filter(None, [relatedtheme.strip() for relatedtheme in themeobj.relatedthemes.split(',')])
     return theme_od
