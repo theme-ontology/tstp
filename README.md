@@ -1,6 +1,6 @@
 # TSTP
 
-http://www.themeontology.com/
+http://www.themeontology.org/
 
 
 ## Overview
