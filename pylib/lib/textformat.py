@@ -1,14 +1,46 @@
-def remove_word_wrap_column_width_newlines(text):
+import textwrap
+
+def remove_wordwrap(text):
     """
     Remove single newline characters (i.e. '\n') from string, but leave double newlines (i.e. '\n\n').
     Args:
         text: string
     Returns: string
     """
-    text_blocks = text.rstrip().split("\n\n")
-    newline_free_text_blocks = []
+    text_blocks = text.split("\n")
+    dewordwraped_text_block = []
+    dewordwraped_text_blocks = []
 
     for text_block in text_blocks:
-        newline_free_text_blocks.append(text_block.replace("\n", " "))
+        text_block = text_block.strip()
 
-    return "\n\n".join(newline_free_text_blocks)
+        if not text_block:
+            if dewordwraped_text_block:
+                dewordwraped_text_blocks.append(" ".join(dewordwraped_text_block))
+            dewordwraped_text_block = []
+        else:
+            dewordwraped_text_block.append(text_block)
+
+    if dewordwraped_text_block:
+        dewordwraped_text_blocks.append(" ".join(dewordwraped_text_block))
+
+    return "\n\n".join(dewordwraped_text_blocks)
+
+def add_wordwrap(text, wrap_length=78):
+    """
+    Add line breaks to string (i.e. '\n' character) so that each line is at most 'wrap_length'
+    characters in length.
+    Args:
+        text: string
+        wrap_length: integer
+    Returns: string
+    """
+    paragraphs = remove_wordwrap(text)
+    wordwrapped_lines = []
+
+    for paragraph in paragraphs.split("\n\n"):
+        for wordwrapped_line in textwrap.fill(paragraph, wrap_length).split("\n"):
+            wordwrapped_lines.append(wordwrapped_line.strip())
+        wordwrapped_lines.append("")
+
+    return "\n".join(wordwrapped_lines)
