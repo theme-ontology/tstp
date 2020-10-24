@@ -8,6 +8,7 @@ import lib.xls
 import lib.log
 import textwrap
 from lib.func import memoize
+import lib.textformat
 
 
 def expload_field( field ):
@@ -85,18 +86,6 @@ def sanitize(lines):
     return lines
 
 
-def block_fill(lines):
-    paragraphs = blockjoin(lines)
-    lines = []
-
-    for txt in paragraphs.split("\n\n"):
-        for line in textwrap.fill(txt, 78).split("\n"):
-            lines.append(line.strip())
-        lines.append("")
-
-    return "\n".join(lines)
-
-
 def make_themes(fieldinfo, empty_comments=True):
     """
     Take a list of tuples as yielded by expload_field and format into themes block.
@@ -133,27 +122,18 @@ def themejoin(lines, empty_comments=True):
     return make_themes(fielditer, empty_comments=empty_comments)
 
 
+def block_fill(lines):
+    """
+    Wordwrap text in paragraphs.
+    """
+    return lib.textformat.add_wordwrap("\n".join(lines))
+
+
 def blockjoin(lines):
     """
     Remove breaklines in paragraphs but not between.
     """
-    acc = []
-    block = []
-
-    for line in lines:
-        line = line.strip()
-
-        if not line:
-            if block:
-                acc.append(" ".join(block))
-            block = []
-        else:
-            block.append(line)
-
-    if block:
-        acc.append(" ".join(block))
-
-    return "\n\n".join(acc)
+    return lib.textformat.remove_wordwrap("\n".join(lines))
 
 
 def simple_blockfill(lines):
