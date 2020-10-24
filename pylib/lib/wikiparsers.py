@@ -84,7 +84,8 @@ def fetch_info(wikipagename):
     return info
 
 
-def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=(1, 3, 4, 6), isterse=False, table_offset=0):
+def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=(1, 3, 4, 6), isterse=False,
+                      table_offset=0, singleseason=False):
     """
 
     :param url:
@@ -133,6 +134,8 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
                 title_link = titlefield.find("a")
                 title = titlefield.get_text().strip(" \"")
                 datetext = datefield.get_text().strip()
+                author = "Story by: " + get_author(authorfield)
+                director = "Directed by: " + directorfield.get_text()
                 date = None
 
                 for regex in [
@@ -147,10 +150,12 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
                     except AttributeError:  # no regex match
                         pass
 
+                # find episode number-in-season
                 if not coloffset:
-                    epfield = row.find("td").get_text()
-                author = "Story by: " + get_author(authorfield)
-                director = "Directed by: " + directorfield.get_text()
+                    if singleseason:
+                        epfield = row.find("th").get_text()
+                    else:
+                        epfield = row.find("td").get_text()
 
                 #sys.stderr.write(str(authorfield).decode("utf-8").encode("ascii", "ignore") + "\n")
                 #f = authorfield
@@ -158,7 +163,10 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
 
                 for match in re.findall("(\d+)([a-z]*)", epfield):
                     nepid, sepid = int(match[0]), match[1]
-                    sid = prefix + "%sx%02d%s" % (idx - table_offset + season_offsset, nepid, sepid)
+                    if singleseason:
+                        sid = prefix + "%02d%s" % (nepid, sepid)
+                    else:
+                        sid = prefix + "%sx%02d%s" % (idx - table_offset + season_offsset, nepid, sepid)
                     sids.append(sid)
 
                 if isterse and title_link:

@@ -1,5 +1,5 @@
 import webdb
-from wikiparsers import find_episodes_st1
+from lib.wikiparsers import find_episodes_st1
 import sys
 
 

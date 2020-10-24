@@ -1,7 +1,5 @@
-import urllib2
-from bs4 import BeautifulSoup
 import webdb
-from wikiparsers import find_episodes_st1
+from lib.wikiparsers import find_episodes_st1
 
 
 def main():
@@ -14,6 +12,6 @@ def main():
     objs = [ stories[sid] for sid in sorted(stories) ]
     txt = webdb.get_defenitions_text_for_objects(objs)
 
-    print txt.encode("utf-8")
+    print(txt.encode("utf-8"))
 
 

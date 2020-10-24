@@ -1,7 +1,5 @@
-import urllib2
-from bs4 import BeautifulSoup
 import webdb
-from wikiparsers import find_episodes_st1
+from lib.wikiparsers import find_episodes_st1
 import sys
 
 
@@ -9,18 +7,21 @@ def main():
     fn = sys.argv[-1]
 
     urls = [
-        "https://en.wikipedia.org/wiki/List_of_Futurama_episodes",
+        "https://en.wikipedia.org/wiki/The_Twilight_Zone_(2019_TV_series)",
     ]
     stories = {}
 
     for idx, url in enumerate(urls):
+        # cols:
+        # titlefield, directorfield, authorfield, datefield
         for story in find_episodes_st1(
-            url, 1, "futurama", tableclass = "wikiepisodetable", cols = (1, 2, 3, 4), isterse = True
+            url, 1, "tz2019e", cols=(1, 2, 3, 4), isterse=False, tableclass="wikiepisodetable",
         ):
             stories[story.name] = story
 
     objs = [ stories[sid] for sid in sorted(stories) ]
-    txt = webdb.get_defenitions_text_for_objects(objs, empty_storythemes_headers = True, skip_fields = 'collections')
+    txt = webdb.get_defenitions_text_for_objects(objs, empty_storythemes_headers=True,
+                                                 skip_fields=('collections',), add_fields=("Ratings",))
     txt = txt.encode("utf-8")
 
     if fn.endswith(".txt"):

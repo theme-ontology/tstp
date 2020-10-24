@@ -1,7 +1,5 @@
-import urllib2
-from bs4 import BeautifulSoup
 import webdb
-from wikiparsers import find_episodes_st1
+from lib.wikiparsers import find_episodes_st1
 
 
 def main():
@@ -11,7 +9,7 @@ def main():
 
     for story in find_episodes_st1(url_voy_main, 0, "voy"):
         stories[story.name] = story
-    for story in find_episodes_st1(url_voy_s4, 4, "voy", tableclass = "wikiepisodetable"):
+    for story in find_episodes_st1(url_voy_s4, 4, "voy", tableclass="wikiepisodetable"):
         stories[story.name] = story
 
     objs = [ stories[sid] for sid in sorted(stories) ]

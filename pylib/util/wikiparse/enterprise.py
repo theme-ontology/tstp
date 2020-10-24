@@ -1,7 +1,7 @@
 import urllib2
 from bs4 import BeautifulSoup
 import webdb
-from wikiparsers import find_episodes_st1
+from lib.wikiparsers import find_episodes_st1
 
 
 def main():
