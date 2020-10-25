@@ -7,7 +7,7 @@ def main():
     with m4.tasks.ctx():
         gitpath = os.path.join(credentials.GIT_THEMING_PATH_M4, "notes")
         os.chdir(gitpath)
-        os.system("git pull")
+        os.system("git pull --depth=1")
         import webtask.test_formatting
         webtask.test_formatting.NOTESPATH = os.path.join(credentials.GIT_THEMING_PATH_M4, "notes")
         webtask.test_formatting.main()

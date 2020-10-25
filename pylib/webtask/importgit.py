@@ -8,7 +8,7 @@ import webtask.test_formatting
 def update_repo():
     path = os.path.join(GIT_THEMING_PATH, "notes")
     os.chdir(path)
-    os.system("git pull")
+    os.system("git pull --depth=1")
 
 
 def main():
