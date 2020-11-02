@@ -23,6 +23,31 @@ TASKLIST = {
     "validate": "validate-git-repository-notes",
     "monitorgit": "monitor-git-repository-notes",
     "challenge": "create-creative-challenge",
+    "importgit": "import-git-repository-notes",
+}
+TASKEXPLAIN = {
+    "validate": """
+Pull the latest version of https://github.com/theme-ontology/theming
+and perform a variety of tests on it. This is done periodically, and
+when github's webhook reports that the repository changed.
+    """,
+    "monitorgit": """
+Records commits to https://github.com/theme-ontology/theming and sends
+emails with diffs. This is done 30 min after github's webhook reports 
+that the repository changed, the timer being reset if the repository
+changes within that interval.
+    """,
+    "challenge": """
+    Assemble a creative challenge in the form of a list of interesting
+    themes for which the participant is to write a matching story. This
+    task triggers only once per week, targeted for Saturday.
+        """,
+    "importgit": """
+This task will perform the import pipeline: Pull 
+https://github.com/theme-ontology/theming, validate it, load all data
+and store it in the local SQL db, cache various queries and compute
+some final statistics. It can only be started manually. 
+    """,
 }
 taskcount = defaultdict(int)
 LOGPATH = os.path.join(credentials.PUBLIC_DIR, "m4", "logs", "m4.log")
@@ -160,6 +185,7 @@ def runtask(name):
         fhlog.seek(0, os.SEEK_END)
         p = subprocess.Popen(" ".join(cmd), stdout=fhlog, stderr=fhlog, shell=True)
         PROCLIST[name] = (p, fhlog)
+        LAST_STATUS[name] = ["running", "n/a"]
         taskcount[name] += 1
         msg = "[%s] started task, logging in %s" % (name, outpath)
     lib.log.info(msg)
@@ -205,6 +231,12 @@ def task_monitorgit():
     return "[OK]"
 
 
+@app.route("/task/importgit")
+def task_importgit():
+    scheduletask("importgit", 15.0)
+    return "[OK]"
+
+
 @app.route("/event/gitchanged")
 def event_gitchanged():
     scheduletask("validate", 15.0)
@@ -231,6 +263,7 @@ def status():
                 "status": LAST_STATUS.get(name, ["n/a", "unknown"]),
                 "running": 1 if name in PROCLIST else 0,
                 "logpath": lib.files.path2url(LOGS.get(name, "")),
+                "explain": TASKEXPLAIN.get(name, "n/a")
             }
             for name in TASKLIST
         ],
@@ -250,6 +283,7 @@ def event_gitsearch():
 
 
 def main():
+    os.environ["PYTHONUNBUFFERED"] = "1"
     timed_tasks = [
         TaskTimer(task_validate, 3600 * 8, repeating=True),
         TaskTimer(checktasks, 1.0, repeating=True),

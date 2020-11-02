@@ -39,6 +39,12 @@ if($name == "monitorgit")
 {
     $url = "http://127.0.0.1:31985/task/monitorgit";
 }
+/* disabled for safety
+if($name == "importgit") 
+{
+    $url = "http://127.0.0.1:31985/task/importgit";
+}
+*/
 if ($url) {
     $response = file_get_contents($url);
     echo "[" . $_GET["name"] . "]\n";

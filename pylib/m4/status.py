@@ -1,5 +1,4 @@
 import requests
-import lib.log
 
 
 def main():
