@@ -15,6 +15,8 @@ def run_task(taskname):
 
 
 def main():
+    # python git library whines about missing executable
+    os.environ["GIT_PYTHON_REFRESH"] = "quiet"
     pipeline = [
         "updaterepo",
         "test_integrity",
