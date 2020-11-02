@@ -106,11 +106,7 @@
         }
         elseif ($action == "importgit-new")
         {
-            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                $prefix = "http";
-            } else {
-                $prefix = "https";
-            }                
+            $prefix = "http";
             $target = explode("-", $action)[0];
             $url = $prefix . "://127.0.0.1:31985/task/" . $target;
             $response = file_get_contents($url);
