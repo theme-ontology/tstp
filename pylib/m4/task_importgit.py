@@ -20,7 +20,7 @@ def main():
         "test_integrity",
         "test_formatting",
         "importgit",
-        "task_indexing",
+        "indexing",
         "cache_queries",
     ]
     with m4.tasks.ctx():
