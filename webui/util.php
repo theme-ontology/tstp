@@ -56,7 +56,7 @@
                                     var element = document.getElementById("m4log");
                                     $("#m4log").text(result);
                                     scrollToBottom("m4log");
-                                });
+                                }, "text");
                             }
                         }
                     });
