@@ -1,3 +1,4 @@
 *.pyc
 /pylib/credentials.py
 /webui/web.log
+/docker/credentials.py
