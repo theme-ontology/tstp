@@ -2,11 +2,11 @@
 #: this file should be copied to credentials.py and edited
 
 DBS = {
-	'tstp@ldnhome' : dict(
+	'tstp@docker' : dict(
 		host = '127.0.0.1',
-		db = 'theme_ontology_web',
-		user = 'profmoriarty',
-		password = 'randomPassword',
+		db = '',
+		user = '',
+		password = '',
 	),
 }
 
@@ -33,9 +33,9 @@ TEMP_PATH = tempfile.gettempdir()
 
 #: email distribution
 EMAIL_ADMIN = [
-	"mikael@odinlake.net",
+	"myemail@somedomain.org",
 ]
 
 #: how to post to slack
-SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
+SLACK_WEBHOOK_URL = ""
 
