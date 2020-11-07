@@ -500,7 +500,7 @@ def main(test_run=False):
 
     #' use version v0.3.2 for testing purposes
     if test_run:
-        versions = [versions[7]]
+        versions = ["v0.3.2"]
 
     #' create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:
