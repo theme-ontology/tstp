@@ -75,8 +75,8 @@
 
 <div class="container">
 <?php
-    $submit = $_POST["submit"];
-    $action = $_POST["action"];
+    $submit = @$_POST["submit"];
+    $action = @$_POST["action"];
     $response = "";
     $result = "";
     $showM4task = "";

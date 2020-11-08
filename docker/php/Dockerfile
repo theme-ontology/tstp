@@ -1,7 +1,7 @@
 FROM php:rc-fpm-alpine AS base
 RUN apk update; \
     apk upgrade;
-RUN apk add findutils python2 python2-dev musl-dev
+RUN apk add bash findutils python2 python2-dev musl-dev
 RUN docker-php-ext-install mysqli
 
 FROM base AS base_python
@@ -9,8 +9,7 @@ COPY . /code/docker
 RUN python /code/docker/get-pip.py
 RUN pip install pymysql
 
-FROM src_local AS src_local
-
+FROM base_python AS src_local
 RUN updatedb
 
 FROM src_local AS cfg
