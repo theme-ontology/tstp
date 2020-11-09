@@ -1,5 +1,6 @@
-from webtask.indexing import main
+import webtask.indexing
 
 
 def main():
-    main()
+    webtask.indexing.main()
+

@@ -19,7 +19,7 @@
             "resources.php" => "Resources",
 		);
 
-		$cls = ($known[$ME] == $name) ? "active" : "";
+		$cls = (@$known[$ME] == $name) ? "active" : "";
 		$link = $known[$name];
 
 		if ($name == "themeontology.org")

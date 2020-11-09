@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  php:
+    build:
+      context: .
+      dockerfile: ./php/Dockerfile
+    networks:
+      - backend
+    volumes:
+      - ..:/local/tstp:rw
+  apache:
+    build:
+      context: .
+      dockerfile: ./apache/Dockerfile
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "8080:80"
+    volumes:
+      - ..:/local/tstp
+  mysql:
+    image: mysql:5.6.40
+    networks:
+      - backend
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+networks:
+  frontend:
+  backend:
