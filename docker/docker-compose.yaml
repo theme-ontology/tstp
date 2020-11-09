@@ -4,17 +4,23 @@ services:
     build:
       context: .
       dockerfile: ./php/Dockerfile
+    depends_on:
+      - mysql
     networks:
       - backend
     volumes:
       - ..:/local/tstp:rw
+    environment:
+      - WAIT_HOSTS=mysql:3306
+      - WAIT_HOSTS_TIMEOUT=30
+      - WAIT_SLEEP_INTERVAL=3
+      - WAIT_HOST_CONNECT_TIMEOUT=3
   apache:
     build:
       context: .
       dockerfile: ./apache/Dockerfile
     depends_on:
       - php
-      - mysql
     networks:
       - frontend
       - backend
@@ -23,11 +29,14 @@ services:
     volumes:
       - ..:/local/tstp
   mysql:
-    image: mysql:5.6.40
+    image: mysql
     networks:
       - backend
     environment:
       - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=tstpdockeruser
+      - MYSQL_PASSWORD=tstpdockerpass
+      - MYSQL_DATABASE=tstpdockerdb
 networks:
   frontend:
   backend:
