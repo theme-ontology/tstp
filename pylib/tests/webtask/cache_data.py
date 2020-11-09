@@ -18,14 +18,12 @@ class TestCacheData(unittest.TestCase):
         #' (hard coded below).
         basepath = GIT_THEMING_PATH_HIST
         os.chdir(basepath)
-        version = 'v0.3.2'
-        #subprocess.check_output('git reset --hard origin/master'.split(), stderr=subprocess.STDOUT)
-        #subprocess.check_output('git checkout tags/v0.3.2'.split(), stderr=subprocess.STDOUT)
+        version = "v0.3.2"
         expected_theme_count = 2931
         expected_story_count = 2068
         expected_thematic_annotation_count = 25728
-        expected_timestamp = '2019-10-28 22:31:22 (UTC)'
-        expected_commit_id = '56b4640d27b6f78478cd6aada1189add3480bf17'
+        expected_timestamp = "2019-10-28 22:31:22 (UTC)"
+        expected_commit_id = "56b4640d27b6f78478cd6aada1189add3480bf17"
         themeobjs_list, storyobjs_list, storythemeobjs_list, timestamp, commit_id = webtask.cache_data.get_lto_data(version, basepath)
         self.assertEqual(len(themeobjs_list), expected_theme_count)
         self.assertEqual(len(storyobjs_list), expected_story_count)
@@ -54,20 +52,20 @@ class TestCacheData(unittest.TestCase):
         expected_theme_count = len(themeobjs_list) + 1 # the three test themes plus the 'literary thematic entity' root theme
         themes_list = webtask.cache_data.init_themes_list(themeobjs_list, basepath)
         self.assertEqual(len(themes_list), expected_theme_count)
-        # ' If the alphabetical sorting by name works, then the first and last themes in the list of
-        # ' themes will be named as follows:
-        first_theme_name = 'a common enemy unites'
-        last_theme_name = 'zombie'
+        #' If the alphabetical sorting by name works, then the first and last themes in the list of
+        #' themes will be named as follows:
+        first_theme_name = "a common enemy unites"
+        last_theme_name = "zombie"
         self.assertEqual(themes_list[0]['name'], first_theme_name)
         self.assertEqual(themes_list[-1]['name'], last_theme_name)
 
     def test_init_themes_od(self):
         basepath = GIT_THEMING_PATH_HIST
-        theme_name = 'romantic love'
-        theme_description = 'Featured is that peculiar sort of love between people so often associated with sexual attraction'
-        theme_parents = 'love'
-        theme_references = 'https://en.wikipedia.org/wiki/Romance_(love)'
-        source_path = '/notes/themes/primary-themes.th.txt'
+        theme_name = "romantic love"
+        theme_description = "Featured is that peculiar sort of love between people so often associated with sexual attraction."
+        theme_parents = "love"
+        theme_references = "https://en.wikipedia.org/wiki/Romance_(love)"
+        source_path = "/notes/themes/primary-themes.th.txt"
         raw_source_path = basepath + source_path
         theme_meta = json.dumps({'source': raw_source_path})
         test_themeobj = webobject.Theme(
@@ -138,7 +136,7 @@ class TestCacheData(unittest.TestCase):
         self.assertEqual(story_od, None)
 
         #' test that any trailing reference information is correctly stripped from description text
-        expected_description = 'A classic film.'
+        expected_description = "A classic film."
         storyobj = webobject.Story(
             name='movie: Robot Monster (1953)',
             title='Robot Monster',
@@ -201,15 +199,15 @@ class TestCacheData(unittest.TestCase):
     def test_populate_stories_with_themes(self):
         #' initialize a list of story OrderedDict objects
         story_ids = [
-            'movie: A Trip to the Moon (1902)',
-            'movie: The Wizard of Oz (1939)',
-            'movie: Robot Monster (1953)']
+            "movie: A Trip to the Moon (1902)",
+            "movie: The Wizard of Oz (1939)",
+            "movie: Robot Monster (1953)"]
         story_titles = [
-            'A Trip to the Moon (1902)',
-            'The Wizard of Oz (1939)',
-            'Robot Monster (1953)']
-        story_dates = ['1902-10-04', '1939-08-25', '1953-06-24']
-        story_description = 'A classic film.'
+            "A Trip to the Moon (1902)",
+            "The Wizard of Oz (1939)",
+            "Robot Monster (1953)"]
+        story_dates = ["1902-10-04", "1939-08-25", "1953-06-24"]
+        story_description = "A classic film."
         source_path = json.dumps({'source': './a/token/path'})
         story_od_1 = OrderedDict()
         story_od_1['story-id'] = story_ids[0]
@@ -250,12 +248,12 @@ class TestCacheData(unittest.TestCase):
     def test_populate_stories_with_collection_info(self):
         # ' initialize a collection object and put it in a list
         component_story_names = [
-            'movie: Alien (1979)',
-            'movie: Aliens (1986)',
-            'movie: Alien 3 (1992)',
-            'movie: Alien Resurrection (1997)',
-            'movie: Prometheus (2012)',
-            'movie: Alien: Covenant (2017)']
+            "movie: Alien (1979)",
+            "movie: Aliens (1986)",
+            "movie: Alien 3 (1992)",
+            "movie: Alien Resurrection (1997)",
+            "movie: Prometheus (2012)",
+            "movie: Alien: Covenant (2017)"]
         storyobj = webobject.Story(
             name='Collection: Alien',
             title='Alien',
@@ -267,16 +265,16 @@ class TestCacheData(unittest.TestCase):
 
         #' initialize a story OrderedDict object and put it in a list
         story_od = OrderedDict()
-        story_od['story-id'] = 'movie: Alien (1979)'
-        story_od['title'] = 'Alien'
-        story_od['date'] = '1979-05-25'
-        story_od['description'] = 'A classic film.'
+        story_od['story-id'] = "movie: Alien (1979)"
+        story_od['title'] = "Alien"
+        story_od['date'] = "1979-05-25"
+        story_od['description'] = "A classic film."
         story_od['source'] = json.dumps({'source': './a/token/path'})
         story_od['collections'] = []
         stories_list = [story_od]
 
         #' test that collection info is correctly added to story entry
-        expected_collections = ['Collection: Alien']
+        expected_collections = ["Collection: Alien"]
         expected_collection_count = len(expected_collections)
         updated_stories_list = webtask.cache_data.populate_stories_with_collection_info(storyobjs_list, stories_list)
         self.assertEqual(len(updated_stories_list[0]['collections']), expected_collection_count)
@@ -287,4 +285,3 @@ class TestCacheData(unittest.TestCase):
 
 def main():
     unittest.main(verbosity=2)
-
