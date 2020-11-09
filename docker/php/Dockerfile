@@ -1,13 +1,19 @@
 FROM php:rc-fpm-alpine AS base
 RUN apk update; \
     apk upgrade;
-RUN apk add bash findutils python2 python2-dev musl-dev git
+RUN apk add bash findutils python2 git gcc
+RUN apk add libffi-dev openssl-dev python2-dev musl-dev
 RUN docker-php-ext-install mysqli
+
+# Add docker-compose-wait tool -------------------
+ENV WAIT_VERSION 2.7.2
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
+RUN chmod +x /wait
 
 FROM base AS base_python
 COPY . /code/docker
 RUN python /code/docker/get-pip.py
-RUN pip install pymysql natsort python-dateutil networkx
+RUN pip install pymysql natsort python-dateutil networkx cryptography
 
 FROM base_python AS src_local
 RUN git clone --depth 1 https://github.com/theme-ontology/theming /code/theming
