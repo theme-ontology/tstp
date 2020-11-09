@@ -479,10 +479,29 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, category, overwri
         lto_json = str(lto_json, 'UTF-8')
 
     #' write JSON object to file
-    path = output_dir + '/' + 'lto-' + version + '-' + category + '.json'
+    path = generate_lto_file_path(output_dir, version, category=category)
     if not os.path.exists(path) or overwrite:
         with io.open(path, 'w', encoding='utf-8') as f:
             f.write(lto_json)
+
+def generate_lto_file_path(output_dir, version, category):
+    """
+    Generate file path for storing LTO theme, story, or collection data to JSON file.
+    Args:
+        output_dir: string
+        version: string
+        category: string
+    Returns: string
+    """
+    file_path = ""
+    if category == 'theme':
+        file_path = output_dir + '/' + 'lto-' + version + '-themes.json'
+    elif category == 'story':
+        file_path = output_dir + '/' + 'lto-' + version + '-stories.json'
+    elif category == 'collection':
+        file_path = output_dir + '/' + 'lto-' + version + '-collections.json'
+
+    return file_path
 
 def main(test_run=False):
     #' preliminaries
@@ -504,46 +523,61 @@ def main(test_run=False):
 
     #' create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:
-        lib.log.info("Caching LTO %s data...", version)
+        #' check if cached files already exist for non "dev" versions
+        cached_files_exist = False
+        if version != "dev":
+            themes_file_path = generate_lto_file_path(output_dir, version, category='theme')
+            stories_file_path = generate_lto_file_path(output_dir, version, category='story')
+            collections_file_path = generate_lto_file_path(output_dir, version, category='collection')
+            cached_files_exist = os.path.isfile(themes_file_path) and os.path.isfile(stories_file_path) and os.path.isfile(collections_file_path)
 
-        #' retrieve theme, story, collection, and metadata for a given LTO version
-        themeobjs_list, storyobjs_list, storythemeobjs_list, timestamp, commit_id = get_lto_data(version, basepath)
+        #' cache LTO data
+        #' if test_run is true, then only LTO v0.3.2 is cached
+        #' if test_run is false, then
+        #' 1) the "dev" version of LTO is always cached, and
+        #' 2) tagged LTO version data is cached if and only if the corresponding JSON files do not
+        #' already exist
+        if not test_run and not cached_files_exist:
+            lib.log.info("Caching LTO %s data...", version)
 
-        #' prepare theme data and write to JSON file
-        themes_list = init_themes_list(themeobjs_list, basepath)
-        themes_od = OrderedDict()
-        themes_od['lto'] = init_metadata_od(version, timestamp, commit_id, category='theme', count=len(themes_list))
-        themes_od['themes'] = themes_list
-        themes_json = json.dumps(themes_od, ensure_ascii=False, indent=4)
+            #' retrieve theme, story, collection, and metadata for a given LTO version
+            themeobjs_list, storyobjs_list, storythemeobjs_list, timestamp, commit_id = get_lto_data(version, basepath)
 
-        #' prepare story data and write to JSON file
-        stories_list = init_stories_list(storyobjs_list, basepath)
-        stories_list = populate_stories_with_collection_info(storyobjs_list, stories_list)
-        stories_list = populate_stories_with_themes(stories_list, storythemeobjs_list)
-        stories_od = OrderedDict()
-        stories_od['lto'] = init_metadata_od(version, timestamp, commit_id, category='story', count=len(stories_list))
-        stories_od['stories'] = stories_list
-        stories_json = json.dumps(stories_od, ensure_ascii=False, indent=4)
+            #' prepare theme data and write to JSON file
+            themes_list = init_themes_list(themeobjs_list, basepath)
+            themes_od = OrderedDict()
+            themes_od['lto'] = init_metadata_od(version, timestamp, commit_id, category='theme', count=len(themes_list))
+            themes_od['themes'] = themes_list
+            themes_json = json.dumps(themes_od, ensure_ascii=False, indent=4)
 
-        #' prepare collection data and write to JSON file
-        collections_list = init_collections_list(storyobjs_list, basepath)
-        collections_list = populate_collections_with_component_stories_1(collections_list, storyobjs_list)
-        collections_list = populate_collections_with_component_stories_2(collections_list, storyobjs_list)
-        collections_list = populate_collections_with_themes(collections_list, storythemeobjs_list)
-        collection_od = OrderedDict()
-        collection_od['lto'] = init_metadata_od(version, timestamp, commit_id, category='collection', count=len(collections_list))
-        collection_od['collections'] = collections_list
-        collections_json = json.dumps(collection_od, ensure_ascii=False, indent=4)
+            #' prepare story data and write to JSON file
+            stories_list = init_stories_list(storyobjs_list, basepath)
+            stories_list = populate_stories_with_collection_info(storyobjs_list, stories_list)
+            stories_list = populate_stories_with_themes(stories_list, storythemeobjs_list)
+            stories_od = OrderedDict()
+            stories_od['lto'] = init_metadata_od(version, timestamp, commit_id, category='story', count=len(stories_list))
+            stories_od['stories'] = stories_list
+            stories_json = json.dumps(stories_od, ensure_ascii=False, indent=4)
 
-        # ' write theme, story, and collection JSON objects to file
-        # ' set overwrite to True to force existing files to be overwritten
-        # ' only the developmental version should be written to file by default
-        if not test_run:
-            if version == 'dev':
-                write_lto_data_to_json_file(themes_json, version, output_dir, category='themes', overwrite=True)
-                write_lto_data_to_json_file(stories_json, version, output_dir, category='stories', overwrite=True)
-                write_lto_data_to_json_file(collections_json, version, output_dir, category = 'collections', overwrite=True)
-            else:
-                write_lto_data_to_json_file(themes_json, version, output_dir, category='themes', overwrite=False)
-                write_lto_data_to_json_file(stories_json, version, output_dir, category='stories', overwrite=False)
-                write_lto_data_to_json_file(collections_json, version, output_dir, category = 'collections', overwrite=False)
+            #' prepare collection data and write to JSON file
+            collections_list = init_collections_list(storyobjs_list, basepath)
+            collections_list = populate_collections_with_component_stories_1(collections_list, storyobjs_list)
+            collections_list = populate_collections_with_component_stories_2(collections_list, storyobjs_list)
+            collections_list = populate_collections_with_themes(collections_list, storythemeobjs_list)
+            collection_od = OrderedDict()
+            collection_od['lto'] = init_metadata_od(version, timestamp, commit_id, category='collection', count=len(collections_list))
+            collection_od['collections'] = collections_list
+            collections_json = json.dumps(collection_od, ensure_ascii=False, indent=4)
+
+            #' write theme, story, and collection JSON objects to file
+            #' set overwrite to True to force existing files to be overwritten
+            #' only the developmental version should be written to file by default
+            if not test_run:
+                if version == 'dev':
+                    write_lto_data_to_json_file(themes_json, version, output_dir, category='theme', overwrite=True)
+                    write_lto_data_to_json_file(stories_json, version, output_dir, category='story', overwrite=True)
+                    write_lto_data_to_json_file(collections_json, version, output_dir, category = 'collection', overwrite=True)
+                else:
+                    write_lto_data_to_json_file(themes_json, version, output_dir, category='theme', overwrite=False)
+                    write_lto_data_to_json_file(stories_json, version, output_dir, category='story', overwrite=False)
+                    write_lto_data_to_json_file(collections_json, version, output_dir, category = 'collection', overwrite=False)
