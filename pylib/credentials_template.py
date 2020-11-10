@@ -34,6 +34,9 @@ PUBLIC_DIR = "f:\\www\\pub"
 #: Apache Solr server URL base, must end with /
 SOLR_URL = "http://localhost:8983/solr/"
 
+#: Elasticsearch server if available
+ES_HOSTS = []
+
 #: where to keep temporary data files (useful for debugging)
 import tempfile
 TEMP_PATH = tempfile.gettempdir()
