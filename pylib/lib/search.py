@@ -26,14 +26,55 @@ def prod(iter):
     return reduce(f, iter, 1)
 
 
-def query(core, qtype, q):
+def query(idx, qtype, q):
+    if credentials.ES_HOSTS:
+        res = es_query(idx, qtype, q)
+    else:
+        res = solr_query(idx, qtype, q)
+    return res
+
+
+def es_query(idx, qtype, q):
+    """
+    Perform a query using Elasticsearch.
+    """
+    from elasticsearch import Elasticsearch
+    es = Elasticsearch(credentials.ES_HOSTS)
+    res = {}
+    if qtype == "select":
+        ores = es.search(index=idx, body={"query": {"match": {"text": q}}})['hits']['hits']
+        for item in ores:
+            res[item['_source'][idx]] = item['_score']
+
+    elif qtype == "suggest":
+        # ES not configured for this
+        return {}
+
+    elif qtype == "spell":
+        sbody = {}
+        for ii, token in enumerate(q.split()):
+            sbody["s%d"%ii] = {
+                "text": token,
+                "term": {"field": "text"},
+            }
+            ores = es.search(index=idx, body={"suggest": sbody})['suggest']
+            for key in ores:
+                res[ores[key][0]['text']] = ores[key][0]
+    return res
+
+
+def solr_query(core, qtype, q):
+    """
+    Perform a query using Solr.
+    """
     params = {"q": q}
+    res = {}
 
     if qtype == "select":
         params.update({
             "defType": "edismax",
             "fl": core + ",score",
-            "pf": " ".join("%s^%s" % (k, v) for k, v in  FIELD_WEIGHT.iteritems()),
+            "pf": " ".join("%s^%s" % (k, v) for k, v in FIELD_WEIGHT.iteritems()),
             "rows": 1000,
         })
     elif qtype == "suggest":
@@ -45,15 +86,35 @@ def query(core, qtype, q):
         pass
 
     url = URL_BASE + core + "/" + qtype + "?" + urllib.urlencode(params)
-
     try:
         with lib.log.Timer(url if DEBUG else None):
-            return json.load(urllib2.urlopen(url))
+            ores = json.load(urllib2.urlopen(url))
     except urllib2.HTTPError:
         return {}
 
+    if qtype == "select":
+        for item in ores['response']['docs']:
+            for thing in item[core]:
+                res[thing] = item['score']
+    elif qtype == "spell":
+        ores = ores['spellcheck']['suggestions']
+        for ii, kw in enumerate(ores):
+            if ii % 2 == 0:
+                item = ores[ii+1]
+                res[kw] = {
+                    'offset': item['startOffset'],
+                    'length': item['endOffset'] - item['startOffset'],
+                    'options': [
+                        {'freq': sug['freq'], 'score': 1, 'text': sug['word']}
+                        for sug in item['suggestion']
+                    ]
+                }
+    elif qtype == "spell":
+        res = ores
+    return res
 
-def find(core, q):
+
+def find(idx, q):
     """
     Perform search.
     :return:
@@ -72,18 +133,14 @@ def find(core, q):
     if DEBUG: lib.log.debug("query list: %s", qlist)
 
     # find spelling variations
-    spellresult = query(core, "spell", q)
-    try:
-        variations = spellresult['spellcheck']['suggestions']
-    except KeyError:
-        variations = []
-    bykw = {kw:set() for ii, kw in enumerate(variations) if ii%2==0}
-    for ii, kw in enumerate(variations):
+    spellresult = query(idx, "spell", q)
+    bykw = {kw:set() for kw in spellresult}
+    for kw in spellresult:
         # ignores spelling suggestions for words with asterisks and gunk
-        if ii%2 == 0 and kw.isalpha():
-            for spec in variations[ii+1]['suggestion']:
-                word = spec['word']
-                weight = spec['freq']
+        if kw.isalpha():
+            for spec in spellresult[kw]['options']:
+                word = spec['text']
+                weight = spec['freq'] * spec['score']
                 spec['kw'] = kw
                 order.append(spec)
                 bykw[kw].add(word)
@@ -97,7 +154,7 @@ def find(core, q):
     kw = qlist[-1].lower()
     if kw.isalpha():
         maxweight = -1
-        completeresults = query(core, "suggest", q)
+        completeresults = query(idx, "suggest", q)
         try:
             completions = completeresults["suggest"]["completer"][q]['suggestions']
         except KeyError:
@@ -110,7 +167,7 @@ def find(core, q):
             weight = cspec['weight']
             maxweight = max(maxweight, weight)
             if weight < maxweight / 10.0 or ii > 5: break
-            spec = { 'word': word, 'freq': weight }
+            spec = {'word': word, 'freq': weight}
             order.append(spec)
             if kw not in bykw:
                 bykw[kw] = set()
@@ -127,7 +184,7 @@ def find(core, q):
         count = prod(len(x)+1 for x in bykw.itervalues())
         if count > MAX_VARIATIONS:
             spec = order.pop()
-            bykw[spec['kw']].remove(spec['word'])
+            bykw[spec['kw']].remove(spec['text'])
             if DEBUG:
                 lib.log.debug("too many variations (%d), ignoring: %s", count, spec)
         else:
@@ -148,11 +205,10 @@ def find(core, q):
         basescore /= float(len(replace_list)) + 1
         rlu = {kw.lower(): word for kw, word in replace_list}
         nq = " ".join(rlu.get(w.lower().strip("*"), w) for w in qlist)
-        result = query(core, "select", nq.encode('utf8'))['response']['docs']
-        for spec in result:
-            score = (basescore * spec['score']) / 10.0
-            for thing in spec[core]:
-                scores[thing] = max(scores.get(thing), score)
+        result = query(idx, "select", nq.encode('utf8'))
+        for key in result:
+            score = (basescore * result[key]) / 10.0
+            scores[key] = max(scores.get(key), score)
 
     scores = [(v, k) for k, v in scores.iteritems()]
     scores.sort(reverse=True)

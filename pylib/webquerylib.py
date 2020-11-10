@@ -251,40 +251,6 @@ def interpret_daterange(txt):
     return '-'.join(d1), '-'.join(d2)
 
 
-def cache_objects():
-    """
-    Save themes and stories as json files.
-    """
-    for objt in webdb.SUPPORTED_OBJECTS:
-        size = 0
-        header = []
-        base_path = get_data_path(TARGET + "json", objt)
-        log.info("writing to: %s", base_path)
-
-        for ii, row in enumerate(webdb.get_defenitions(objt)):
-            if "storytheme" in objt:
-                continue
-            if ii == 0:
-                header = row
-            else:
-                fn = get_valid_filename(row[0].decode("utf-8").encode("ascii", "ignore"))
-                path = os.path.join(base_path, fn + ".json")
-                data = {k: v for k, v in zip(header, row)}
-                data['type'] = objt
-                data['id'] = objt + "_" + fn
-
-                if 'date' in data:
-                    d1, d2 = interpret_daterange(data['date'])
-                    data['date'] = d1
-                    data['date2'] = d2
-
-                with open(path, "wb+") as fh:
-                    json.dump(data, fh)
-                size += os.stat(path).st_size / (1024.0 ** 2)
-
-        log.debug("..total json size: %.2f Mb", size)
-
-
 def get_commit_log(*args):
     """
     Return commit log stored in SQL.

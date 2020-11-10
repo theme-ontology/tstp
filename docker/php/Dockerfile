@@ -13,7 +13,7 @@ FROM base AS base_python
 RUN mkdir /code
 RUN curl https://bootstrap.pypa.io/get-pip.py -o /code/get-pip.py
 RUN python /code/get-pip.py
-RUN pip install pymysql natsort python-dateutil networkx cryptography pytz numpy
+RUN pip install pymysql natsort python-dateutil networkx cryptography pytz numpy elasticsearch
 
 # Setup local copy of source code
 FROM base_python AS src_local

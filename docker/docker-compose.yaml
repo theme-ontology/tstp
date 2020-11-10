@@ -15,6 +15,7 @@ services:
       - WAIT_HOSTS_TIMEOUT=30
       - WAIT_SLEEP_INTERVAL=3
       - WAIT_HOST_CONNECT_TIMEOUT=3
+
   apache:
     build:
       context: .
@@ -28,6 +29,7 @@ services:
       - "8080:80"
     volumes:
       - ..:/local/tstp
+
   mysql:
     image: mysql
     networks:
@@ -37,6 +39,32 @@ services:
       - MYSQL_USER=tstpdockeruser
       - MYSQL_PASSWORD=tstpdockerpass
       - MYSQL_DATABASE=tstpdockerdb
+
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      #- discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - backend
+
+volumes:
+  data01:
+    driver: local
+    
 networks:
   frontend:
   backend:

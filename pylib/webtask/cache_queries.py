@@ -2,6 +2,7 @@ import log
 import webquerylib
 import sys
 import webtask.cache_data
+import webtask.cache_webjson
 
 
 def main():
@@ -13,7 +14,7 @@ def main():
     log.debug("START cache_special_queries")
     webquerylib.cache_special_queries()
     log.debug("START cache_objects")
-    webquerylib.cache_objects()
+    webtask.cache_webjson.cache_objects()
     log.debug("START cache_visualizations")
     webquerylib.cache_visualizations()
 

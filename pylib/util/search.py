@@ -10,29 +10,3 @@ def main():
     for s, w in lib.search.find(core, q):
         print s, w
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
