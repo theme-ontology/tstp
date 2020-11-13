@@ -24,10 +24,9 @@ RUN xargs -a /build/deps_run.txt apk add --no-cache &&\
 # Setup local copy of docker config files
 FROM base_run AS src_local
 COPY . /build/docker
-COPY php/php.ini-development /usr/local/etc/php/php.ini
-COPY php/www.conf-development /usr/local/etc/php-fpm.d/www.conf
+EXPOSE 31985
 
 # Final configuration
 FROM src_local AS cfg
-CMD /build/docker/php/start.sh
+CMD /build/docker/m4/start.sh
 

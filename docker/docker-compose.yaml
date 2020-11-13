@@ -1,5 +1,25 @@
 version: "3.8"
 services:
+  m4:
+    build:
+      context: .
+      dockerfile: ./m4/Dockerfile
+    depends_on:
+      - mysql
+    networks:
+      - backend
+    volumes:
+      - ..:/local/tstp:rw
+      - data02:/code
+      - data03:/www/pub
+    environment:
+      - WAIT_HOSTS=mysql:3306
+      - WAIT_HOSTS_TIMEOUT=30
+      - WAIT_SLEEP_INTERVAL=3
+      - WAIT_HOST_CONNECT_TIMEOUT=3
+    ports:
+      - "31985:31985"
+
   php:
     build:
       context: .
@@ -10,10 +30,12 @@ services:
       - backend
     volumes:
       - ..:/local/tstp:rw
+      - data02:/code
+      - data03:/www/pub
     environment:
-      - WAIT_HOSTS=mysql:3306
-      - WAIT_HOSTS_TIMEOUT=30
-      - WAIT_SLEEP_INTERVAL=3
+      - WAIT_HOSTS=m4:31985
+      - WAIT_HOSTS_TIMEOUT=10
+      - WAIT_SLEEP_INTERVAL=5
       - WAIT_HOST_CONNECT_TIMEOUT=3
 
   apache:
@@ -25,10 +47,11 @@ services:
     networks:
       - frontend
       - backend
+    volumes:
+      - data02:/code
+      - data03:/www/pub
     ports:
       - "8080:80"
-    volumes:
-      - ..:/local/tstp
 
   mysql:
     image: mysql
@@ -46,7 +69,6 @@ services:
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
-      #- discovery.seed_hosts=es02,es03
       - cluster.initial_master_nodes=es01
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
@@ -64,7 +86,9 @@ services:
 volumes:
   data01:
     driver: local
-    
+  data02:
+  data03:
+
 networks:
   frontend:
   backend:
