@@ -17,8 +17,6 @@ services:
       - WAIT_HOSTS_TIMEOUT=30
       - WAIT_SLEEP_INTERVAL=3
       - WAIT_HOST_CONNECT_TIMEOUT=3
-    ports:
-      - "31985:31985"
 
   php:
     build:
@@ -26,6 +24,7 @@ services:
       dockerfile: ./php/Dockerfile
     depends_on:
       - mysql
+      - m4
     networks:
       - backend
     volumes:
@@ -34,8 +33,8 @@ services:
       - data03:/www/pub
     environment:
       - WAIT_HOSTS=m4:31985
-      - WAIT_HOSTS_TIMEOUT=10
-      - WAIT_SLEEP_INTERVAL=5
+      - WAIT_HOSTS_TIMEOUT=20
+      - WAIT_SLEEP_INTERVAL=3
       - WAIT_HOST_CONNECT_TIMEOUT=3
 
   apache:
@@ -48,6 +47,7 @@ services:
       - frontend
       - backend
     volumes:
+      - ..:/local/tstp:rw
       - data02:/code
       - data03:/www/pub
     ports:
@@ -66,6 +66,7 @@ services:
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
     container_name: es01
+    command: ["elasticsearch", "-Elogger.level=WARN"]
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
@@ -78,8 +79,6 @@ services:
         hard: -1
     volumes:
       - data01:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
     networks:
       - backend
 
