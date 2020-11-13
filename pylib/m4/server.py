@@ -289,7 +289,7 @@ def main():
         TaskTimer(checktasks, 1.0, repeating=True),
         TaskTimer(lambda: scheduletask("challenge", 5.0), 3600 * 8, nowAndRepeat=True),
     ]
-    app.run(host="127.0.0.1", port="31985")
+    app.run(host="0.0.0.0", port="31985")
     for task in timed_tasks:
         task.stop()
     for name in list(PROCLIST):

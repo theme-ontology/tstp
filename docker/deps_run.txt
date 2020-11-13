@@ -2,3 +2,4 @@ python2
 git
 curl
 bash
+socat

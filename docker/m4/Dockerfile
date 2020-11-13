@@ -24,9 +24,9 @@ RUN xargs -a /build/deps_run.txt apk add --no-cache &&\
 # Setup local copy of docker config files
 FROM base_run AS src_local
 COPY . /build/docker
-EXPOSE 31985
 
 # Final configuration
 FROM src_local AS cfg
+EXPOSE 31985
 CMD /build/docker/m4/start.sh
 
