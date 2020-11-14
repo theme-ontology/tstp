@@ -95,12 +95,6 @@ def uuid(name):
     return do("""SELECT last_insert_id()""")[0][0]
 
 
-def test():
-    query = '''SELECT * FROM aliens_tos'''
-    for row in do(query):
-        log.debug('%s' % str(row))
-
-
 if __name__ == '__main__':
     print(uuid("event"))
     #test()

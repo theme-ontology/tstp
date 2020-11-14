@@ -7,3 +7,4 @@ pytz
 numpy
 elasticsearch
 flask
+requests

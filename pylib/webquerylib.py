@@ -11,6 +11,7 @@ import re
 import datetime
 import importlib
 import credentials
+import traceback
 
 
 TARGET = "web"
@@ -75,8 +76,11 @@ def cache_visualizations():
         base = get_public_path("tstpviz", *fname[:-1])
         path = os.path.join(base, fname[-1])
         log.debug("Creating visualization: %s => %s", name, path)
-        svg, width, height = mod.make_viz()
-        svg.write(path, width, height)
+        try:
+            svg, width, height = mod.make_viz()
+            svg.write(path, width, height)
+        except Exception as e:
+            traceback.print_exc()
 
     base = get_public_path("tstpviz", "themegraphs")
     from viz.theme_graphs import write_to_path

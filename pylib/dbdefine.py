@@ -118,7 +118,7 @@ TABLES = {
 }
 
 
-def create_tables(recreate = False, subset="web_.*$"):
+def create_tables(recreate=False, subset="web_.*$", quietish=False):
     if isinstance(subset, str):
         subset = set(k for k in TABLES.keys() if re.match(subset, k))
     if subset is None:
@@ -126,16 +126,21 @@ def create_tables(recreate = False, subset="web_.*$"):
     if recreate:
         for key, _query in TABLES.iteritems():
             if key in subset:
-                do("""DROP TABLE `%s`""" % key)
-
+                do("""DROP TABLE `%s`""" % key, quietish=quietish)
     for key, query in TABLES.iteritems():
         if key in subset:
-            do(query)
+            do(query, quietish=quietish)
 
 
 if __name__ == '__main__':
-    command = (sys.argv[1] if len(sys.argv) > 1 else "")
-    create_tables(command == "recreate")
+    flags = [x for x in sys.argv if x.startswith("-")]
+    remainder = [x for x in sys.argv if not x.startswith("-")]
+    command = (sys.argv[1] if len(remainder) > 1 else "")
+    quietish = "-q" in sys.argv
+    if command == "assertall":
+        create_tables(False, subset=None, quietish=quietish)
+    else:
+        create_tables(command == "recreate", quietish=quietish)
 
 
 

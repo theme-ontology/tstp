@@ -5,18 +5,18 @@ export TSTPDOCKER=1
 
 if [ -d "$LOCALTSTP" ]; then
     echo "configuring for: UAT"
-    ln -s $LOCALTSTP /code/tstp
+    ln -sfn $LOCALTSTP /code/tstp
 else
     echo "configuring for: PROD"
     echo "..."
 fi
 
 # this will ensure theming repos are set up and updated
-if [ -d "/code/theming" ]; then
+if [ ! -d "/code/theming" ]; then
     git clone --depth 1 https://github.com/theme-ontology/theming /code/theming
 fi
-if [ -d "/code/theming-hist" ]; then
-    git clone https://github.com/theme-ontology/theming /code/theming
+if [ ! -d "/code/theming-hist" ]; then
+    git clone https://github.com/theme-ontology/theming /code/theming-hist
 fi
 git -C /code/theming reset --hard origin/master
 chown -R root:www-data /code/theming

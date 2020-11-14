@@ -153,6 +153,8 @@ def get_commits_data(period='weekly'):
         SELECT id, time, author, stats FROM commits_stats
         ORDER BY time ASC
     """))
+    if not entries:
+        return []
     dt1 = entries[0][1]
     dt2 = entries[-1][1]
     if period == 'weekly':
@@ -223,6 +225,7 @@ def dbstore_commit_data(fromdate=None, recreate=False, quieter=False):
             if not quieter:
                 print("SKIPPING EARLIER COMMIT:", (commit, author, date))
         else:
+            print("processing date: %s" % date)
             try:
                 res = subprocess.check_output(['git', 'checkout', '-f', commit]).decode("utf-8")
             except Exception as e:

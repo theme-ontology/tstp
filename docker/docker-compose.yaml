@@ -14,9 +14,9 @@ services:
       - data03:/www/pub
     environment:
       - WAIT_HOSTS=mysql:3306
-      - WAIT_HOSTS_TIMEOUT=30
-      - WAIT_SLEEP_INTERVAL=3
-      - WAIT_HOST_CONNECT_TIMEOUT=3
+      - WAIT_HOSTS_TIMEOUT=10
+      - WAIT_SLEEP_INTERVAL=2
+      - WAIT_HOST_CONNECT_TIMEOUT=2
 
   php:
     build:
@@ -33,7 +33,7 @@ services:
       - data03:/www/pub
     environment:
       - WAIT_HOSTS=m4:31985
-      - WAIT_HOSTS_TIMEOUT=20
+      - WAIT_HOSTS_TIMEOUT=30
       - WAIT_SLEEP_INTERVAL=3
       - WAIT_HOST_CONNECT_TIMEOUT=3
 
