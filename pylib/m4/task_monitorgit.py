@@ -188,16 +188,21 @@ def react_to_commit():
         hours = int(args[-1][4:]) if args else 24
         ts = (datetime.utcnow() - timedelta(hours=hours)).strftime('%Y-%m-%d %H:%M:%S')
         db.do("""DELETE FROM commits_log WHERE time > '%s'""" % ts)
-    commitslog = list(db.do("""SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""))
-    if commitslog:
-        fromid, fromtime = commitslog[0]
-        sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
-        lib.log.debug("last previously known commit is %s at %s", fromid, sfromtime)
-        lib.commits.dbstore_commit_data(fromdate=fromtime, recreate=False, quieter=True)
-    else:
+
+    commitssql = """SELECT id, time FROM commits_log ORDER BY time DESC LIMIT 1"""
+    commitslog = list(db.do(commitssql))
+    if not commitslog:
         lib.log.debug("no previous commits logged, running from scratch...")
         lib.commits.dbstore_commit_data(fromdate=None, recreate=True, quieter=False)
+    commitslog = list(db.do(commitssql))
+    if not commitslog:
+        lib.log.debug("no previous commits logged still, failing...")
+        return
 
+    fromid, fromtime = commitslog[0]
+    sfromtime = fromtime.strftime('%Y-%m-%d %H:%M:%S')
+    lib.log.debug("last previously known commit is %s at %s", fromid, sfromtime)
+    lib.commits.dbstore_commit_data(fromdate=fromtime, recreate=False, quieter=True)
     entries = list(db.do("""
         SELECT id, time, author, committype, message FROM commits_log
         WHERE time > '%s' ORDER BY time ASC""" % sfromtime
