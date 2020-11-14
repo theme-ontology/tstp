@@ -71,7 +71,7 @@ foreach ($m4status->subtasks as &$task)
                     <font><?php echo substr($t, 0, 19); ?></font>:
                     <?php echo $title; ?>, exit code <?php echo $s; ?>.
                     <div style="float:right;">
-                        [<A target="_top" href="m4notify?name=<?php echo $task->shortname; ?>">ping</A>]
+                        [<A target="_blank" href="m4notify?name=<?php echo $task->shortname; ?>">schedule</A>]
 <?php
     if ($s === "unknown") {
 ?>
@@ -79,7 +79,7 @@ foreach ($m4status->subtasks as &$task)
 <?php
     } else {
 ?>
-                        [<A href="<?php echo $task->logpath; ?>">log</A>]
+                        [<A target="_blank" href="<?php echo $task->logpath; ?>">log</A>]
 <?php
     }
 ?>

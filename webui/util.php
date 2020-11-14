@@ -114,13 +114,41 @@
 ?>
 <script>
     LOADTIME = Date.now();
-    setTimeout(() => { updateM4Status("importgit"); }, 1000);
+    setTimeout(() => { updateM4Status("<?php echo $showM4task; ?>"); }, 1000);
+</script>
+<?php
+        }
+        elseif ($action == "monitorgit")
+        {
+            $prefix = "http";
+            $target = explode("-", $action)[0];
+            $url = $prefix . "://127.0.0.1:31985/task/" . $target;
+            $response = file_get_contents($url);
+            $showM4task = "monitorgit";
+?>
+<script>
+    LOADTIME = Date.now();
+    setTimeout(() => { updateM4Status("<?php echo $showM4task; ?>"); }, 1000);
+</script>
+<?php
+        }
+        elseif ($action == "validate")
+        {
+            $prefix = "http";
+            $target = explode("-", $action)[0];
+            $url = $prefix . "://127.0.0.1:31985/task/" . $target;
+            $response = file_get_contents($url);
+            $showM4task = "validate";
+?>
+<script>
+    LOADTIME = Date.now();
+    setTimeout(() => { updateM4Status("<?php echo $showM4task; ?>"); }, 1000);
 </script>
 <?php
         }
     }
 
-    if ($showM4task == "importgit") {
+    if ($showM4task !== "") {
 ?>
     <div class="row">
         <div class="basebox">
@@ -145,9 +173,11 @@
                         <label for="action">What?</label>
                         <select id="action" name="action">
                             <option value="nothing">&lt;nothing selected&gt;</option>
-                            <option value="importgit-old">Old import data from GIT repository "theming/notes".</option>
-                            <option value="importgit-new">Schedule GIT "theming/notes" import pipeline with M-4.</option>
+                            <option value="importgit-new">Schedule Data Import on GIT "theming/notes" with M-4.</option>
+                            <option value="monitorgit">Schedule History Update on GIT "theming/notes" with M-4.</option>
+                            <option value="validate">Schedule Tests on GIT repository "theming/notes" with M-4.</option>
                             <option value="runtests">Run tests on GIT repository "theming/notes".</option>
+                            <option value="importgit-old">Old import data from GIT repository "theming/notes".</option>
                         </select>
                     </fieldset>
 

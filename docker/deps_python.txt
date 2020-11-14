@@ -8,3 +8,4 @@ numpy
 elasticsearch
 flask
 requests
+waitress
