@@ -79,21 +79,21 @@ def cache_visualizations():
         try:
             svg, width, height = mod.make_viz()
             svg.write(path, width, height)
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
 
     try:
         base = get_public_path("tstpviz", "themegraphs")
         from viz.theme_graphs import write_to_path
         write_to_path(base)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
 
     try:
         path = os.path.join(get_public_path("tstpviz"), "themehierarchy.html")
         from viz.themehierarchy import write_to_path
         write_to_path(path)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
 
 

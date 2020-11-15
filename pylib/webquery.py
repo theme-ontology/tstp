@@ -23,6 +23,7 @@ OBJECT_TYPES = {
 def handle_submit(obj_type):
     """
     Do the db-update part of the query.
+    DEPRECATED
     """
     if issubclass(obj_type, webobject.TSTPConnection):
         update = get("data")
@@ -67,8 +68,9 @@ def get_response(obj_type, fields='', fuzzysearch=None, variant=None, string_lim
     if variant == "proposedevents":
         # a list of events session user has proposed for insertion,
         # not yet stored in database
-        from webupload import get_pending_events
-        objs = get_pending_events()
+        #from webupload import get_pending_events
+        #objs = get_pending_events()
+        raise RuntimeError("operation deprecated")
 
     elif issubclass(obj_type, webobject.TSTPEvent):
         cat1s = get('c1')
@@ -186,7 +188,8 @@ def handle_query():
     ## queries for each object type available
     if obj_type:
         if act_type == "submit":
-            handle_submit(obj_type)
+            #handle_submit(obj_type)
+            raise RuntimeError("operation deprecated")
         return handle_response(obj_type, req_type)
     
     else:
@@ -205,7 +208,16 @@ if __name__ == '__main__':
 
 
 def main():
-    get_response(webobject.Story,
-                     fields="score,name,title,date,description", fuzzysearch=None, variant=None, string_limit=200, row_limit=10000,
-                     collapsecollections=None, regexpnamefilter=None, collectionfilter="Collection: Critters", version='latest')
+    get_response(
+        webobject.Story,
+        fields="score,name,title,date,description",
+        fuzzysearch=None,
+        variant=None,
+        string_limit=200,
+        row_limit=10000,
+        collapsecollections=None,
+        regexpnamefilter=None,
+        collectionfilter="Collection: Critters",
+        version='latest'
+    )
 

@@ -77,6 +77,8 @@ function gatherFields(fields, pdata)
     return payload;    
 }
 
+
+/*
 function submitData()
 {
     var payload = gatherFields(g_objFields, g_objData);
@@ -114,9 +116,9 @@ function submitData()
 
 }
 
-
 function submitConnection(defn)
 {
     d = g_objDefs[defn];
     
 }
+*/

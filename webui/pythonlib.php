@@ -40,6 +40,8 @@ foreach($_SERVER as $key => $value)
 }
 
 
+// only in \webui\json.php
+// not needed in docker setup
 function tstp_run_python($cmd) {
     legacy_setup();
     
@@ -94,6 +96,7 @@ function tstp_basedir() {
 }
 
 
+// only in \webui\util.php
 function tstp_pyrun($cmd) {
     $cmd = tstp_basedir() . '/scripts/pyrun ' . $cmd;
     $fd = popen($cmd, "r");

@@ -13,6 +13,7 @@ from collections import defaultdict
 import json
 import lib.files
 from urllib import unquote_plus
+import traceback
 
 
 log = logging.getLogger('werkzeug')
@@ -212,6 +213,17 @@ def scheduletask(name, delay=60.0):
 def root():
     lib.log.info("manual ping from %s", request.remote_addr)
     return ping()
+
+
+@app.route("/webjson")
+def webjson():
+    try:
+        import webquery
+        webquery.get = request.values.get
+        lib.log.info("ANSWERING webjson?%s" % request.query_string)
+        return webquery.handle_query()
+    except Exception:
+        traceback.print_exc()
 
 
 @app.route("/ping")
