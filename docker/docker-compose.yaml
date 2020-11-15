@@ -10,8 +10,8 @@ services:
       - backend
     volumes:
       - ..:/local/tstp:rw
-      - data02:/code
-      - data03:/www/pub
+      - code_data:/code
+      - www_data:/www/pub
     environment:
       - WAIT_HOSTS=mysql:3306
       - WAIT_HOSTS_TIMEOUT=10
@@ -29,8 +29,8 @@ services:
       - backend
     volumes:
       - ..:/local/tstp:rw
-      - data02:/code
-      - data03:/www/pub
+      - code_data:/code
+      - www_data:/www/pub
     environment:
       - WAIT_HOSTS=m4:31985
       - WAIT_HOSTS_TIMEOUT=30
@@ -48,13 +48,13 @@ services:
       - backend
     volumes:
       - ..:/local/tstp:rw
-      - data02:/code
-      - data03:/www/pub
+      - code_data:/code
+      - www_data:/www/pub
     ports:
       - "8080:80"
 
   mysql:
-    image: mysql
+    image: mysql/mysql-server:latest
     networks:
       - backend
     environment:
@@ -78,15 +78,17 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - data01:/usr/share/elasticsearch/data
+      - es_data:/usr/share/elasticsearch/data
     networks:
       - backend
 
 volumes:
-  data01:
+  es_data:
     driver: local
-  data02:
-  data03:
+  code_data:
+    driver: local
+  www_data:
+    driver: local
 
 networks:
   frontend:

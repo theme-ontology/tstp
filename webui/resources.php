@@ -35,9 +35,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><A href = "viz/themehierarchy.php">Theme Hierarchy Reference Sheet</A></td>
+                        <td><A href = "/pub/tstpviz/themehierarchy.html">Theme Hierarchy Reference Sheet</A></td>
                         <td>
-                            Browser friendly, tabular, overview of all themes in the current hierarchy.
+                            Browser friendly tabular overview of all themes in the current hierarchy.
                         </td>
                     </tr>
                     <tr>
@@ -82,18 +82,6 @@
           	<H3 class="px-3">Download Latest Data</H3>
         	<TABLE class="table table-striped">
             	<tbody>
-	            	<tr>
-		            	<td><A href = "download.php?what=storydefinitions&fmt=txt">Story Definitions (txt)</A></td>
-	            		<td>For each story, a description of what it is and other relevant data.</td>
-		            </tr>
-	            	<tr>
-		            	<td><A href = "download.php?what=themedefinitions&fmt=txt">Theme Definitions (txt)</A></td>
-	            		<td>For each theme, the definition of the theme and other relevant data.</td>
-		            </tr>
-		            <tr>
-	            		<td><A href = "download.php?what=storythemes&fmt=txt">Themes in Stories (txt)</A></td>
-	            		<td>For each story, all themes that have been assigned to it along with notes and comments.</td>
-	            	</tr>
                     <tr>
                         <td><A href = "json.php?action=metathemedata">Full Theme/Metatheme usage and hierarchy data (json)</A></td>
                         <td>
@@ -112,8 +100,6 @@
                         <td>
                             First row will contain headers. 
                             The data will contain story id, title, date, and description. 
-                            Other columns may be added.
-                            We will try not to remove or rename columns.
                         </td>
                     </tr>
                     <tr>
@@ -121,8 +107,6 @@
                         <td>
                             First row will contain headers. 
                             The data will contain theme name, description and parents. 
-                            Other columns may be added.
-                            We will try not to remove or rename columns.
                         </td>
                     </tr>
 	            	</tbody>

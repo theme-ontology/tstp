@@ -82,9 +82,19 @@ def cache_visualizations():
         except Exception as e:
             traceback.print_exc()
 
-    base = get_public_path("tstpviz", "themegraphs")
-    from viz.theme_graphs import write_to_path
-    write_to_path(base)
+    try:
+        base = get_public_path("tstpviz", "themegraphs")
+        from viz.theme_graphs import write_to_path
+        write_to_path(base)
+    except Exception as e:
+        traceback.print_exc()
+
+    try:
+        path = os.path.join(get_public_path("tstpviz"), "themehierarchy.html")
+        from viz.themehierarchy import write_to_path
+        write_to_path(path)
+    except Exception as e:
+        traceback.print_exc()
 
 
 def build_heavy_visualizations():
