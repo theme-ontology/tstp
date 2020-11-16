@@ -2,13 +2,14 @@ import re
 import codecs
 from collections import defaultdict
 import json
+import os.path
 
 import webobject
 import lib.xls
 import lib.log
-import textwrap
 from lib.func import memoize
 import lib.textformat
+import lib.files
 
 
 def expload_field( field ):
@@ -522,6 +523,20 @@ def read_storythemes_from_txt(filename, verbose = True):
                     yield webobject.StoryTheme.create(
                         sid, theme, weight, motivation
                     )
+
+
+def read_themes_from_repo():
+    """
+    Get theme objects from data in repository configured.
+    """
+    from credentials import GIT_THEMING_PATH
+    basepath = GIT_THEMING_PATH
+    notespath = os.path.join(basepath, "notes")
+    objs = []
+    for path in lib.files.walk(notespath, ".*\.(st|th)\.txt$"):
+        if path.endswith(".th.txt"):
+            objs.extend(lib.dataparse.read_themes_from_txt(path, False))
+    return objs
 
 
 def read_storythemes_from_xls_compact(filename):

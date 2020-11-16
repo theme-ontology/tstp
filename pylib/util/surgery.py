@@ -52,7 +52,7 @@ def parse_themes(args):
     Returns:
         list of themes
     """
-    themeobjs = list(lib.dataparse.read_themes_from_db())
+    themeobjs = list(lib.dataparse.read_themes_from_repo())
     themes = []
     flag = ""
 
