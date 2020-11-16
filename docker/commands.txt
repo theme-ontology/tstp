@@ -1,0 +1,18 @@
+
+# build local dev linked to local source code
+docker-compose up --build
+
+# locally build prod version for aws snapping source code from git
+docker-compose -f docker-compose-aws.yaml up --build
+
+# deploy to aws/ecs
+docker context use tstp
+docker compose up --file=docker-compose-aws.yaml
+
+# create secret credentials
+docker secret rm pycredentials
+docker secret create pycredentials ..\pylib\credentials.py
+
+# get logs
+docker service logs tstp_test_m4
+

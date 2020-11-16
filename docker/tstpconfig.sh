@@ -1,14 +1,18 @@
 #!/bin/bash
 
-LOCALTSTP=/local/tstp
 export TSTPDOCKER=1
+LOCALTSTP=/local/tstp
 
 if [ -d "$LOCALTSTP" ]; then
-    echo "configuring for: UAT"
+    echo "configuring for: DEV"
     ln -sfn $LOCALTSTP /code/tstp
 else
     echo "configuring for: PROD"
-    echo "..."
+    rm -rf /code/tstp-latest
+    rm -rf /code/tstp
+    git clone --depth 1 https://github.com/theme-ontology/tstp /code/tstp-latest
+    ln -sfn /code/tstp-latest /code/tstp
+    cp /run/secrets/pycredentials /code/tstp/pylib/credentials.py
 fi
 
 # this will ensure theming repos are set up and updated
