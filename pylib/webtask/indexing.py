@@ -47,7 +47,7 @@ def solr_commit():
             with open(fn) as fh:
                 obj = json.load(fh)
                 for kk in obj:
-                    obj[kk] = PATTERNS.sub(u' ', obj[kk])
+                    obj[kk] = SANITIZER.sub(u' ', obj[kk])
                 blob = '\n\n'.join(sorted(obj.itervalues()))
                 obj['_text_'] = blob
                 objs.append(obj)
