@@ -24,8 +24,10 @@ def read(filename):
     Read required columns from an excel file.
     """
     lib.log.info("Reading named columns from %s: %s", filename, HEADERS)
-    data, sheetcount, rowcount = lib.xls.read_xls(filename, headers=HEADERS)
+    data, sheetcount, rowcount = lib.xls.read_xls(filename, headers=HEADERS, sheetname="data")
     lib.log.info("Read %s rows from %s sheets.", rowcount, sheetcount)
+    if sheetcount < 1:
+        lib.log.warn("Found no sheet named 'data'. Expected one!")
     return data
 
 

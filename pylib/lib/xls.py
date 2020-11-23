@@ -66,7 +66,7 @@ def read_xls(filename, headers=None, sheetname=".*"):
     return results, sheetcount, rowcount
 
 
-def write_xls(filename, headers, rows, sheetname = "data"):
+def write_xls(filename, headers, rows, sheetname="data"):
     """
     Write an oldfashioned .xls file with a single workbook and given heasers, rows.
     """
