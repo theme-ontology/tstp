@@ -57,7 +57,7 @@ def read_xls(filename, headers=None, sheetname=".*"):
                         try:
                             idxs.append(row.index(header))
                         except ValueError:
-                            raise IOError("Missing header: '%s' in %s" % (header, str(row)))
+                            raise IOError("Missing Header: '%s', in Sheet '%s', Row %s: %s" % (header, sheet, idx, str(row)))
                     continue
                 
                 rowcount += 1
