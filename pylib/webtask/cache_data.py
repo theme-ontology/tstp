@@ -114,7 +114,7 @@ def init_theme_od(themeobj, basepath):
         'parents',
         'references',
         'examples',
-        'relatedthemes',
+        'related-themes',
         'source'
     ]
     theme_od = OrderedDict()
@@ -137,7 +137,7 @@ def init_theme_od(themeobj, basepath):
     if 'examples' in extra_fields:
         theme_od['examples'] = filter(None, lib.textformat.remove_wordwrap(themeobj.examples).split('\n\n'))
     if 'relatedthemes' in extra_fields:
-        theme_od['relatedthemes'] = filter(None, [relatedtheme.strip() for relatedtheme in themeobj.relatedthemes.split(',')])
+        theme_od['related-themes'] = filter(None, [relatedtheme.strip() for relatedtheme in themeobj.relatedthemes.split(',')])
     return theme_od
 
 def init_story_od(storyobj, basepath):
@@ -359,7 +359,7 @@ def add_root_theme(themes_list):
     theme_od['parents'] = []
     theme_od['references'] = []
     theme_od['examples'] = []
-    theme_od['relatedthemes'] = []
+    theme_od['related-themes'] = []
     theme_od['source'] = ''
     themes_list.append(theme_od)
 

@@ -82,7 +82,7 @@ class TestCacheData(unittest.TestCase):
         self.assertEqual(theme_od['parents'][0], theme_parents)
         self.assertEqual(type(theme_od['references']), list)
         self.assertEqual(type(theme_od['examples']), list)
-        self.assertEqual(type(theme_od['relatedthemes']), list)
+        self.assertEqual(type(theme_od['related-themes']), list)
         self.assertEqual(theme_od['source'], '.' + source_path)
 
     def test_init_stories_list(self):
