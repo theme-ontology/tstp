@@ -82,6 +82,12 @@
         	<TABLE class="table table-striped">
             	<tbody>
                     <tr>
+                        <td><A href = "/pub/data/">Find versioned copies of the data as json files</A></td>
+                        <td>
+                            "dev" indicates the latest version which has been imported from git. It is the data that is live on this website.
+                        </td>
+                    </tr>
+                    <tr>
                         <td><A href = "json.php?action=metathemedata">Full Theme/Metatheme usage and hierarchy data (json)</A></td>
                         <td>
                             Five items will be returned:
@@ -92,20 +98,6 @@
                             <li>A mapping from parent_theme to child_theme, indicating the hierarchy.</li>
                             <li>A list of "top" level themes, i.e., those that have no parents.</li>
                             </ol>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><A href = "json.php?action=storydefinitions">Full list of stories (json)</A></td>
-                        <td>
-                            First row will contain headers. 
-                            The data will contain story id, title, date, and description. 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><A href = "json.php?action=themedefinitions">Full list of themes (json)</A></td>
-                        <td>
-                            First row will contain headers. 
-                            The data will contain theme name, description and parents. 
                         </td>
                     </tr>
 	            	</tbody>
