@@ -22,8 +22,8 @@ def main():
         "test_integrity",
         "test_formatting",
         "importgit",
-        "indexing",
         "cache_queries",
+        "indexing",  # depends on cache_queries
     ]
     with m4.tasks.ctx():
         lib.log.info("[starting import pipeline...]")
