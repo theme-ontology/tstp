@@ -1,6 +1,6 @@
 import m4.tasks
 import lib.log
-from webtask.lib import run_task
+from webtask.common import run_task
 
 
 def main():
