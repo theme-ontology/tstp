@@ -1,22 +1,9 @@
-import os
 import m4.tasks
 import lib.log
-
-
-def run_task(taskname):
-    """
-    pyrun webtask.taskname
-    """
-    cmd = "pyrun webtask.%s" % taskname
-    lib.log.info("executing: %s", cmd)
-    code = os.system(cmd)
-    lib.log.info("command finished with code %s", code)
-    return code
+from webtask.lib import run_task
 
 
 def main():
-    # python git library whines about missing executable
-    os.environ["GIT_PYTHON_REFRESH"] = "quiet"
     pipeline = [
         "updaterepo",
         "test_integrity",
