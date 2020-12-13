@@ -26,16 +26,24 @@ class Tests(object):
         """
         import networkx as nx  # may not be present in which case test simply fails
         graph = nx.DiGraph()
+        selfrefs = []
         for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
             objs = list(lib.dataparse.read_themes_from_txt(path, False))
-            for theme in objs:
-                for parent in theme.parents.split(","):
-                    graph.add_edge(theme, parent.strip())
+            for themeobj in objs:
+                theme = themeobj.name
+                for parent in themeobj.parents.split(","):
+                    parent = parent.strip()
+                    if theme == parent:
+                        selfrefs.append(theme)
+                    else:
+                        graph.add_edge(theme, parent.strip())
         cycles = list(nx.simple_cycles(graph))
-        if cycles:
-            for cycle in cycles:
-                log.debug("cycle: %s" % repr(cycle))
-            return "found %d cycles" % len(cycles)
+        for selfref in selfrefs:
+            log.debug("Self-reference: %s" % repr(selfref))
+        for cycle in cycles:
+            log.debug("cycle: %s" % repr(cycle))
+        if cycles or selfrefs:
+            return "found %d cycles and %d self-parenting themes" % (len(cycles), len(selfrefs))
 
     def test_unused_themes(self):
         """
