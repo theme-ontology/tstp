@@ -39,6 +39,10 @@ if($name == "monitorgit")
 {
     $url = "http://127.0.0.1:31985/task/monitorgit";
 }
+if($name == "buildanimation") 
+{
+    $url = "http://127.0.0.1:31985/task/buildanimation";
+}
 /* disabled for safety
 if($name == "importgit") 
 {

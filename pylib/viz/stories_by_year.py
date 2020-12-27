@@ -46,8 +46,8 @@ def get_data_from_head():
             cat = re.match(r"([A-Za-z]+)", name).group(1)
             if fromyear <= year <= untilyear:
                 data[cat][year - fromyear] += 1
-            if 0 <= year < 2100:
-                centurydata[cat][year//100] += 1
+            if 0 <= year < 2000:
+                centurydata[cat][year//100+1] += 1
 
     data = [(np.sum(a), k, a) for k, a in data.items()]
     centurydata = [(np.sum(a), k, a) for k, a in centurydata.items()]
@@ -156,20 +156,20 @@ def make_viz_from_data(xs, data, centurydata=None, yrange=None, bigtitle=None):
     plot.plotarea()
 
     if centurydata:
-        cnx1, cny1, cnx2, cny2 = nx1+30, ny1+120, 360, ny1+200
+        cnx1, cny1, cnx2, cny2 = nx1+30, ny1+110, 250, ny1+180
         sumsy = sum(ys for _, _, ys in centurydata)
-        maxy = max(sumsy[:19]) + 1
+        maxy = max(sumsy[:20]) + 1
         svg['annotation'].rect(cnx1, cny1, cnx2-cnx1, cny2-cny1, cls="background", style={"fill": "white", "stroke":None})
-        centuryplot = svg["chart2"].xychart(cnx1, cny1, cnx2, cny2,  0, 19, 0, maxy, baseline_reference=10).config({
+        centuryplot = svg["chart2"].xychart(cnx1, cny1, cnx2, cny2,  0, 19.5, 0, maxy, baseline_reference=10).config({
             'xtype': 'enum',
-            "xtick-delta": 20,
+            "xtick-delta": 15,
         })
         centuryxs = np.array(xrange(21))
         with centuryplot.stack():
             for _, key, ys in centurydata:
                 color = regcolor.get(key, "#444466")
                 centuryplot.plot([centuryxs, ys], shape="bar", cls='', style={"fill":color})
-        svg['annotation'].text((cnx1+cnx2)/2, cny2+25, "century of release", cls="annotation")
+        svg['annotation'].text((cnx1+cnx2)/2, cny2+25, "pre-1900 by century of publication", cls="annotation")
         centuryplot.plotarea()
 
     return svg, nx2 + nx1, ny2 + ny1
@@ -218,8 +218,8 @@ def make_animation(path):
             y = int(y)
             if x0 <= y <= xx:
                 pass
-            elif 0 <= y <= 2000:
-                _bb[y//100] += c
+            elif 0<=y<2000:
+                _bb[y//100+1] += c
         return _bb
 
     for atdt, datapoint in lib.commits.get_commits_data(period='weekly'):
