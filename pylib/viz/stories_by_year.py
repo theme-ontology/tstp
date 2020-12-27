@@ -123,7 +123,7 @@ def make_viz_from_data(xs, data, centurydata=None, yrange=None, bigtitle=None):
         'xtype': 'enum',
     })
     colorscale = iter_colors()
-    lx0, ly0, ldx, lmaxx = nx1 + 10, ny1 + 10, 100, 320
+    lx0, ly0, ldx, lmaxx = nx1 + 10, ny1 + 10, 80, 320
     lx, ly = lx0, ly0
     svg['annotation'].rect(lx0 - 5, ly0 - 5, 320, 10 + 15 * (len(data) / 4 + (1 if len(data)%4 else 0)), cls="background", style={"fill":"white"})
     svg['annotation'].text(nx1 + 10, ny1 - 10, "number of stories", cls="annotation")
@@ -147,7 +147,7 @@ def make_viz_from_data(xs, data, centurydata=None, yrange=None, bigtitle=None):
             regcolor[key] = color
             plot.plot([xs, ys], shape="bar", cls='', style={"fill":color})
             svg['annotation'].rect(lx, ly, 8, 8, style={"fill":color})
-            svg['annotation'].text(lx + 12, ly+10, skey)
+            svg['annotation'].text(lx + 12, ly+8, skey)
             lx += ldx
             if lx > lmaxx:
                 lx = lx0
@@ -196,7 +196,7 @@ def make_animation(path):
     keys = set(r[1] for r in data)
     x0 = xs[0]
     xx = xs[-1]
-    yrange = 80
+    yrange = 100
 
     def make(datapoint, key):
         _aa = np.zeros(shape=len(xs))
