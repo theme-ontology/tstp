@@ -25,6 +25,7 @@ TASKLIST = {
     "monitorgit": "monitor-git-repository-notes",
     "challenge": "create-creative-challenge",
     "importgit": "import-git-repository-notes",
+    "buildanimation": "build-storybyyear-animation",
 }
 TASKEXPLAIN = {
     "validate": """
@@ -49,6 +50,11 @@ https://github.com/theme-ontology/theming, validate it, load all data
 and store it in the local SQL db, cache various queries and compute
 some final statistics. It can only be started manually. 
     """,
+    "buildanimation": """
+This task will build the gif animation of stories included in the database 
+by year of publication. 
+    """,
+
 }
 taskcount = defaultdict(int)
 LOGPATH = os.path.join(credentials.PUBLIC_DIR, "m4", "logs", "m4.log")
@@ -246,6 +252,12 @@ def task_monitorgit():
 @app.route("/task/importgit")
 def task_importgit():
     scheduletask("importgit", 15.0)
+    return "[OK]"
+
+
+@app.route("/task/buildanimation")
+def task_buildanimation():
+    scheduletask("buildanimation", 15.0)
     return "[OK]"
 
 

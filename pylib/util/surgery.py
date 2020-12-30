@@ -2,6 +2,7 @@ import pandas as pd
 import lib.dataparse
 import sys
 from itertools import groupby
+from collections import defaultdict
 
 
 def triangle_infidelity_1():
@@ -44,6 +45,21 @@ def makejoined(dfs):
     return dfacc
 
 
+def get_descendents(children, ancestor):
+    """
+    Returns:
+    A list of all children, children of children, etc. for a list of ancestor themes.
+    """
+    found = set()
+    pending = set(children[ancestor])
+    while pending:
+        th = pending.pop()
+        if th not in found:
+            found.add(th)
+            pending.update(children[th])
+    return found
+
+
 def parse_themes(args):
     """
     Args:
@@ -55,20 +71,31 @@ def parse_themes(args):
     themeobjs = list(lib.dataparse.read_themes_from_repo())
     themes = []
     flag = ""
+    children = defaultdict(list)
+
+    for tobj in themeobjs:
+        for parent in tobj.list_parents():
+            children[parent].append(tobj.name)
 
     for arg in args:
         if arg.startswith("-"):
             flag = arg
         else:
+            themes.append(arg)
+            print("+ %s" % arg)
             if flag == "-co":
                 print("children of of '%s':" % arg)
                 for obj in themeobjs:
                     if arg in obj.list_parents():
                         themes.append(obj.name)
                         print("  + %s" % obj.name)
-            else:
-                themes.append(arg)
-                print("+ %s" % arg)
+            if flag == "-do":
+                print("descendents of of '%s':" % arg)
+                desc = get_descendents(children, arg)
+                for obj in themeobjs:
+                    if obj.name in desc:
+                        themes.append(obj.name)
+                        print("  + %s" % obj.name)
             flag = ""
 
     return sorted(set(themes))
