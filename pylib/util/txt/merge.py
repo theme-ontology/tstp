@@ -1,8 +1,11 @@
+# Copyright 2020, themeontology.org
+# Tests:
 """
 Merge different txt files with data in our special format together into one.
 Some fields (themes, descriptions) will have predefined formating.
 Priority is given to fields early in the list of files.
 """
+from __future__ import print_function
 import sys
 import os.path
 import lib.themeformat
@@ -25,6 +28,5 @@ def main():
         targets.add(os.path.abspath(arg))
 
     for line in lib.themeformat.format_files(sorted(targets), banned=banned, forced=forced):
-        print line
-
+        print(line)
 
