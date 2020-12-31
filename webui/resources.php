@@ -41,11 +41,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><A href = "viz/stories-by-year.gif">Animated Project Progress Over Time</A></td>
+                        <td><A href = "/pub/tstpviz/animated_stories_by_year.gif">Animated Project Progress Over Time</A></td>
                         <td>
-                            An animated version of static all_stories_by_year.svg
-                            <A href = "/pub/tstpviz/all_stories_by_year.svg">
-                            <IMG width="80%" src="/pub/tstpviz/all_stories_by_year.svg"></A>
+                            An animated version of how stories have been added over time.
                         </td>
                     </tr>
                 </tbody>
