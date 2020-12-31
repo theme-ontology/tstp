@@ -8,10 +8,11 @@ from collections import defaultdict
 import lib.files
 from unidecode import unidecode
 from pprint import pprint
+import lib.dataparse
 
 
 HEADERS = [
-    "sid", "weight", "theme", "comment", "revised theme", "revised weight", "revised comment"
+    "sid", "weight", "theme", "motivation", "revised theme", "revised weight", "revised comment"
 ]
 FIELDNAMES = {
     "minor": "Minor Themes",
@@ -39,6 +40,8 @@ def main():
     newentries = defaultdict(lambda: defaultdict(list))
     replacements = defaultdict(list)
     deletions = defaultdict(bool)
+    old_themes = set(obj.name for obj in lib.dataparse.read_themes_from_repo())
+    new_themes = defaultdict(list)
 
     for sid, w, t, c, rt, rw, rc in read(sys.argv[2]):
         sid = sid.strip()
@@ -47,6 +50,8 @@ def main():
         oldweight = FIELDNAMES.get(w.strip(), "")
         weight = FIELDNAMES.get(rw.strip() or w.strip(), "")
         comment = rc.strip() or c
+        if theme and theme not in old_themes:
+            new_themes[theme].append(oldtheme)
         if not sid:
             continue  ## blank rows at end, maybe
         if not weight:
@@ -135,4 +140,9 @@ def main():
     for (sid, theme), fieldlist in themelist.items():
         if len(fieldlist) > 1:
             lib.log.warn("Multiple entries for %s in %s", (sid, theme), fieldlist)
+
+    for newtheme, previous in new_themes.items():
+        lib.log.warn("Undefined New Theme: %s CHANGED FROM %s", newtheme, sorted(set(previous)))
+
+
 
