@@ -14,7 +14,7 @@ def main():
         for th, tobj in themes.iteritems()
     }
     #mask = np.array(Image.open(path.join(d, "ellipse1000x500.png")))
-    mask = np.array(Image.open("ellipse1000x500.png"))
+    #mask = np.array(Image.open("ellipse1000x500.png"))
     wordcloud = WordCloud(
         font_path = 'Helvetica.ttf',
         max_words = 5000,
@@ -23,7 +23,7 @@ def main():
         width = width,
         height = height,
         scale = 2,
-        mask = mask,
+        #mask = mask,
         relative_scaling = 1.0,
     ).fit_words(data)
 

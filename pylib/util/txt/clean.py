@@ -1,6 +1,10 @@
+# Copyright 2021, themeontology.org
+# Tests:
 """
 Read one or more text files and write their contents on stdout, while doing TO
 specific cleaning and re-ordering.
+
+Presently works only on story (.st.txt) files.
 """
 import sys
 import os
@@ -98,3 +102,5 @@ def main():
                 fh.write(clean_blob(obj.blob) + "\n")
 
 
+
+ 

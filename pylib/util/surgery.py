@@ -115,38 +115,4 @@ def main():
     if show_raw_columns:
         df.to_excel(filename)
     else:
-        REVIEW_COLS = ["sid", "title", "parents", "theme", "weight", "motivation", "DISCUSS", "revised comment",
-                       "revised theme", "revised weight", "tentative action", "discussion thread", "MO notes"]
-        REVIEW_COL_WIDTHS = {'weight':10, 'motivation': 40, 'revised comment': 40}
-
-        for col in REVIEW_COLS:
-            if col not in df.columns:
-                df[col] = ""
-
-        writer = pd.ExcelWriter(filename, engine="xlsxwriter")
-        df.to_excel(writer, columns=REVIEW_COLS, header=True, index=False, freeze_panes=(1,1), sheet_name="data")
-        workbook = writer.book
-        worksheet = writer.sheets['data']
-        worksheet.set_default_row(70)
-        basic = {
-            'text_wrap': True,
-            'valign': 'vcenter',
-            'align': 'left',
-            'border': 1,
-            'border_color': '#cccccc',
-        }
-        revise = dict(basic, **{
-            'bg_color': '#ffffcc'
-        })
-        format_basic = workbook.add_format(basic)
-        format_revise = workbook.add_format(revise)
-
-        for idx, colname in enumerate(REVIEW_COLS):
-            width = REVIEW_COL_WIDTHS.get(colname, 15)
-            colc = chr(ord("A")+idx)
-            fmt = format_revise if 7 <= idx <= 9 else format_basic
-            worksheet.set_column('{}:{}'.format(colc, colc), width, fmt)
-
-        writer.save()
-
-
+        lib.xls.write_themelist(df, filename)
