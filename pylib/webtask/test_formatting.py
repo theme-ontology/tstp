@@ -33,7 +33,7 @@ class Tests(object):
                 lu[th.name].append(path)
         for name in lu:
             if len(lu[name]) > 1:
-                log.debug("multiple theme definitions for '%s' in: %s" % (name, lu[name]))
+                log.debug("multiple theme definitions for '%s' in: %s" % (name, sorted(set(lu[name]))))
 
     def test_read_stories(self):
         """
@@ -45,7 +45,7 @@ class Tests(object):
                 lu[st.name].append(path)
         for name in lu:
             if len(lu[name]) > 1:
-                log.debug("multiple story definitions for '%s' in: %s" % (name, lu[name]))
+                log.debug("multiple story definitions for '%s' in: %s" % (name, sorted(set(lu[name]))))
 
     def test_read_storythemes(self):
         """
@@ -57,7 +57,7 @@ class Tests(object):
                 lu[(st.name1, st.name2, st.capacity)].append(path)
         for name in lu:
             if len(lu[name]) > 1:
-                log.debug("multiple story themes for '%s' in: %s" % (name, lu[name]))
+                log.debug("multiple story themes for '%s' in: %s" % (name, sorted(set(lu[name]))))
 
     def test_field_references(self):
         """
