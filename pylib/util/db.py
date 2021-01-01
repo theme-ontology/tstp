@@ -138,7 +138,7 @@ def main():
         for thing, dd in rorder:
             for key, ll in dd.iteritems():
                 if len(ll) > 1:
-                    spec = [ path for path, _ in ll ]
+                    spec = sorted(set([ path for path, _ in ll ]))
                     log.warn('Multiple definitions of %s "%s": %s.', thing, key, spec)
 
         # create and commit events
