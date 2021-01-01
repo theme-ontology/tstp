@@ -60,8 +60,8 @@ def parse_themes(txt):
     else:
         field = " ".join(x.strip() for x in txt)
 
-    for kw, comment, _implication, _capacity in expload_field(field):
-        yield kw, comment
+    for kw, comment, _implication, capacity in expload_field(field):
+        yield kw, comment, capacity
 
 
 def simple_line_collection(lines):
@@ -161,6 +161,7 @@ SUBJECTS_PARSE_THEMES = {
     "References": simple_line_collection,
     "Collections": simple_line_collection,
     "Component Stories": simple_fieldclean,
+    "Template": simple_fieldclean,
 }
 
 
@@ -308,6 +309,7 @@ def read_themes_from_txt(filename, verbose=True, addextras=False, combinedescrip
     unused_fieldnames = {
         "related themes",
         "other parents",
+        "template",
     }
     meta = {
         "source": filename,
@@ -519,9 +521,9 @@ def read_storythemes_from_txt(filename, verbose = True):
         if field.lower().endswith("themes"):
             weight = field.split(" ")[0].lower()
             if weight in ("absent", "minor", "major", "choice"):
-                for theme, motivation in data:
+                for theme, motivation, capacity in data:
                     yield webobject.StoryTheme.create(
-                        sid, theme, weight, motivation
+                        sid, theme, weight, motivation, capacity
                     )
 
 
@@ -587,11 +589,11 @@ def dataframe(source="txt", debug=False):
             if debug:
                 print(path)
             if path.endswith(".th.txt"):
-                ol = list(lib.dataparse.read_themes_from_txt(path, False))
+                ol = list(lib.dataparse.read_themes_from_txt(path, verbose=False, addextras=True))
                 objs[0].extend(ol)
             if path.endswith(".st.txt"):
-                ol1 = lib.dataparse.read_storythemes_from_txt(path, False)
-                ol2 = list(lib.dataparse.read_stories_from_txt(path, False))
+                ol1 = lib.dataparse.read_storythemes_from_txt(path, verbose=False)
+                ol2 = list(lib.dataparse.read_stories_from_txt(path, verbose=False))
                 objs[1].extend(ol1)
                 objs[2].extend(ol2)
     if source == "db":
@@ -599,7 +601,7 @@ def dataframe(source="txt", debug=False):
         objs[1].extend(read_storythemes_from_db())
         objs[2].extend(read_stories_from_db())
 
-    for olist in objs:
+    for idx, olist in enumerate(objs):
         fields = olist[0].fields
         for obj in olist:
             if fields != obj.fields:

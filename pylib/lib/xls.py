@@ -94,7 +94,7 @@ def write_themelist(df, filename):
     """
     import pandas as pd
     df = df.copy()
-    REVIEW_COLS = ["sid", "title", "parents", "theme", "weight", "motivation", "DISCUSS", "revised comment",
+    REVIEW_COLS = ["sid", "title", "parents", "theme", "capacity", "weight", "motivation", "DISCUSS", "revised comment",
                    "revised theme", "revised weight", "revised capacity", "tentative action", "discussion thread",
                    "MO notes"]
     REVIEW_COL_WIDTHS = {'weight': 10, 'motivation': 40, 'revised comment': 40, "revised weight": 10,

@@ -54,7 +54,7 @@ class Tests(object):
         lu = defaultdict(list)
         for path in lib.files.walk(NOTESPATH, r".*\.st\.txt$"):
             for st in lib.dataparse.read_storythemes_from_txt(path, verbose=True):
-                lu[(st.name1, st.name2)].append(path)
+                lu[(st.name1, st.name2, st.capacity)].append(path)
         for name in lu:
             if len(lu[name]) > 1:
                 log.debug("multiple story themes for '%s' in: %s" % (name, lu[name]))

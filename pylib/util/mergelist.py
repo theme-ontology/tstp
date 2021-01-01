@@ -12,7 +12,7 @@ import lib.dataparse
 
 
 HEADERS = [
-    "sid", "weight", "theme", "motivation", "revised theme", "revised weight", "revised comment"
+    "sid", "weight", "theme", "motivation", "revised theme", "revised weight", "revised comment", "revised capacity"
 ]
 FIELDNAMES = {
     "minor": "Minor Themes",
@@ -32,6 +32,16 @@ def read(filename):
     return data
 
 
+def format_line(theme, comment, capacity):
+    """
+    Format a theme entry line.
+    """
+    if capacity:
+        return "%s <%s> [%s],\n" % (theme, capacity, comment)
+    else:
+        return "%s [%s],\n" % (theme, comment)
+
+
 def main():
     """
     pyrun util.mergelist mydata.xlsx ./notes
@@ -43,13 +53,14 @@ def main():
     old_themes = set(obj.name for obj in lib.dataparse.read_themes_from_repo())
     new_themes = defaultdict(list)
 
-    for sid, w, t, c, rt, rw, rc in read(sys.argv[2]):
+    for sid, w, t, c, rt, rw, rc, rcap in read(sys.argv[2]):
         sid = sid.strip()
         oldtheme = t.strip()
         theme = rt.strip()
         oldweight = FIELDNAMES.get(w.strip(), "")
         weight = FIELDNAMES.get(rw.strip() or w.strip(), "")
         comment = rc.strip() or c
+        capacity = rcap.strip()
         if theme and theme not in old_themes:
             new_themes[theme].append(oldtheme)
         if not sid:
@@ -61,11 +72,11 @@ def main():
             deletions[(sid, oldweight, oldtheme)] = True
             if theme:
                 if oldweight == weight:
-                    replacements[(sid, oldweight, oldtheme)].append((weight, theme, comment))
+                    replacements[(sid, oldweight, oldtheme)].append((weight, theme, comment, capacity))
                 else:
-                    newentries[sid][weight].append([theme, comment])
+                    newentries[sid][weight].append([theme, comment, capacity])
         elif theme:
-            newentries[sid][weight].append([theme, comment])
+            newentries[sid][weight].append([theme, comment, capacity])
 
     if '--test' in sys.argv:
         print("NEW")
@@ -100,11 +111,12 @@ def main():
                         if key in deletions:
                             changed = True
                             deleteit = True
-                            for nw, nt, nc in replacements[key]:
+                            for nw, nt, nc, ncapacity in replacements[key]:
                                 newtheme = unidecode(nt)
                                 newcomment = unidecode(nc)
+                                ncapacity = unidecode(ncapacity)
                                 themelist[(cursid, newtheme)].append(curfield)
-                                lines.append("%s [%s],\n" % (newtheme, newcomment))
+                                lines.append(format_line(newtheme, newcomment, ncapacity))
                             replacements[key] = []
                         else:
                             themelist[(cursid, theme)].append(curfield)
@@ -114,17 +126,19 @@ def main():
                         curfielddone = True  # mustn't do this more than once
                         for key in replacements:
                             if key[:2] == (cursid, curfield):
-                                for nw, nt, nc in replacements[key]:
+                                for nw, nt, nc, ncapacity in replacements[key]:
                                     lib.log.warn("REPLACEMENT TARGET MISSING, APPENDING: %s -> %s", key, nt)
                                     newtheme = unidecode(nt)
                                     newcomment = unidecode(nc)
+                                    ncapacity = unidecode(ncapacity)
                                     themelist[(cursid, newtheme)].append(curfield)
-                                    lines.append("%s [%s],\n" % (newtheme, newcomment))
+                                    lines.append(format_line(newtheme, newcomment, ncapacity))
                                     changed = True
-                        for theme, comment in newentries[cursid][curfield]:
+                        for theme, comment, ncapacity in newentries[cursid][curfield]:
                             theme = unidecode(theme)
                             themelist[(cursid, theme)].append(curfield)
-                            lines.append("%s [%s],\n" % (theme, comment))
+                            ncapacity = unidecode(ncapacity)
+                            lines.append(format_line(theme, comment, ncapacity))
                             changed = True
 
                     # unless explicitly deleted, add back just as it was

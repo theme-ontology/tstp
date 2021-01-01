@@ -35,8 +35,13 @@ def makejoined(dfs):
     if len(dfs) > 1:
         for idx, df in list(enumerate(dfs)):
             if idx > 0:
-                df = df[["sid", "theme", "weight", "motivation"]]
-            df = df.rename(columns={"theme": "theme" + str(idx), "weight": "weight" + str(idx), "motivation": "motivation" + str(idx)})
+                df = df[["sid", "theme", "weight", "motivation", "capacity"]]
+            df = df.rename(columns={
+                "theme": "theme" + str(idx),
+                "weight": "weight" + str(idx),
+                "motivation": "motivation" + str(idx),
+                "capacity": "capacity" + str(idx),
+            })
             df.set_index("sid", inplace=True)
             dfs[idx] = df
     dfacc = dfs[0]

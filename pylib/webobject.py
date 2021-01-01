@@ -368,42 +368,8 @@ class TSTPConnection(TSTPObject):
         "name1",
         "category2",
         "name2",
-        "weight",
-        "motivation",
     )
     
-    @classmethod
-    def propose_edit_object(cls, cat1, name1, cat2, name2, attrs, vals):
-        table = "web_connections"
-        dt = datetime.datetime.now()
-        cat, name = esc(cat, name)
-        attrstr = cls.sql_filter_list(attrs)
-        oldvalue = None
-        alu = dict(izip(attrs, vals))
-        evidbase = "ev.%d-" % uuid("event")
-        idx = 0
-
-        events = []
-        updates = []
-
-        for attr, oldvalue in do("""
-            SELECT attr, value FROM `%s` WHERE 
-            category1 = "%s" AND name1 = "%s" AND
-            category2 = "%s" AND name2 = "%s" AND
-            attr IN %s LIMIT 1
-        """ % (table, cat1, name1, cat2, name2, attrstr)):
-            evid = evidbase + str(idx)
-            idx += 1
-            newvalue = alu[attr]
-            event = (evid, "odinlake", dt, "edit", "event", "", 
-                cat1, name1, cat2, name2, attr, oldvalue, newvalue, "pending")
-            update = ("featureof", cat1, name1, cat2, name2, attr, newvalue)
-
-            events.append(event)
-            updates.append(update)
-            
-        return events, updates
-
     @classmethod
     def commit_updates(cls, updates):
         """
@@ -612,16 +578,23 @@ class Theme(TSTPObject):
 ##
 ##################################################################
 class StoryTheme(TSTPConnection):
+    fields = TSTPConnection.fields + (
+        "weight",
+        "motivation",
+        "capacity",
+    )
+
     @classmethod
-    def create(cls, story, theme, weight, motivation):
+    def create(cls, story, theme, weight, motivation, capacity):
         return super(StoryTheme, cls).create(
-            category = "featureof",
-            category1 = "story",
-            name1 = story,
-            category2 = "theme",
-            name2 = theme,
-            weight = weight,
-            motivation = motivation,
+            category="featureof",
+            category1="story",
+            name1=story,
+            category2="theme",
+            name2=theme,
+            weight=weight,
+            motivation=motivation,
+            capacity=capacity
         )
     
     @classmethod
