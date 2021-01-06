@@ -16,6 +16,8 @@ lib.log.redirect()
 
 CUTOFF_YEAR = 1900
 MISC_CATEGORY_NAME = "[misc.]"
+CENTURY_RANGE = (-10, 21)
+CENTURY_COUNT = CENTURY_RANGE[1] - CENTURY_RANGE[0]
 
 
 def get_data_from_head():
@@ -29,7 +31,7 @@ def get_data_from_head():
     nn = untilyear - fromyear + 1
     xs = [fromyear + i for i in range(nn)]
     data = defaultdict(lambda: np.zeros(nn))
-    centurydata = defaultdict(lambda: np.zeros(21))
+    centurydata = defaultdict(lambda: np.zeros(CENTURY_COUNT))
     themed = set()
 
     for storytheme in lib.dataparse.read_storythemes_from_db():
@@ -41,14 +43,19 @@ def get_data_from_head():
         if name in themed:
             if 'collection' in name.lower() or re.match(r"\d{4}-\d{4}", date):
                 continue
-            if not re.match(r"\d{4}", date):
+            yearmatch = re.match("\d+", date)
+            if not yearmatch:
                 continue
-            year = int(date[:4])
+            year = int(yearmatch.group())
+            if "bc" in date.lower():
+                print(date)
+                year *= -1
             cat = re.match(r"([A-Za-z]+)", name).group(1)
             if fromyear <= year <= untilyear:
                 data[cat][year - fromyear] += 1
-            if 0 <= year < 2000:
-                centurydata[cat][year//100+1] += 1
+            centurybucket = year // 100 + 1 - CENTURY_RANGE[0]
+            if 0 <= centurybucket < CENTURY_COUNT:
+                centurydata[cat][centurybucket] += 1
 
     data = [(np.sum(a), k, a) for k, a in data.items()]
     centurydata = [(np.sum(a), k, a) for k, a in centurydata.items()]
@@ -159,17 +166,17 @@ def make_viz_from_data(xs, data, centurydata=None, yrange=None, bigtitle=None):
     if centurydata:
         cnx1, cny1, cnx2, cny2 = nx1+30, ny1+110, 250, ny1+180
         sumsy = sum(ys for _, _, ys in centurydata)
-        maxy = max(sumsy[:20]) + 1
+        maxy = max(sumsy[:CENTURY_COUNT-1]) + 1
         svg['annotation'].rect(cnx1, cny1, cnx2-cnx1, cny2-cny1, cls="background", style={"fill": "white", "stroke":None})
-        centuryplot = svg["chart2"].xychart(cnx1, cny1, cnx2, cny2,  0, 19.5, 0, maxy, baseline_reference=10).config({
+        centuryplot = svg["chart2"].xychart(cnx1, cny1, cnx2, cny2, CENTURY_RANGE[0]+0.5, CENTURY_RANGE[1]-1.5, 0, maxy, baseline_reference=10).config({
             'xtype': 'enum',
             "xtick-delta": 15,
         })
-        centuryxs = np.array(xrange(21))
+        centuryxs = np.array(xrange(*CENTURY_RANGE))
         with centuryplot.stack():
             for _, key, ys in centurydata:
                 color = regcolor.get(key, None) or regcolor.get(MISC_CATEGORY_NAME, "#333333")
-                centuryplot.plot([centuryxs, ys], shape="bar", cls='', style={"fill":color})
+                centuryplot.plot([centuryxs, ys, centuryxs], shape="bar", cls='', style={"fill":color})
         svg['annotation'].text((cnx1+cnx2)/2, cny2+25, "pre-1900 by century of publication", cls="annotation")
         centuryplot.plotarea()
 
@@ -206,21 +213,19 @@ def make_animation(path):
             y = int(y)
             if x0 <= y <= xx:
                 _aa[y-x0] += c
-            elif 0 <= y <= 2000:
-                pass
-            else:
-                print("BAD YEAR:", y, c)
         return _aa
 
     def make2(datapoint, key):
-        _bb = np.zeros(shape=21)
+        _bb = np.zeros(shape=CENTURY_COUNT)
         years = datapoint.get('prefix:{}'.format(key), {})
         for y, c in years.items():
             y = int(y)
             if x0 <= y <= xx:
                 pass
-            elif 0<=y<2000:
-                _bb[y//100+1] += c
+            elif CENTURY_RANGE[0] <= y < CENTURY_RANGE[1]:
+                _bb[y//100+1-CENTURY_RANGE[0]] += c
+            else:
+                print("BAD YEAR:", y, c)
         return _bb
 
     for atdt, datapoint in lib.commits.get_commits_data(period='weekly'):
@@ -233,20 +238,20 @@ def make_animation(path):
         prefixes = {}
         centuries = {}
         zeros = np.zeros(shape=len(xs))
-        zeros2 = np.zeros(shape=21)
+        zeros2 = np.zeros(shape=CENTURY_COUNT)
         for key in keys:
             prefixes[key] = make(datapoint, key)
             centuries[key] = make2(datapoint, key)
         for pkey in datapoint:
             aa = np.zeros(shape=len(xs))
-            bb = np.zeros(shape=21)
+            bb = np.zeros(shape=CENTURY_COUNT)
             if pkey.startswith("prefix:"):
                 key = pkey.split(":", 1)[-1]
                 if key not in prefixes:
                     aa += make(datapoint, key)
                     bb += make2(datapoint, key)
-            prefixes['miscellanous'] = aa
-            centuries['miscellanous'] = bb
+            prefixes[MISC_CATEGORY_NAME] = aa
+            centuries[MISC_CATEGORY_NAME] = bb
 
         for idx, (_, key, _) in enumerate(list(data)):
             aa = prefixes.get(key, zeros)

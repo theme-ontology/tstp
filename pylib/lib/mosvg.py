@@ -460,10 +460,14 @@ class SVGPlot(SVG):
             },            
             "rect.plotarea": {
                 "fill": "none",
+                "stroke": "none",
+            },
+            "rect.cliparea": {
+                "fill": "none",
                 "stroke": "black",
             },
             "line.axis": {
-                "stroke": "black"
+                "stroke": "none"
             },
             "line.tick": {
                 "stroke": "black"
@@ -655,6 +659,8 @@ class SVGPlot(SVG):
                                 if label:
                                     self.text(x, y-3, label, cls="datapointlabel " + cls, style=style)
                                     self.circle(x, y, 1, cls="datapointlabelmarker "+cls, style=style)
+
+            self.rect2(x1 + 1, y1 + 1, x2, y2, cls="cliparea")
 
 
 class SVGStockObjects(object):
