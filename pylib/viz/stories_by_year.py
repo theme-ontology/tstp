@@ -15,6 +15,7 @@ lib.log.redirect()
 
 
 CUTOFF_YEAR = 1900
+MISC_CATEGORY_NAME = "[misc.]"
 
 
 def get_data_from_head():
@@ -77,7 +78,7 @@ def limit_data(data, cutoff=19):
     data.sort(reverse=True)
     if remains:
         ys = sum(x[2] for x in remains)
-        data.append((0, 'miscellaneous', ys))
+        data.append((0, MISC_CATEGORY_NAME, ys))
     return data
 
 
@@ -167,7 +168,7 @@ def make_viz_from_data(xs, data, centurydata=None, yrange=None, bigtitle=None):
         centuryxs = np.array(xrange(21))
         with centuryplot.stack():
             for _, key, ys in centurydata:
-                color = regcolor.get(key, "#444466")
+                color = regcolor.get(key, None) or regcolor.get(MISC_CATEGORY_NAME, "#333333")
                 centuryplot.plot([centuryxs, ys], shape="bar", cls='', style={"fill":color})
         svg['annotation'].text((cnx1+cnx2)/2, cny2+25, "pre-1900 by century of publication", cls="annotation")
         centuryplot.plotarea()
