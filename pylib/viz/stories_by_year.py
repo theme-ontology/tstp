@@ -20,6 +20,20 @@ CENTURY_RANGE = (-10, 21)
 CENTURY_COUNT = CENTURY_RANGE[1] - CENTURY_RANGE[0]
 
 
+class CenturyFormater(object):
+    def format(self, n):
+        if n <= 0:
+            return '{}BC'.format(-n+1)
+        if n == 1:
+            return '{}st'.format(n)
+        if n == 2:
+            return '{}nd'.format(n)
+        if n == 3:
+            return '{}rd'.format(n)
+        return '{}th'.format(n)
+
+
+
 def get_data_from_head():
     """
     Get latest data about stories from db.
@@ -48,7 +62,6 @@ def get_data_from_head():
                 continue
             year = int(yearmatch.group())
             if "bc" in date.lower():
-                print(date)
                 year *= -1
             cat = re.match(r"([A-Za-z]+)", name).group(1)
             if fromyear <= year <= untilyear:
@@ -164,13 +177,14 @@ def make_viz_from_data(xs, data, centurydata=None, yrange=None, bigtitle=None):
     plot.plotarea()
 
     if centurydata:
-        cnx1, cny1, cnx2, cny2 = nx1+30, ny1+110, 250, ny1+180
+        cnx1, cny1, cnx2, cny2 = nx1+30, ny1+110, 300, ny1+180
         sumsy = sum(ys for _, _, ys in centurydata)
         maxy = max(sumsy[:CENTURY_COUNT-1]) + 1
         svg['annotation'].rect(cnx1, cny1, cnx2-cnx1, cny2-cny1, cls="background", style={"fill": "white", "stroke":None})
         centuryplot = svg["chart2"].xychart(cnx1, cny1, cnx2, cny2, CENTURY_RANGE[0]+0.5, CENTURY_RANGE[1]-1.5, 0, maxy, baseline_reference=10).config({
             'xtype': 'enum',
-            "xtick-delta": 15,
+            "xtick-delta": 25,
+            'xtick-format': CenturyFormater(),
         })
         centuryxs = np.array(xrange(*CENTURY_RANGE))
         with centuryplot.stack():
