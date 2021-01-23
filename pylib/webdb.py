@@ -52,7 +52,7 @@ def get_metatheme_data():
     ret_child_lu = {}
 
     for theme in themes:
-        parents = [ t.strip() for t in theme.parents.split(",") if t.strip() ]
+        parents = theme.list_parents()
         parent_lu[theme.name] = parents
 
         for parent in parents:

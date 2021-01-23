@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import re
 import codecs
 from collections import defaultdict
@@ -10,48 +12,15 @@ import lib.log
 from lib.func import memoize
 import lib.textformat
 import lib.files
-import themeontology
+from themeontology import TOParser
 
 
 def expload_field(field):
     '''
     Explode a field of raw data into quadruplets of (keyword,comment,implication,capacity).
     '''
-    def dict2row( token ):
-        kw = token.get( '', '' ).strip()
-        com = token.get( '[', '' ).strip()
-        imp = token.get( '{', '' ).strip()
-        cap = token.get( '<', '' ).strip()
-        return ( kw, com, imp, cap )
-
-    token = {}
-    delcorr = { '[':']', '{':'}', '<':'>' }
-    farr = re.split( '([\[\]\{\}\<\>,])', field )
-    state = ''
-    splitters = ',\n'
-
-    for part in farr:
-        if part in delcorr:
-            state = part
-        elif part in delcorr.values():
-            if delcorr.get( state, None ) == part:
-                state = ''
-            else:
-                raise AssertionError( 'Malformed field (bracket mismatch):\n  %s' % field )
-        elif part in splitters and not state:
-            tokrow = dict2row( token )
-            if not tokrow[0].strip():
-                # raise AssertionError('Malformed field (empty keyword %s):\n  %s' % (str(tokrow), field))
-                pass  # possible now that we allow splitting by both newline and comma
-            else:
-                yield tokrow
-            token = {}
-        else:
-            token[state] = token.get( state, '' ) + part
-
-    tokrow = dict2row( token )
-    if tokrow[0].strip():
-        yield dict2row( token )
+    for tkw, tcapacity, tmotivation, tnotes in TOParser.iter_kwitems(field.split("\n")):
+        yield tkw, tmotivation, tnotes, tcapacity
 
 
 def parse_themes(txt):
@@ -61,7 +30,7 @@ def parse_themes(txt):
     if isinstance(txt, basestring):
         field = txt
     else:
-        field = " ".join(x.strip() for x in txt)
+        field = "\n".join(x.strip() for x in txt)
 
     for kw, comment, _implication, capacity in expload_field(field):
         yield kw, comment, capacity
@@ -175,6 +144,7 @@ SUBJECTS = {
     "Minor Themes": simple_themejoin,
     "Other Keywords": simple_themejoin,
     "References": simple_line_collection,
+    "Parents": simple_line_collection,
     "Collections": simple_line_collection,
     "Component Stories": simple_fieldclean,
     "Description": simple_blockfill,
@@ -626,7 +596,38 @@ def dataframe(source="txt", debug=False):
     return df
 
 
+def test():
+    from credentials import GIT_THEMING_PATH
+    basepath = GIT_THEMING_PATH
+    notespath = os.path.join(basepath, "notes")
+    themes = []
+    for path in lib.files.walk(notespath, ".*\.(st|th)\.txt$"):
+        if path.endswith(".th.txt"):
+            print(path)
+            ol = list(lib.dataparse.read_themes_from_txt(path, verbose=False, addextras=True))
+            themes.extend(ol)
+    thememap = {t.name: t for t in themes}
+    for o in themes:
+        if o.parents not in thememap:
+            print("*", o.name)
+            print(o.parents)
+    return
+    for path in lib.files.walk(notespath, ".*\.(st|th)\.txt$"):
+        if "boccaccio" not in path:
+            continue
+        if path.endswith(".st.txt"):
+            print(path)
+            ol1 = list(lib.dataparse.read_stories_from_txt(path, verbose=False))
+            for o in ol1:
+                print(o.name)
+            ol2 = lib.dataparse.read_storythemes_from_txt(path, verbose=False)
+            for o in ol2:
+                print(o.name1, "->", o.name2)
+
+
 def main():
+    test()
+    return
     df = dataframe()
     dff = df.reset_index()  # because fuck pandas
     dfp = dff[dff["theme"] == "pride"]

@@ -157,7 +157,7 @@ class TOParser(object):
         field = '\n'.join(lines)
         token = {}
         delcorr = {'[': ']', '{': '}', '<': '>'}
-        farr = re.split('([\[\]\{\}\<\>,\n])', field)
+        farr = re.split('([\[\]\{\}\<\>,\\n])', field)
         state = ''
         splitters = ',\n'
 

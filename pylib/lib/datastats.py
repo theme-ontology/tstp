@@ -18,7 +18,7 @@ def get_theme_graph():
     graph = KWGraph()
     for theme in lib.dataparse.read_themes_from_db():
         child = theme.name
-        parents = [t.strip() for t in theme.parents.split(",")]
+        parents = theme.list_parents()
         for parent in parents:
             if parent:
                 graph.makeEdge(parent, child)
@@ -108,7 +108,7 @@ def get_theme_stats(theme):
     descriptions = {}
     metas = {}
     for th in lib.dataparse.read_themes_from_db():
-        thp = [x.strip() for x in th.parents.split(",")]
+        thp = th.list_parents()
         if th.name == theme:
             parents = filter(None, thp)
             descriptions[th.name] = th.description
@@ -153,7 +153,7 @@ def construct_theme_tree(themeobjects):
 
     for thobj in themeobjects:
         theme = thobj.name
-        thp = filter(None, [x.strip() for x in thobj.parents.split(",")])
+        thp = thobj.theme.list_parents()
         parents[theme] = sorted(set(thp))
 
         if theme not in children:

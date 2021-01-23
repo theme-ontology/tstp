@@ -31,7 +31,7 @@ class Tests(object):
             objs = list(lib.dataparse.read_themes_from_txt(path, False))
             for themeobj in objs:
                 theme = themeobj.name
-                for parent in themeobj.parents.split(","):
+                for parent in themeobj.list_parents():
                     parent = parent.strip()
                     if theme == parent:
                         selfrefs.append(theme)
@@ -56,7 +56,7 @@ class Tests(object):
         for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
             objs = list(lib.dataparse.read_themes_from_txt(path, False))
             for theme in objs:
-                for parent in theme.parents.split(","):
+                for parent in theme.list_parents():
                     counts[parent.strip()] += 1
         for path in lib.files.walk(NOTESPATH, r".*\.th\.txt$"):
             objs = list(lib.dataparse.read_themes_from_txt(path, False))

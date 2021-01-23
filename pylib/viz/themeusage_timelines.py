@@ -111,7 +111,7 @@ def make_viz():
             if sid[:3] in prefixes:
                 score += weights[st.weight] * 3 + 1
 
-        leafthemes.append((score, theme, obj.stories, obj.parents.split(",")[0]))
+        leafthemes.append((score, theme, obj.stories, obj.list_parents()[0]))
 
     leafthemes.sort(reverse = True)
 

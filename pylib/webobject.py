@@ -3,7 +3,7 @@ from itertools import izip
 import datetime
 
 from db import do, esc, uuid
-import log
+import re
 
 
 ##################################################################
@@ -558,8 +558,8 @@ class Theme(TSTPObject):
         Returns:
         List of parent theme names.
         """
-        parents = [t.strip() for t in self.parents.split(",")]
-        return parents
+        parents = [t.strip() for t in re.split("[,\n]", self.parents)]
+        return [t for t in parents if t]
 
     @classmethod
     def make_json(cls, objs, fields = (), limit = 10000):

@@ -94,7 +94,7 @@ def main():
         # note any parent-less themes
         for key, ll in rthemes.iteritems():
             for path, theme in ll:
-                parents = filter(None, [ x.strip() for x in theme.parents.split(",") ])
+                parents = theme.list_parents()
                 if not parents:
                     log.info('Top Level Theme "%s" in %s', key, path)
                 for parent in parents:
@@ -109,7 +109,7 @@ def main():
             for key in rthemes.keys():
                 ll = rthemes[key]
                 for path, theme in ll:
-                    parents = filter(None, [x.strip() for x in theme.parents.split(",")])
+                    parents = theme.list_parents()
                     if parents and all(p not in rthemes for p in parents):
                         log.info('Dropping theme with undefined parents: "%s": "%s"', key, parents)
                         changed = True

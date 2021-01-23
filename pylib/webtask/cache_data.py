@@ -123,7 +123,7 @@ def init_theme_od(themeobj, basepath):
     theme_od['name'] = themeobj.name
     theme_od['description'] = lib.textformat.remove_wordwrap(themeobj.description)
     if hasattr(themeobj, 'parents'):
-        theme_od['parents'] = filter(None, [parent.strip() for parent in themeobj.parents.split(',')])
+        theme_od['parents'] = themeobj.list_parents()
     if theme_od['parents'] == []:
         theme_od['parents'] = ["literary thematic entity"]
     theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(themeobj.meta)['source'])
