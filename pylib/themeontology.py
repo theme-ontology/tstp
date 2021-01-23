@@ -7,25 +7,24 @@ https://github.com/theme-ontology/theming and contain nothing that is not
 required for that purpose.
 """
 from __future__ import print_function
-import os.path
-import lib.files
+
 import codecs
+import os.path
+import re
 from collections import defaultdict
+
+import lib.files
+import lib.textformat
 
 
 THEME_FIELD_CONFIG = {
-    "Description": {
-        "type": "text",
-        "required": True,
-    },
+    "Description": {"type": "text", "required": True},
     "Parents": {"type": "list"},
     "References": {"type": "list"},
     "Examples": {"type": "text"},
     "Notes": {"type": "text"},
     "Aliases": {"type": "list"},
-    "Template": {"type": "text"},
-    "Other Parents": {"type": "text", "deprecated": True},
-    "Related Themes": {"type": "text", "deprecated": True},
+    "Template": {"type": "blob"},
 }
 
 THEME_FIELD_ORDER = [
@@ -41,21 +40,20 @@ THEME_FIELD_ORDER = [
 STORY_FIELD_CONFIG = {
     "Title": {"type": "text"},
     "Date": {"type": "date"},
-    "Authors": {"type": "text"},
-    "Variation": {"type": "text"},
+    "Authors": {"type": "blob"},
+    "Variation": {"type": "blob"},
     "Description": {"type": "text"},
     "References": {"type": "list"},
     "Ratings": {"type": "list"},
-    "Choice Themes": {"type": "list"},
-    "Major Themes": {"type": "list"},
-    "Minor Themes": {"type": "list"},
-    "Not Themes": {"type": "list"},
-    "Other Keywords": {"type": "list"},
+    "Choice Themes": {"type": "kwlist"},
+    "Major Themes": {"type": "kwlist"},
+    "Minor Themes": {"type": "kwlist"},
+    "Not Themes": {"type": "kwlist"},
+    "Other Keywords": {"type": "kwlist"},
     "Collections": {"type": "list"},
     "Component Stories": {"type": "list"},
-    "Genre": {"type": "text"},
-    "Related Stories": {"type": "text"},
-    "Notes": {"type": "text", "deprecated": True},
+    "Genre": {"type": "blob"},
+    "Related Stories": {"type": "list"},
 }
 
 STORY_FIELD_ORDER = [
@@ -66,10 +64,10 @@ STORY_FIELD_ORDER = [
     "Variation",
     "References",
     "Genre",
+    "Ratings",
     "Collections",
     "Component Stories",
     "Related Stories",
-    "Ratings",
     "Choice Themes",
     "Major Themes",
     "Minor Themes",
@@ -128,12 +126,89 @@ class TOParser(object):
         if linebuffer:
             yield linebuffer
 
+    @classmethod
+    def iter_listitems(cls, lines):
+        """
+        Turn a list of strings into items. Items may be newline or comma separated.
+        Args:
+            lines: list of strings
+        """
+        for line in lines:
+            for item in line.split(","):
+                item = item.strip()
+                if item:
+                    yield item
+
+    @classmethod
+    def iter_kwitems(cls, lines):
+        """
+        Turn a list of strings into kewyword items. Items may be newline or comma separated.
+        Items may contain data in () [] {} parentheses.
+        Args:
+            lines: list of strings
+        """
+        def dict2row(tokendict):
+            tkw = tokendict.get('', '').strip()
+            tmotivation = tokendict.get('[', '').strip()
+            tcapacity = tokendict.get('<', '').strip()
+            tnotes = tokendict.get('{', '').strip()
+            return tkw, tcapacity, tmotivation, tnotes
+
+        field = '\n'.join(lines)
+        token = {}
+        delcorr = {'[': ']', '{': '}', '<': '>'}
+        farr = re.split('([\[\]\{\}\<\>,\n])', field)
+        state = ''
+        splitters = ',\n'
+
+        for part in farr:
+            if part in delcorr:
+                state = part
+            elif part in delcorr.values():
+                if delcorr.get(state, None) == part:
+                    state = ''
+                else:
+                    raise AssertionError('Malformed field (bracket mismatch):\n  %s' % field)
+            elif part in splitters and not state:
+                tokrow = dict2row(token)
+                if not tokrow[0].strip():
+                    #raise AssertionError('Malformed field (empty keyword %s):\n  %s' % (str(tokrow), field))
+                    pass  # possible now that we allow splitting by both newline and comma
+                else:
+                    yield tokrow
+                token = {}
+            else:
+                token[state] = token.get(state, '') + part
+
+        tokrow = dict2row(token)
+        if tokrow[0].strip():
+            yield dict2row(token)
+
+
+class TOKeyword(object):
+    def __init__(self, keyword, capacity=None, motivation=None, notes=None):
+        self.keyword = keyword
+        self.motivation = motivation
+        self.capacity = capacity
+        self.notes = notes
+        assert(len(keyword.strip()) > 0)
+
+    def __str__(self):
+        pm = u" [{}]".format(self.motivation) if self.motivation else ""
+        pc = u"<{}>".format(self.capacity) if self.capacity else ""
+        pn = u" {{{}}}".format(self.notes) if self.notes else ""
+        return u"{}{}{}{}".format(self.keyword, pc, pm, pn)
+
+    def __repr__(self):
+        return 'TOKeyword<{}>'.format(str(self))
+
 
 class TOField(object):
-    def __init__(self, lines=None):
+    def __init__(self, lines=None, fieldconfig=None):
         self.name = ""
         self.source = []
         self.data = []
+        self.fieldconfig = fieldconfig or {}
         if lines:
             self.populate(lines)
 
@@ -155,10 +230,38 @@ class TOField(object):
         self.name = lines[0].strip(": ")
         self.data = lines[1:]
 
+    def iter_parts(self):
+        """
+        Iterater over components in the data of this field.
+        """
+        fieldtype = self.fieldconfig.get("type", "blob")
+        if fieldtype == "kwlist":
+            for kwtuple in TOParser.iter_kwitems(self.data):
+                yield TOKeyword(*kwtuple)
+        elif fieldtype == "list":
+            for item in TOParser.iter_listitems(self.data):
+                yield item
+        elif fieldtype == "text":
+            yield lib.textformat.add_wordwrap("\n".join(self.data)).strip()
+        else:
+            yield '\n'.join(self.data)
+
+    def text_canonical(self):
+        """
+        Returns:
+            A text blob representing this field in its canonical format.
+        """
+        parts = [u":: {}".format(self.name)]
+        parts.extend(unicode(x) for x in self.iter_parts())
+        return u'\n'.join(parts)
+
 
 class TOEntry(object):
+    cfg = None
+    order = None
     def __init__(self, lines=None):
-        self.cfg = {}
+        self.cfg = self.cfg or {}
+        self.order = self.order or []
         self.name = ""
         self.fields = []
         self.source = []
@@ -197,7 +300,7 @@ class TOEntry(object):
         Interpret a list of text lines as an "entry", assuming they conform
         to the required format.
         Args:
-            lines:
+            lines: list of strings
         """
         self.source.extend(lines)
         cleaned = []
@@ -212,26 +315,56 @@ class TOEntry(object):
         for fieldlines in TOParser.iter_fields(cleaned):
             while fieldlines and not fieldlines[-1]:
                 fieldlines.pop()
-            self.fields.append(TOField(fieldlines))
+            name = fieldlines[0].strip(": ")
+            fieldconfig = self.cfg.get(name, {})
+            self.fields.append(TOField(fieldlines, fieldconfig))
 
     def validate(self):
+        """
+        Report on problems with the syntax of the entry.
+        Returns:
+            yields warnings as strings.
+        """
+        junklines = []
+        for idx, line in enumerate(self.source):
+            if idx > 1:
+                if line.startswith("::"):
+                    break
+                elif line.strip():
+                    junklines.append(line)
+        if junklines:
+            junkmsg = '/'.join(junklines)
+            if len(junkmsg) > 13:
+                junkmsg = junkmsg[:10] + "..."
+            yield u"{}: junk in entry header: {}".format(self.name, junkmsg)
         for field in self.fields:
             if field.name not in self.cfg:
                 yield u"{}: unknown field '{}'".format(self.name, field.name)
 
+    def text_canonical(self):
+        """
+        Returns:
+            A text blob representing this entry in its canonical format.
+        """
+        lines = [self.name, "=" * len(self.name), ""]
+        for field in self.iter_fields(reorder=True, skipunknown=True):
+            lines.append(field.text_canonical())
+            lines.append("")
+        return "\n".join(lines)
+
 
 class TOTheme(TOEntry):
     def __init__(self, lines=None):
-        super(TOTheme, self).__init__(lines=lines)
         self.cfg = THEME_FIELD_CONFIG
         self.order = THEME_FIELD_ORDER
+        super(TOTheme, self).__init__(lines=lines)
 
 
 class TOStory(TOEntry):
     def __init__(self, lines=None):
-        super(TOStory, self).__init__(lines=lines)
         self.cfg = STORY_FIELD_CONFIG
         self.order = STORY_FIELD_ORDER
+        super(TOStory, self).__init__(lines=lines)
 
 
 class ThemeOntology(object):
@@ -275,13 +408,9 @@ class ThemeOntology(object):
         omitting unknown field names.
         """
         for path, entries in self.entries.items():
-            print(path)
             lines = []
             for entry in entries:
-                lines.extend([entry.name, "=" * len(entry.name), ""])
-                for field in entry.iter_fields(reorder=False, skipunknown=True):
-                    lines.extend(field.source)
-                    lines.append("")
+                lines.append(entry.text_canonical())
                 lines.append("")
             with codecs.open(path, "w", encoding='utf-8') as fh:
                 fh.writelines(x + "\n" for x in lines)
