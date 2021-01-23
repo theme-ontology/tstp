@@ -29,6 +29,24 @@ def xls_sheet_to_memory(filename, sheets = 'ALL'):
     return outdict
 
 
+def get_headers(filename, sheetname=".*"):
+    """
+    Return cells in rows with given headers for all sheets in file.
+    """
+    try:
+        sheets = xls_sheet_to_memory(filename)
+    except (OSError, KeyError):
+        raise IOError("Unable to read excel file")
+    results = []
+    for sheet in sheets:
+        if re.match(sheetname, sheet):
+            if sheet:
+                results.append((sheetname, sheet[0]))
+            else:
+                results.append((sheetname, []))
+    return results
+
+
 def read_xls(filename, headers=None, sheetname=".*"):
     """
     Return cells in rows with given headers for all sheets in file.

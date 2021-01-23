@@ -1,3 +1,4 @@
+from __future__ import print_function
 import urllib2
 import re
 from dateutil import parser
@@ -84,6 +85,33 @@ def fetch_info(wikipagename):
     return info
 
 
+def fetch_links_info(url, filter="/wiki/", startafter="/wiki/Help:Maintenance", stopat="/wiki/Help:Category"):
+    """
+    Open url, extract qualifying wikipedia links and then read json page summary
+    for those links using fetch_info.
+    Args:
+        url:
+    Returns: yield (title, page-name, json info) tuples.
+    """
+    started = False
+    data = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(data, "html.parser")
+    for link in soup.find_all("a"):
+        url2 = link.get("href")
+        if url2:
+            if not started:
+                if re.match(startafter, url2):
+                    started = True
+                continue
+            if re.match(stopat, url2):
+                break
+            if re.match(filter, url2):
+                print(url2)
+                title = link.get_text()
+                pagename = url2.rsplit("/")[-1]
+                yield title, pagename, fetch_info(pagename)
+
+
 def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=(1, 3, 4, 6), isterse=False,
                       table_offset=0, singleseason=False):
     """
@@ -102,7 +130,6 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
     """
     data = urllib2.urlopen(url).read()
     soup = BeautifulSoup(data, "html.parser")
-    resturl = "https://en.wikipedia.org/api/rest_v1/page/summary/"
     sidcounter = defaultdict(int)
 
     for idx, table in enumerate(soup.find_all("table", class_ = tableclass)):

@@ -11,8 +11,11 @@ from pprint import pprint
 import lib.dataparse
 
 
-HEADERS = [
-    "sid", "weight", "theme", "motivation", "revised theme", "revised weight", "revised comment", "revised capacity"
+REQUIRED_HEADERS = [
+    "sid", "weight", "theme", "motivation", "revised theme", "revised weight", "revised comment"
+]
+OPTIONAL_HEADERS = [
+    "revised capacity"
 ]
 FIELDNAMES = {
     "minor": "Minor Themes",
@@ -24,12 +27,20 @@ def read(filename):
     """
     Read required columns from an excel file.
     """
-    lib.log.info("Reading named columns from %s: %s", filename, HEADERS)
-    data, sheetcount, rowcount = lib.xls.read_xls(filename, headers=HEADERS, sheetname="data")
+    headers = lib.xls.get_headers(filename, sheetname="data")[0][1]
+    for hh in REQUIRED_HEADERS:
+        if hh not in headers:
+            lib.log.error("missing header: %s", hh)
+    activeheaders = list(REQUIRED_HEADERS)
+    for hh in OPTIONAL_HEADERS:
+        if hh in headers:
+            activeheaders.append(hh)
+    lib.log.info("Reading named columns from %s: %s", filename, activeheaders)
+    data, sheetcount, rowcount = lib.xls.read_xls(filename, headers=activeheaders, sheetname="data")
     lib.log.info("Read %s rows from %s sheets.", rowcount, sheetcount)
     if sheetcount < 1:
         lib.log.warn("Found no sheet named 'data'. Expected one!")
-    return data
+    return activeheaders, data
 
 
 def format_line(theme, comment, capacity):
@@ -52,8 +63,12 @@ def main():
     deletions = defaultdict(bool)
     old_themes = set(obj.name for obj in lib.dataparse.read_themes_from_repo())
     new_themes = defaultdict(list)
+    activeheaders, data = read(sys.argv[2])
+    do_capacity = "revised capacity" in activeheaders
 
-    for sid, w, t, c, rt, rw, rc, rcap in read(sys.argv[2]):
+    for row in data:
+        sid, w, t, c, rt, rw, rc = row[:7]
+        rcap = row[7] if do_capacity else ""
         sid = sid.strip()
         oldtheme = t.strip()
         theme = rt.strip()

@@ -141,7 +141,8 @@ def get_defenitions_text(target):
     return get_defenitions_text_for_objects(objs)
 
 
-def get_defenitions_text_for_objects(objs, empty_storythemes_headers=False, skip_fields=(), add_fields=()):
+def get_defenitions_text_for_objects(objs, empty_storythemes_headers=False, skip_fields=(), add_fields=(),
+                                     presorted=False):
     if not objs:
         return ""
 
@@ -152,12 +153,17 @@ def get_defenitions_text_for_objects(objs, empty_storythemes_headers=False, skip
     headers = [f for f in klass.fields if f not in skip_fields]
     grouped = defaultdict(list)
     lines = []
+    ordering = []
 
     for obj in objs:
         obj_name = getattr(obj, headers[0])
         grouped[obj_name].append(obj)
+        ordering.append(obj_name)
 
-    for obj_name in natsorted(grouped):
+    if not presorted:
+        ordering = natsorted(grouped)
+
+    for obj_name in ordering:
         lines.append(obj_name)
         lines.append("=" * len(obj_name))
         lines.append("")
