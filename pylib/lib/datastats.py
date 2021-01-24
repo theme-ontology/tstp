@@ -153,7 +153,7 @@ def construct_theme_tree(themeobjects):
 
     for thobj in themeobjects:
         theme = thobj.name
-        thp = thobj.theme.list_parents()
+        thp = thobj.list_parents()
         parents[theme] = sorted(set(thp))
 
         if theme not in children:

@@ -73,7 +73,7 @@ def elasticsearch_commit():
         except ImportError:
             pass
     if not es:
-        log.debug("elasticsearch no available, skipping indexing")
+        log.debug("elasticsearch not available, skipping indexing")
         return
 
     def iter_actions():
