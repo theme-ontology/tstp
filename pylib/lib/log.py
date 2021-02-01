@@ -19,7 +19,7 @@ LOGTARGET = sys.stdout
 LOGTARGETMODE = "utf-8"
 
 
-def redirect(loc = "stderr"):
+def redirect(loc="stderr"):
     global LOGTARGET
     LOGTARGET = getattr(sys, loc)
 
@@ -43,9 +43,7 @@ def set_level(level):
 
 def set_logmode(mode = "utf-8"):
     global LOGTARGETMODE
-
     lt = "stderr" if LOGTARGET == sys.stderr else "stdout"
-
     if mode == "utf-8":
         sys.stdout = codecs.getwriter('utf8')(bin_stdout)
         sys.stderr = codecs.getwriter('utf8')(bin_stderr)
@@ -54,7 +52,6 @@ def set_logmode(mode = "utf-8"):
         sys.stderr = bin_stderr
     else:
         raise RuntimeError("no such mode: " + mode)
-
     LOGTARGETMODE = mode
     redirect(lt)
 
@@ -67,13 +64,13 @@ def printfunc(s):
     LOGTARGET.write("\n")
     
     
-def printmsg(msg, level = 'INFO', args = None):
+def printmsg(msg, level='INFO', args=None):
     dt = datetime.now()
-    tstr = dt.strftime( '%Y-%m-%d %H:%M:%S' )
+    tstr = dt.strftime('%Y-%m-%d %H:%M:%S')
     
     if args:
         msg = msg % args
-    msg = unicode(msg).encode('ascii','ignore')
+    msg = unicode(msg).encode('ascii', 'ignore').decode()
     logline = u'%-6s %s  %s' % (level, tstr, msg)
     
     if LOGFILE is not None:
@@ -140,7 +137,11 @@ class Mode( object ):
 
 
 #: set up default
-set_logmode()
+import six
+if six.PY2:
+    set_logmode()
+if six.PY3:
+    unicode = str
 redirect("stderr")
 
 

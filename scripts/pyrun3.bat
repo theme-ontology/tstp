@@ -2,7 +2,7 @@
 
 set DIR=%~dp0
 set PATH=D:\Applications\Python37;D:\Applications\Python37\Scripts;%PATH%;%DIR%
-set PYTHONPATH=%PYTHONPATH%;%DIR%\..\pylib
+set PYTHONPATH=%DIR%\..\py3lib;%DIR%\..\pylib;%PYTHONPATH%
 set TSTPPATH=%DIR%..
 
 

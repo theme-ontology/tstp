@@ -9,6 +9,7 @@ import lib.files
 from unidecode import unidecode
 from pprint import pprint
 import lib.dataparse
+import themeontology
 
 
 REQUIRED_HEADERS = [
@@ -27,7 +28,7 @@ def read(filename):
     """
     Read required columns from an excel file.
     """
-    headers = lib.xls.get_headers(filename, sheetname="data")[0][1]
+    headers = lib.xls.get_headers(filename, sheetpattern="data")[0][1]
     for hh in REQUIRED_HEADERS:
         if hh not in headers:
             lib.log.error("missing header: %s", hh)
@@ -48,24 +49,23 @@ def format_line(theme, comment, capacity):
     Format a theme entry line.
     """
     if capacity:
-        return "%s <%s> [%s],\n" % (theme, capacity, comment)
+        return "%s <%s> [%s]\n" % (theme, capacity, comment)
     else:
-        return "%s [%s],\n" % (theme, comment)
+        return "%s [%s]\n" % (theme, comment)
 
 
-def main():
+def get_changes(listpath):
     """
-    pyrun util.mergelist mydata.xlsx ./notes
+    Read desired changes from excel file.
+    Returns:
     """
-    themelist = defaultdict(list)
+    old_themes = set(obj.name for obj in lib.dataparse.read_themes_from_repo())
+    activeheaders, data = read(listpath)
+    do_capacity = "revised capacity" in activeheaders
     newentries = defaultdict(lambda: defaultdict(list))
     replacements = defaultdict(list)
     deletions = defaultdict(bool)
-    old_themes = set(obj.name for obj in lib.dataparse.read_themes_from_repo())
     new_themes = defaultdict(list)
-    activeheaders, data = read(sys.argv[2])
-    do_capacity = "revised capacity" in activeheaders
-
     for row in data:
         sid, w, t, c, rt, rw, rc = row[:7]
         rcap = row[7] if do_capacity else ""
@@ -93,18 +93,34 @@ def main():
         elif theme:
             newentries[sid][weight].append([theme, comment, capacity])
 
-    if '--test' in sys.argv:
-        print("NEW")
-        for sid in newentries:
-            print(sid)
-            pprint(dict(newentries[sid]))
-        print("REPLACEMENT")
-        pprint(dict(replacements))
-        print("DELETION")
-        pprint(dict(deletions))
-        return
+    return newentries, replacements, deletions, new_themes
 
-    for path in lib.files.walk(sys.argv[3]):
+
+def report_changes(newentries, replacements, deletions, new_themes):
+    """
+    Just print a summary of changes for debugging.
+    """
+    print("NEW")
+    for sid in newentries:
+        print(sid)
+        pprint(dict(newentries[sid]))
+    print("REPLACEMENT")
+    pprint(dict(replacements))
+    print("DELETION")
+    pprint(dict(deletions))
+
+    for newtheme, previous in new_themes.items():
+        lib.log.warn("Undefined New Theme: %s CHANGED FROM %s", newtheme, sorted(set(previous)))
+
+
+def old_mergelist(listpath, notespath):
+    themelist = defaultdict(list)
+    newentries, replacements, deletions, new_themes = get_changes(listpath)
+
+    if '--test' in sys.argv:
+        return report_changes(newentries, replacements, deletions, new_themes)
+
+    for path in lib.files.walk(notespath):
         if path.endswith(".st.txt"):
             lib.log.debug("Reading %s...", path)
             lines, cursid, curfield, changed = [], None, None, False
@@ -174,4 +190,44 @@ def main():
         lib.log.warn("Undefined New Theme: %s CHANGED FROM %s", newtheme, sorted(set(previous)))
 
 
+def new_mergelist(listpath, notespath):
+    themelist = defaultdict(list)
+    newentries, replacements, deletions, new_themes = get_changes(listpath)
+    if '--test' in sys.argv:
+        return report_changes(newentries, replacements, deletions, new_themes)
+    to = themeontology.read()
 
+    # delete keywords and replace if needed
+    for key in deletions:
+        (sid, oldweight, oldtheme) = key
+        kwfield = to.story[sid].get(oldweight)
+        idx = kwfield.delete(oldtheme)
+        for nw, nt, nc, ncapacity in replacements[key]:
+            assert oldweight == nw, "replacement listed but weights don't match, illogical"
+            kwfield.insert(idx, nt, nc, ncapacity)  ## {notes} not supported yet
+        del replacements[key]
+
+    # add remaining replacements, if any
+    for key in replacements:
+        (sid, oldweight, oldtheme) = key
+        kwfield = to.story[sid].get(oldweight)
+        for nw, nt, nc, ncapacity in replacements[key]:
+            lib.log.warn("REPLACEMENT TARGET MISSING, APPENDING: %s -> %s", key, nt)
+            assert oldweight == nw, "replacement listed but weights don't match, illogical"
+            kwfield.insert(None, nt, nc, ncapacity)
+
+    for sid in newentries:
+        for fieldname in newentries[sid]:
+            for theme, comment, ncapacity in newentries[sid][fieldname]:
+                kwfield = to.story[sid].get(fieldname)
+                kwfield.insert(None, theme, comment, ncapacity)
+
+    to.write_clean()
+
+
+def main():
+    """
+    pyrun util.mergelist mydata.xlsx ./notes
+    """
+    #old_mergelist(sys.argv[2], sys.argv[3])
+    new_mergelist(sys.argv[2], sys.argv[3])
