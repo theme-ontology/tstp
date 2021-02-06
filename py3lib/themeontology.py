@@ -220,6 +220,9 @@ class TOField(object):
             len(self.data)
         )
 
+    def __iter__(self):
+        yield from self.iter_parts()
+
     def populate(self, lines):
         """
         Interpret a list of text lines as a "field", assuming they conform
@@ -447,11 +450,16 @@ class TOStory(TOEntry):
 
 
 class ThemeOntology(object):
-    def __init__(self, path):
+    def __init__(self, paths=None):
         self.theme = {}
         self.story = {}
         self.entries = defaultdict(list)
-        self.read(path)
+        if paths:
+            if isinstance(paths, (list, tuple)):
+                for path in paths:
+                    self.read(path)
+            else:
+                self.read(paths)
 
     def stories(self):
         """
@@ -521,9 +529,9 @@ class ThemeOntology(object):
                 fh.writelines(x + "\n" for x in lines)
 
 
-def read(path=None):
-    if not path:
+def read(paths=None):
+    if not paths:
         import credentials
         path = os.path.join(credentials.GIT_THEMING_PATH, "notes")
-    return ThemeOntology(path)
+    return ThemeOntology(paths)
 

@@ -104,7 +104,7 @@ def write_xls(filename, headers, rows, sheetname="data"):
     wb.save(filename)
 
 
-def write_themelist(df, filename):
+def write_themelist(df, filename, columns=None):
     """
     Write a review list of themes and usages given data as a dataframe.
     Args:
@@ -118,13 +118,14 @@ def write_themelist(df, filename):
                    "MO notes"]
     REVIEW_COL_WIDTHS = {'weight': 10, 'motivation': 40, 'revised comment': 40, "revised weight": 10,
                          "revised capacity": 10}
+    columns = columns or REVIEW_COLS
 
-    for col in REVIEW_COLS:
+    for col in columns:
         if col not in df.columns:
             df[col] = ""
 
     writer = pd.ExcelWriter(filename, engine="xlsxwriter")
-    df.to_excel(writer, columns=REVIEW_COLS, header=True, index=False, freeze_panes=(1, 1), sheet_name="data")
+    df.to_excel(writer, columns=columns, header=True, index=False, freeze_panes=(1, 1), sheet_name="data")
     workbook = writer.book
     worksheet = writer.sheets['data']
     worksheet.set_default_row(70)
@@ -141,10 +142,10 @@ def write_themelist(df, filename):
     format_basic = workbook.add_format(basic)
     format_revise = workbook.add_format(revise)
 
-    for idx, colname in enumerate(REVIEW_COLS):
+    for idx, colname in enumerate(columns):
         width = REVIEW_COL_WIDTHS.get(colname, 15)
         colc = chr(ord("A") + idx)
-        fmt = format_revise if 7 <= idx <= 10 else format_basic
+        fmt = format_revise if 'revised' in colname else format_basic
         worksheet.set_column('{}:{}'.format(colc, colc), width, fmt)
 
     writer.save()

@@ -1,9 +1,16 @@
+from __future__ import print_function
+
 import json
-from itertools import izip
 import datetime
 
 from db import do, esc, uuid
 import re
+
+import six
+if six.PY3:
+    unicode = str
+else:
+    from itertools import izip
 
 
 ##################################################################
@@ -28,7 +35,7 @@ class TSTPObject(object):
         extra_fields = []
         for field, value in zip(self.fields, args):
             setattr(self, field, value)
-        for field, value in kwargs.iteritems():
+        for field, value in kwargs.items():
             setattr(self, field, value)
             if field not in self.fields:
                 extra_fields.append(field)
@@ -45,7 +52,7 @@ class TSTPObject(object):
         
         for kwarg in kwargs:
             if kwarg not in cls.fields:
-                raise ValueError, "Invalid field %s" % kwarg
+                raise ValueError("Invalid field %s" % kwarg)
                 
         for field in cls.fields:
             value = kwargs.get(field, None) 
@@ -54,7 +61,7 @@ class TSTPObject(object):
             if value is not None or not strict:
                 setattr(obj, field, "" if value is None else value)
             else:
-                raise ValueError, "Missing value for %s" % field
+                raise ValueError("Missing value for %s" % field)
             
         return obj
 
@@ -64,7 +71,7 @@ class TSTPObject(object):
         """
         for field in self.fields:
             if not hasattr(self, field):
-                raise ValueError, "Missing value for %s" % field
+                raise ValueError("Missing value for %s" % field)
 
     @classmethod
     def edit_object(cls, cat, name, attrs, vals):
@@ -195,7 +202,7 @@ class TSTPObject(object):
 
                 setattr(obj, attr, value)
 
-        return result.itervalues()
+        return result.values()
 
     @classmethod
     def load(cls, names = None, limit = 10000):
@@ -667,7 +674,7 @@ class TSTPEvent(TSTPObject):
             for attr, val in izip(attrs, row):
                 setattr(obj, attr, val)
 
-        return result.itervalues()
+        return result.values()
 
     @classmethod
     def commit_many(cls, events):
@@ -692,7 +699,7 @@ class TSTPEvent(TSTPObject):
             klassmap[klass].add((event.name1, event.name2))
 
         #: batch load objects for every class
-        for klass, items in klassmap.iteritems():
+        for klass, items in klassmap.items():
             if "name2" in klass.fields:
                 name1s = set( x[0] for x in items )
                 name2s = set( x[1] for x in items )
@@ -703,7 +710,7 @@ class TSTPEvent(TSTPObject):
                 for obj in klass.load(name1s):
                     objmap[(klass, obj.name, None)] = obj
             else:
-                raise ValueError, "Unknown object type"
+                raise ValueError("Unknown object type")
 
         #: fill in missing info on event: id and old-value
         for event in events:
@@ -721,7 +728,7 @@ class TSTPEvent(TSTPObject):
 
             klassevmap[klass].append(event)
 
-        for klass, events in klassevmap.iteritems():
+        for klass, events in klassevmap.items():
             updates = []
 
             for event in events:
@@ -792,7 +799,7 @@ def test():
     stories = Story.load_all()
 
     for story in stories:
-        print unicode(story).encode("ascii", "ignore")
+        print(unicode(story).encode("ascii", "ignore"))
 
 
 if __name__ == '__main__':

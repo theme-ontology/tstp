@@ -1,5 +1,4 @@
 # Copyright 2021, themeontology.org
-from __future__ import print_function
 import unittest
 import themeontology
 import credentials

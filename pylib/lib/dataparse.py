@@ -27,10 +27,10 @@ def parse_themes(txt):
     """
     parse a theme field.
     """
-    if isinstance(txt, basestring):
-        field = txt
-    else:
+    if isinstance(txt, list):
         field = "\n".join(x.strip() for x in txt)
+    else:
+        field = txt
 
     for kw, comment, _implication, capacity in expload_field(field):
         yield kw, comment, capacity
@@ -87,10 +87,10 @@ def themejoin(lines, empty_comments=True):
     """
     Format lines of theme specification into a standard format.
     """
-    if isinstance(lines, basestring):
-        field = lines
-    else:
+    if isinstance(lines, list):
         field = " ".join(x.strip() for x in lines).strip(' ,')
+    else:
+        field = lines
     fielditer = expload_field(field)
     return make_themes(fielditer, empty_comments=empty_comments)
 
@@ -541,7 +541,7 @@ def read_storythemes_from_xls_compact(filename):
 
 
 @memoize
-def dataframe(source="txt", debug=False):
+def dataframe(source="txt", subject="all", debug=False):
     """
     Return one big pandas dataframe with all story and theme data in DB.
     Returns:
@@ -553,6 +553,7 @@ def dataframe(source="txt", debug=False):
 
     objs = [[], [], []]
     dfs = []
+    targets = "stc" if subject == "all" else subject[0]
 
     if source == "txt":
         from credentials import GIT_THEMING_PATH
@@ -561,10 +562,10 @@ def dataframe(source="txt", debug=False):
         for path in lib.files.walk(notespath, ".*\.(st|th)\.txt$"):
             if debug:
                 print(path)
-            if path.endswith(".th.txt"):
+            if path.endswith(".th.txt") and 't' in targets:
                 ol = list(lib.dataparse.read_themes_from_txt(path, verbose=False, addextras=True))
                 objs[0].extend(ol)
-            if path.endswith(".st.txt"):
+            if path.endswith(".st.txt") and 's' in targets:
                 ol1 = lib.dataparse.read_storythemes_from_txt(path, verbose=False)
                 ol2 = list(lib.dataparse.read_stories_from_txt(path, verbose=False))
                 objs[1].extend(ol1)
@@ -575,12 +576,14 @@ def dataframe(source="txt", debug=False):
         objs[2].extend(read_stories_from_db())
 
     for idx, olist in enumerate(objs):
-        fields = olist[0].fields
-        for obj in olist:
-            if fields != obj.fields:
-                raise RuntimeError("Expected all %s objects to have same field definition" % type(obj))
-        fields = [f for f in fields if not f.startswith("category") and not f=="meta"]
-        data = [[getattr(obj, f) for f in fields] for obj in olist]
+        fields, data = ["sid", "theme"], []
+        if olist:
+            fields = olist[0].fields
+            for obj in olist:
+                if fields != obj.fields:
+                    raise RuntimeError("Expected all %s objects to have same field definition" % type(obj))
+            fields = [f for f in fields if not f.startswith("category") and not f=="meta"]
+            data = [[getattr(obj, f) for f in fields] for obj in olist]
         dfs.append(pd.DataFrame(columns=fields, data=data))
 
     dfT, dfST, dfS = dfs
@@ -590,7 +593,10 @@ def dataframe(source="txt", debug=False):
     dfT.set_index("theme", inplace=True)
     dfST.set_index(["sid", "theme"], inplace=True)
     dfS.set_index("sid", inplace=True)
-
+    if targets == 's':
+        return dfS
+    if targets == 't':
+        return dfT
     df = dfST.join(dfS, on="sid", how="left")
     df = df.join(dfT, on="theme", how="left")
     return df

@@ -6,7 +6,7 @@ class memoize(dict):
         self.func = func
 
     def __call__(self, *args, **kwargs):
-        key =  ( tuple(args), tuple(sorted(kwargs.iteritems())) )
+        key = (tuple(args), tuple(sorted(kwargs.items())))
         return self[key]
 
     def __missing__(self, key):
