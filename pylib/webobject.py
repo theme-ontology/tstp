@@ -565,7 +565,6 @@ class Theme(TSTPObject):
         Returns:
         List of parent theme names.
         """
-        print(self.parents)
         parents = [t.strip() for t in re.split("[,\n]", self.parents)]
         return [t for t in parents if t]
 
