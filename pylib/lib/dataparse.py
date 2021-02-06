@@ -37,7 +37,7 @@ def parse_themes(txt):
 
 
 def simple_line_collection(lines):
-    return [ t.strip() for line in lines for t in line.split(", ") ]
+    return [t.strip() for line in lines for t in line.split(", ")]
 
 
 def sanitize(lines):
@@ -46,7 +46,7 @@ def sanitize(lines):
     and end of blob (but not in between text).
     """
     i = 0
-    lines = [ x.strip() for x in lines ]
+    lines = [x.strip() for x in lines]
     while lines and not lines[-1]:
         lines.pop()
     for i, l in enumerate(lines):
@@ -303,7 +303,7 @@ def read_themes_from_txt(filename, verbose=True, addextras=False, combinedescrip
             out_composites[theme][lfield] = '\n'.join(data)
 
         if attr in themeobj.fields:
-            setattr(themeobj, attr, data[0])
+            setattr(themeobj, attr, '\n'.join(data))
         elif addextras:
             exattr = lfield.replace(" ", "")
             setattr(themeobj, exattr, '\n'.join(data))

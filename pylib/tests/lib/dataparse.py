@@ -19,13 +19,14 @@ identifier1
 ===========
 
 :: Description
-    stuff
+stuff
 
 :: Parents
-    more stuff
+parent1
+parent2
 
 :: unknown_field
-    unknown
+unknown
         """)
         fh.close()
 
@@ -39,7 +40,7 @@ identifier1
         self.assertEqual(len(themes), 1)
         self.assertFalse(hasattr(theme, "unknown_field"))
         self.assertEqual(theme.description.strip(), "stuff")
-        self.assertEqual(theme.parents.strip(), "more stuff")
+        self.assertEqual(theme.list_parents(), ["parent1", "parent2"])
 
     def test_db(self):
         n = 5
