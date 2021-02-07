@@ -4,28 +4,22 @@ import re
 # if packages are missing
 
 
-def xls_sheet_to_memory(filename, sheets = 'ALL'):
+def xls_sheet_to_memory(filename, sheets='ALL'):
     """ 
     Read xls file into memory as lists of tuples, as dict of sheets.
     """
-    import xlrd
-
+    import pandas as pd
     outdict = {}
-    book = xlrd.open_workbook(filename)
-    
+    pdict = pd.read_excel(filename, sheet_name=None, header=None, dtype=str, na_filter=False)
     if sheets == 'ALL':
-        sheet_names = set( s.name for s in book.sheets() )
+        sheet_names = set(pdict)
     else:
         sheet_names = set([sheets]) if isinstance(sheets, str) else set(sheets)
-        
-    for sheet in book.sheets():
-        if sheet.name in sheet_names:
-            keystr = str(sheet.name)
-            allrows = []
-            for i in xrange( sheet.nrows ):
-                allrows.append( tuple( unicode(cell.value) for cell in sheet.row(i) ) )
+    for sheetname in pdict:
+        if sheetname in sheet_names:
+            keystr = str(sheetname)
+            allrows = pdict[sheetname].values.tolist()
             outdict[keystr] = allrows
-            
     return outdict
 
 

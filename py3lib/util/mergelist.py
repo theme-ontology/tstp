@@ -6,7 +6,6 @@ import lib.xls
 import lib.log
 from collections import defaultdict
 import lib.files
-from unidecode import unidecode
 from pprint import pprint
 import lib.dataparse
 import themeontology
@@ -113,83 +112,6 @@ def report_changes(newentries, replacements, deletions, new_themes):
         lib.log.warn("Undefined New Theme: %s CHANGED FROM %s", newtheme, sorted(set(previous)))
 
 
-def old_mergelist(listpath, notespath):
-    themelist = defaultdict(list)
-    newentries, replacements, deletions, new_themes = get_changes(listpath)
-
-    if '--test' in sys.argv:
-        return report_changes(newentries, replacements, deletions, new_themes)
-
-    for path in lib.files.walk(notespath):
-        if path.endswith(".st.txt"):
-            lib.log.debug("Reading %s...", path)
-            lines, cursid, curfield, changed = [], None, None, False
-            with open(path, "r") as fh:
-                for line in fh:
-                    line = line.decode('utf8')
-                    deleteit = False
-
-                    # parse each line, understand flow and delete/replace themes
-                    if line.startswith("==="):
-                        cursid = lines[-1].strip()
-                    elif line.startswith("::"):
-                        curfield, curfielddone = line[2:].strip(), False
-                    elif line.strip() and cursid and curfield and curfield.endswith(" Themes"):
-                        theme = line.split("[")[0].strip()
-                        key = (cursid, curfield, theme)
-
-                        # delete theme and insert replacements?
-                        if key in deletions:
-                            changed = True
-                            deleteit = True
-                            for nw, nt, nc, ncapacity in replacements[key]:
-                                newtheme = unidecode(nt)
-                                newcomment = unidecode(nc)
-                                ncapacity = unidecode(ncapacity)
-                                themelist[(cursid, newtheme)].append(curfield)
-                                lines.append(format_line(newtheme, newcomment, ncapacity))
-                            replacements[key] = []
-                        else:
-                            themelist[(cursid, theme)].append(curfield)
-
-                    # add new themes at end of field
-                    if not line.strip() and cursid and curfield and not curfielddone:
-                        curfielddone = True  # mustn't do this more than once
-                        for key in replacements:
-                            if key[:2] == (cursid, curfield):
-                                for nw, nt, nc, ncapacity in replacements[key]:
-                                    lib.log.warn("REPLACEMENT TARGET MISSING, APPENDING: %s -> %s", key, nt)
-                                    newtheme = unidecode(nt)
-                                    newcomment = unidecode(nc)
-                                    ncapacity = unidecode(ncapacity)
-                                    themelist[(cursid, newtheme)].append(curfield)
-                                    lines.append(format_line(newtheme, newcomment, ncapacity))
-                                    changed = True
-                        for theme, comment, ncapacity in newentries[cursid][curfield]:
-                            theme = unidecode(theme)
-                            themelist[(cursid, theme)].append(curfield)
-                            ncapacity = unidecode(ncapacity)
-                            lines.append(format_line(theme, comment, ncapacity))
-                            changed = True
-
-                    # unless explicitly deleted, add back just as it was
-                    if not deleteit:
-                        lines.append(line)
-
-            if changed:
-                with open(path, "w") as fh:
-                    for line in lines:
-                        fh.write(line.encode("utf8"))
-                        #print(line.encode("ascii", "ignore"))
-
-    for (sid, theme), fieldlist in themelist.items():
-        if len(fieldlist) > 1:
-            lib.log.warn("Multiple entries for %s in %s", (sid, theme), fieldlist)
-
-    for newtheme, previous in new_themes.items():
-        lib.log.warn("Undefined New Theme: %s CHANGED FROM %s", newtheme, sorted(set(previous)))
-
-
 def new_mergelist(listpath, notespath):
     themelist = defaultdict(list)
     newentries, replacements, deletions, new_themes = get_changes(listpath)
@@ -219,7 +141,6 @@ def new_mergelist(listpath, notespath):
     for sid in newentries:
         for fieldname in newentries[sid]:
             for theme, comment, ncapacity in newentries[sid][fieldname]:
-                print(sid, fieldname)
                 kwfield = to.story[sid].get(fieldname)
                 kwfield.insert(None, theme, comment, ncapacity)
 

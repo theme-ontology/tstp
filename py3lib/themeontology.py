@@ -6,8 +6,6 @@ This module shall contain all definitions required to parse data in
 https://github.com/theme-ontology/theming and contain nothing that is not
 required for that purpose.
 """
-from __future__ import print_function
-
 import codecs
 import os.path
 import re
@@ -204,12 +202,12 @@ class TOKeyword(object):
 
 
 class TOField(object):
-    def __init__(self, lines=None, fieldconfig=None):
-        self.name = ""
+    def __init__(self, lines=None, fieldconfig=None, name=''):
+        self.name = name
         self.source = []
         self.data = []
         self.fieldconfig = fieldconfig or {}
-        self.parts = None
+        self.parts = []
         if lines:
             self.populate(lines)
 
@@ -221,7 +219,8 @@ class TOField(object):
         )
 
     def __iter__(self):
-        yield from self.iter_parts()
+        for part in self.iter_parts():
+            yield part
 
     def populate(self, lines):
         """
@@ -259,7 +258,7 @@ class TOField(object):
             A text blob representing this field in its canonical format.
         """
         parts = [u":: {}".format(self.name)]
-        parts.extend(unicode(x) for x in self.iter_parts())
+        parts.extend(str(x) for x in self.iter_parts())
         return u'\n'.join(parts)
 
     def delete(self, kw):
@@ -416,6 +415,9 @@ class TOEntry(object):
         for field in self.fields:
             if field.name == fieldname:
                 return field
+        fieldconfig = self.cfg.get(fieldname, {})
+        self.fields.append(TOField([], fieldconfig, name=fieldname))
+        return self.fields[-1]
 
 
 class TOTheme(TOEntry):
@@ -532,6 +534,6 @@ class ThemeOntology(object):
 def read(paths=None):
     if not paths:
         import credentials
-        path = os.path.join(credentials.GIT_THEMING_PATH, "notes")
+        paths = os.path.join(credentials.GIT_THEMING_PATH, "notes")
     return ThemeOntology(paths)
 
