@@ -16,6 +16,7 @@
             loadDataOnReady();
         });
 
+        // why is this not picked up from tstp_util.js?
         function makeThemeLink(data, color = null)
         {
             urldata = encodeURIComponent(data);
@@ -24,6 +25,23 @@
                 return '<A style="color:' + color + ';" href="theme.php?name=' + urldata + '">' + data + '</A>';
             }
             return "<A href=\"theme.php?name=" + urldata + "\">" + data + "</A>";
+        }
+
+        // multiple themes are separated by newlines (once was commas)
+        function makeThemeLinkList(data, color = null)
+        {
+            html = "";
+            parents = data.split("\n");
+            for (ii = 0; ii < parents.length; ii++)
+            {
+                cleanparent = parents[ii].trim();
+                if (cleanparent)
+                {
+                    fmtparent = makeThemeLink(cleanparent, color = color);
+                    html += fmtparent + "\n";
+                }
+            }
+            return html;
         }
 
         function loadDataOnReady() {
@@ -61,8 +79,7 @@
 						},
 			        	{
 						    "render": function ( data, type, row ) {
-						    	val = data.split(",")[0];
-                                return makeThemeLink(val, "black");
+                                return makeThemeLinkList(data, "black");
 						    },
 						    "targets": 2,
                             "width": "10%",
