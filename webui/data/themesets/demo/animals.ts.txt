@@ -1,0 +1,23 @@
+Themeset: animals
+=================
+
+:: Description
+Themes related to non-human creatures, such as dogs, tigers, elephants, birds,
+horses, etc. That is, animals in the everyday sense of the term, as opposed to
+the scientific definition of an animal as are multicellular eukaryotic
+organisms that form the biological kingdom Animalia. 
+
+:: Component Themes
+animal cruelty
+animal guide
+human vs. venomous animal
+what if I turned into an animal
+intelligent animal
+animal sacrifice
+the nature of animal instincts in humans
+animal behavior
+animal testing
+animal rights
+facing a vermin infestation
+human vs. beast
+the killing of animals
