@@ -28,5 +28,5 @@ def main():
         targets.add(os.path.abspath(arg))
 
     for line in lib.themeformat.format_files(sorted(targets), banned=banned, forced=forced):
-        print(line)
+        sys.stdout.buffer.write((line + "\n").encode("utf8"))
 
