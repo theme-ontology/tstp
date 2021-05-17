@@ -14,9 +14,9 @@
 			 | <A href="http://www.themeontology.org/">prod</A>
 <?php } else { ?>
 			 | <A href="http://www.themeontology.org:8080/tstp/webui/">uat</A>
-<?php }  */?>
+<?php }  
 			 | <A href="support">donate</A>
-
+*/?>
 		</p>
 	</div>
 </footer>
