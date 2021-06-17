@@ -243,38 +243,24 @@ def init_thematic_annotation_od(storythemeobj):
         storythemeobj: TSTPObject
     Returns: OrderedDict
     """
+    
+    #' initialize ordered dict in which to store an individual story thematic annotation
+    thematic_annotation_od = OrderedDict()
     fields = [
         'name',
         'level',
-        'motivation'
+        'motivation',
+        'capacity'
     ]
-    thematic_annotation_od = OrderedDict()
     for field in fields:
         thematic_annotation_od[field] = []
+    
+    #' populate it with the thematic annotation info
     thematic_annotation_od['name'] = storythemeobj.name2
     thematic_annotation_od['level'] = storythemeobj.weight
     thematic_annotation_od['motivation'] = storythemeobj.motivation
-    return thematic_annotation_od
+    thematic_annotation_od['capacity'] = storythemeobj.capacity
 
-def init_thematic_annotation_od(storythemeobj):
-    """
-    Initialize an ordered dictionary and populate its entries with the preprocessed fields of a
-    TSTPObject object of category StoryTheme.
-    Args:
-        storythemeobj: TSTPObject
-    Returns: OrderedDict
-    """
-    fields = [
-        'name',
-        'level',
-        'motivation'
-    ]
-    thematic_annotation_od = OrderedDict()
-    for field in fields:
-        thematic_annotation_od[field] = []
-    thematic_annotation_od['name'] = storythemeobj.name2
-    thematic_annotation_od['level'] = storythemeobj.weight
-    thematic_annotation_od['motivation'] = storythemeobj.motivation
     return thematic_annotation_od
 
 def init_themes_list(themeobjs_list, basepath):
@@ -287,16 +273,17 @@ def init_themes_list(themeobjs_list, basepath):
         basepath: string
     Returns: list
     """
-    # ' read theme files
+    
+    #' read theme files
     themes_list = list()
     for themeobj in themeobjs_list:
         theme_od = init_theme_od(themeobj, basepath)
         themes_list.append(theme_od)
 
-    # ' add literary thematic entity as root theme
+    #' add literary thematic entity as root theme
     themes_list = add_root_theme(themes_list)
 
-    # ' sort themes in alphabetical order of the 'name' field
+    #' sort themes in alphabetical order of the 'name' field
     themes_list = sorted(themes_list, key=lambda i: i['name'].lower())
 
     return themes_list
@@ -310,7 +297,8 @@ def init_stories_list(storyobjs_list, basepath):
         basepath: string
     Returns: list
     """
-    # ' create ordered dictionary entry for each story in list
+    
+    #' create ordered dictionary entry for each story in list
     stories_list = list()
     for storyobj in storyobjs_list:
         if not storyobj.name.startswith("Collection:"):
@@ -330,14 +318,15 @@ def init_collections_list(storyobjs_list, basepath):
         basepath: string
     Returns: list
     """
-    # ' create ordered dictionary entry for each story in list
+    
+    #' create ordered dictionary entry for each story in list
     collections_list = list()
     for storyobj in storyobjs_list:
         if storyobj.name.startswith("Collection:"):
             collection_od = init_collection_od(storyobj, basepath)
             collections_list.append(collection_od)
 
-    # ' sort collections in alphabetical order of collection title
+    #' sort collections in alphabetical order of collection title
     collections_list = sorted(collections_list, key=lambda i: i['title'])
 
     return collections_list
