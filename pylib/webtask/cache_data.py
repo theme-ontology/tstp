@@ -22,6 +22,7 @@ import pytz
 import lib.log
 import subprocess
 import dateutil.parser
+import re
 
 def get_lto_data(version, basepath):
     """
@@ -111,6 +112,7 @@ def init_theme_od(themeobj, basepath):
         'aliases',
         'description',
         'notes',
+        'template',
         'parents',
         'references',
         'examples',
@@ -129,9 +131,18 @@ def init_theme_od(themeobj, basepath):
     theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(themeobj.meta)['source'])
     extra_fields = set(themeobj.extra_fields)
     if 'aliases' in extra_fields:
-        theme_od['aliases'] = filter(None, [alias.strip() for alias in themeobj.aliases.split(',')])
+        theme_od['aliases'] = filter(None, themeobj.aliases.split('\n'))
     if 'notes' in extra_fields:
         theme_od['notes'] = filter(None, lib.textformat.remove_wordwrap(themeobj.notes).split('\n\n'))
+    if 'template' in extra_fields:
+        template_od = OrderedDict()
+        template = filter(None, themeobj.template)
+
+        if template is not None:
+            template_od['parent'] = re.search('<(.+?)>', template).group(1)
+            template_od['children'] = template.split('>: ')[1].split(', ')
+
+        theme_od['template'] = template_od
     if 'references' in extra_fields:
         theme_od['references'] = filter(None, themeobj.references.split('\n'))
     if 'examples' in extra_fields:
