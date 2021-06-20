@@ -132,10 +132,11 @@ class TOParser(object):
             lines: list of strings
         """
         for line in lines:
-            for item in line.split(","):
-                item = item.strip()
-                if item:
-                    yield item
+            # note: once upon a time we used to have multiple items separated by commas on a single line
+            # but that is no longer permitted.
+            item = line.strip()
+            if item:
+                yield item
 
     @classmethod
     def iter_kwitems(cls, lines):
