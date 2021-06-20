@@ -159,7 +159,6 @@ def init_story_od(storyobj, basepath):
             'story-id',
             'title',
             'date',
-            'genres',
             'description',
             'collections',
             'references',
@@ -184,8 +183,6 @@ def init_story_od(storyobj, basepath):
         story_od['collections'] = filter(None, storyobj.collections.split('\n'))
         story_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
         extra_fields = set(storyobj.extra_fields)
-        if 'genre' in extra_fields:
-            story_od['genres'] = filter(None, storyobj.genre.split('\n'))
         if 'references' in extra_fields:
             story_od['references'] = filter(None, storyobj.references.split('\n'))
 
@@ -208,7 +205,6 @@ def init_collection_od(storyobj, basepath):
             'collection-id',
             'title',
             'date',
-            'genres',
             'description',
             'component-story-ids',
             'references',
@@ -230,8 +226,6 @@ def init_collection_od(storyobj, basepath):
         collection_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
         collection_od['themes'] = []
         extra_fields = set(storyobj.extra_fields)
-        if 'genre' in extra_fields:
-            collection_od['genres'] = filter(None, storyobj.genre.split('\n'))
         if 'references' in extra_fields:
             collection_od['references'] = filter(None, storyobj.references.split('\n'))
 

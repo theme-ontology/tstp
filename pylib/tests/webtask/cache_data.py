@@ -146,18 +146,6 @@ class TestCacheData(unittest.TestCase):
         story_od = webtask.cache_data.init_story_od(storyobj, basepath)
         self.assertEqual(story_od['description'], expected_description)
 
-        #' test that stories with multiple genres are correctly handled
-        expected_genres = ['sci-fi', 'horror']
-        storyobj = webobject.Story(
-            name='movie: Robot Monster (1953)',
-            title='Robot Monster',
-            date='1953-06-24',
-            genre='sci-fi, horror',
-            description='A classic film.',
-            meta=json.dumps({'source': './a/token/path'}))
-        story_od = webtask.cache_data.init_story_od(storyobj, basepath)
-        self.assertEqual(story_od['genres'], expected_genres)
-
         #' test that multiple references are correctly handled
         reference_1 = 'a reference'
         reference_2 = 'another reference'
@@ -246,7 +234,7 @@ class TestCacheData(unittest.TestCase):
         self.assertEqual(updated_stories_list[2]['themes'][0]['motivation'], storythemeobj_1.motivation)
 
     def test_populate_stories_with_collection_info(self):
-        # ' initialize a collection object and put it in a list
+        #' initialize a collection object and put it in a list
         component_story_names = [
             "movie: Alien (1979)",
             "movie: Aliens (1986)",
