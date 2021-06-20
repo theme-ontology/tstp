@@ -85,19 +85,6 @@
                             "dev" indicates the latest version which has been imported from git. It is the data that is live on this website.
                         </td>
                     </tr>
-                    <tr>
-                        <td><A href = "json.php?action=metathemedata">Full Theme/Metatheme usage and hierarchy data (json)</A></td>
-                        <td>
-                            Five items will be returned:
-                            <ol>
-                            <li>A mapping from leaf_theme to list of [sid, weight] tuples, indicating when a theme was directly used.</li>
-                            <li>A mapping from meta_theme to list of [sid, weight] tuples, indicating when a theme was indirectly used.</li>
-                            <li>A mapping from child_theme to parent_theme, indicating the hierarchy.</li>
-                            <li>A mapping from parent_theme to child_theme, indicating the hierarchy.</li>
-                            <li>A list of "top" level themes, i.e., those that have no parents.</li>
-                            </ol>
-                        </td>
-                    </tr>
 	            	</tbody>
         	</TABLE>
         </div>
