@@ -57,7 +57,7 @@
 
 
         function loadTablesOnReady() {
-            var BASE_URL = "json.php?type=story&fields=score,name,title,date,description&slimit=200&rlimit=10000";
+            var BASE_URL = "json.php?type=story&fields=score,name,title,date,description&slimit=201&rlimit=10000";
             var sidurldata = encodeURIComponent(g_objName);
             var sidurl = BASE_URL + "&collectionfilter=" + sidurldata;
 
@@ -98,48 +98,52 @@
                 if (g_objName.startsWith("collection:") || g_objName.startsWith("Collection:"))
                 {
                     $('#member_stories').css('display','inline');
-
-                    var table2 = $('#stories_datatable').DataTable( {
-                        "ajax": sidurl,
-                        "paging" : false,
-                        "searching": false,
-                        "order": [
-                            [ 3, "desc" ],
-                            [ 2, "asc" ],
-                        ],
-                        "columnDefs" : [
-                            {
-                                "visible": false,
-                                "targets": 0,
-                            },
-                            {
-                                "render": function ( data, type, row ) {
-                                    var urldata = encodeURIComponent(data);
-                                    return "<A href=\"story.php?name=" + urldata + "\">" + data + "</A>";
-                                },
-                                "className": "tstp-sid-cell",
-                                "targets": 1,
-                            },
-                            {
-                                "width": "30%",
-                                "targets": 2,
-                            },
-                            {
-                                "className": "tstp-date-cell",
-                                "targets": 3,
-                            },
-                            {
-                                "className": "tstp-description-cell",
-                                "targets": 4,
-                            },
-                        ],
-                        "initComplete": function(settings, json) {
-                            $('#stories_loading_message').css('display','none');
-                        }
-                    } );
                 }
-			} );
 
+                var table2 = $('#stories_datatable').DataTable( {
+                    "ajax": sidurl,
+                    "paging" : false,
+                    "searching": false,
+                    "order": [
+                        [ 3, "desc" ],
+                        [ 2, "asc" ],
+                    ],
+                    "columnDefs" : [
+                        {
+                            "visible": false,
+                            "targets": 0,
+                        },
+                        {
+                            "render": function ( data, type, row ) {
+                                var urldata = encodeURIComponent(data);
+                                return "<A href=\"story.php?name=" + urldata + "\">" + data + "</A>";
+                            },
+                            "className": "tstp-sid-cell",
+                            "targets": 1,
+                        },
+                        {
+                            "width": "30%",
+                            "targets": 2,
+                        },
+                        {
+                            "className": "tstp-date-cell",
+                            "targets": 3,
+                        },
+                        {
+                            "className": "tstp-description-cell",
+                            "targets": 4,
+                        },
+                    ],
+                    "initComplete": function(settings, json) {
+                        $('#stories_loading_message').css('display','none');
+                        console.log(this.fnSettings().fnRecordsTotal());
+                        if (this.fnSettings().fnRecordsTotal() > 0)
+                        {
+                            $('#member_stories').css('display','inline');
+                        }
+                    }
+                } );
+			} );
         }
     </script>
 

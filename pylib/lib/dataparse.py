@@ -370,6 +370,7 @@ def read_stories_from_txt(filename, verbose=True, addextras=False, strict=True):
         verbose=(verbose and filename), addextras=addextras, globcollection=globcollection, strict=strict
     ):
         obj.meta.update(meta)
+        obj.meta["components"] = obj.components.count("\n")
         obj.meta = json.dumps(obj.meta)
         yield obj
 

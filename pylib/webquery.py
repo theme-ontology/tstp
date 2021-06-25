@@ -105,11 +105,10 @@ def get_response(obj_type, fields='', fuzzysearch=None, variant=None, string_lim
     if issubclass(obj_type, webobject.Story):
         objmap = {obj.name: obj for obj in objs}
         for obj in objs:
-            if obj.name.lower().startswith("collection:"):
-                for line in obj.components.split("\n"):
-                    cname = line.strip()
-                    if cname in objmap:
-                        objmap[cname].collections += "\n%s" % obj.name
+            for line in obj.components.split("\n"):
+                cname = line.strip()
+                if cname in objmap:
+                    objmap[cname].collections += "\n%s" % obj.name
 
     ## order items according to a search string and "fuzzy" string matching heuristics
     if isinstance(fuzzysearch, basestring) and fuzzysearch.strip():
