@@ -151,40 +151,42 @@ def init_story_od(storyobj, basepath):
         basepath: string
     Returns: OrderedDict
     """
-    #' do not create list entries for collections
-    if storyobj.name.startswith('Collection:'):
-        story_od = None
+
+    #' initialize story ordered dictionary
+    fields = [
+        'story-id',
+        'title',
+        'date',
+        'description',
+        'collections',
+        'component-story-ids',
+        'references',
+        'source',
+        'themes'
+    ]
+    story_od = OrderedDict()
+    for field in fields:
+        story_od[field] = []
+
+    #' populate story ordered dictionary with data
+    story_od['story-id'] = storyobj.name
+    if hasattr(storyobj, 'title'):
+        story_od['title'] = storyobj.title
     else:
-        fields = [
-            'story-id',
-            'title',
-            'date',
-            'description',
-            'collections',
-            'references',
-            'source',
-            'themes'
-        ]
-        story_od = OrderedDict()
-        for field in fields:
-            story_od[field] = []
-        story_od['story-id'] = storyobj.name
-        if hasattr(storyobj, 'title'):
-            story_od['title'] = storyobj.title
-        else:
-            story_od['title'] = ''
-        if hasattr(storyobj, 'date'):
-            story_od['date'] = storyobj.date
-        else:
-            story_od['date'] = ''
-        #' the split on three newlines is needed to get rid of the story references which are
-        #' included at the end of the description
-        story_od['description'] = lib.textformat.remove_wordwrap(storyobj.description.rstrip().split('\n\n\n')[0])
-        story_od['collections'] = filter(None, storyobj.collections.split('\n'))
-        story_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
-        extra_fields = set(storyobj.extra_fields)
-        if 'references' in extra_fields:
-            story_od['references'] = filter(None, storyobj.references.split('\n'))
+        story_od['title'] = ''
+    if hasattr(storyobj, 'date'):
+        story_od['date'] = storyobj.date
+    else:
+        story_od['date'] = ''
+    #' the split on three newlines is needed to get rid of the story references which are
+    #' included at the end of the description
+    story_od['description'] = lib.textformat.remove_wordwrap(storyobj.description.rstrip().split('\n\n\n')[0])
+    story_od['collections'] = filter(None, storyobj.collections.split('\n'))
+    story_od['component-story-ids'] = filter(None, storyobj.components.split('\n'))
+    story_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
+    extra_fields = set(storyobj.extra_fields)
+    if 'references' in extra_fields:
+        story_od['references'] = filter(None, storyobj.references.split('\n'))
 
     return story_od
 
@@ -197,37 +199,38 @@ def init_collection_od(storyobj, basepath):
         basepath: string
     Returns: OrderedDict
     """
-    #' only create list entries for Story objects of the 'collection' variety
-    if not storyobj.name.startswith('Collection:'):
-        collection_od = None
+
+    #' initialize collection ordered dictionary
+    fields = [
+        'collection-id',
+        'title',
+        'date',
+        'description',
+        'component-story-ids',
+        'references',
+        'source',
+        'themes'
+    ]
+    collection_od = OrderedDict()
+    for field in fields:
+        collection_od[field] = []
+
+    collection_od['collection-id'] = storyobj.name
+    if hasattr(storyobj, 'title'):
+        collection_od['title'] = storyobj.title
     else:
-        fields = [
-            'collection-id',
-            'title',
-            'date',
-            'description',
-            'component-story-ids',
-            'references',
-            'source'
-        ]
-        collection_od = OrderedDict()
-        for field in fields:
-            collection_od[field] = []
-        collection_od['collection-id'] = storyobj.name
-        if hasattr(storyobj, 'title'):
-            collection_od['title'] = storyobj.title
-        else:
-            collection_od['title'] = ''
-        if hasattr(storyobj, 'date'):
-            collection_od['date'] = storyobj.date
-        else:
-            collection_od['date'] = ''
-        collection_od['description'] = lib.textformat.remove_wordwrap(storyobj.description.rstrip().split('\n\n\n')[0])
-        collection_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
-        collection_od['themes'] = []
-        extra_fields = set(storyobj.extra_fields)
-        if 'references' in extra_fields:
-            collection_od['references'] = filter(None, storyobj.references.split('\n'))
+        collection_od['title'] = ''
+    if hasattr(storyobj, 'date'):
+        collection_od['date'] = storyobj.date
+    else:
+        collection_od['date'] = ''
+    collection_od['description'] = lib.textformat.remove_wordwrap(storyobj.description.rstrip().split('\n\n\n')[0])
+    collection_od['component-story-ids'] = filter(None, storyobj.components.split('\n'))
+    collection_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
+    collection_od['themes'] = []
+    extra_fields = set(storyobj.extra_fields)
+    if 'references' in extra_fields:
+        collection_od['references'] = filter(None, storyobj.references.split('\n'))
 
     return collection_od
 
@@ -308,9 +311,8 @@ def init_stories_list(storyobjs_list, basepath):
     #' create ordered dictionary entry for each story in list
     stories_list = list()
     for storyobj in storyobjs_list:
-        if not storyobj.name.startswith('Collection:'):
-            story_od = init_story_od(storyobj, basepath)
-            stories_list.append(story_od)
+        story_od = init_story_od(storyobj, basepath)
+        stories_list.append(story_od)
 
     #' sort stories by increasing order of release data
     stories_list = sorted(stories_list, key=lambda i: i['date'])
@@ -329,7 +331,8 @@ def init_collections_list(storyobjs_list, basepath):
     #' create ordered dictionary entry for each story in list
     collections_list = list()
     for storyobj in storyobjs_list:
-        if storyobj.name.startswith('Collection:'):
+        component_story_names = filter(None, storyobj.components.split('\n'))
+        if len(component_story_names) > 0:
             collection_od = init_collection_od(storyobj, basepath)
             collections_list.append(collection_od)
 
@@ -393,11 +396,10 @@ def populate_stories_with_collection_info(storyobjs_list, stories_list):
     story_ids = [story_od['story-id'] for i, story_od in enumerate(stories_list)]
 
     for storyobj in storyobjs_list:
-        if storyobj.name.startswith('Collection:'):
-            component_story_names = filter(None, storyobj.components.split('\n'))
-            for component_story_name in component_story_names:
-                if component_story_name in story_ids:
-                    stories_list[story_ids.index(component_story_name)]['collections'].append(storyobj.name)
+        component_story_names = filter(None, storyobj.components.split('\n'))
+        for component_story_name in component_story_names:
+            if component_story_name in story_ids:
+                stories_list[story_ids.index(component_story_name)]['collections'].append(storyobj.name)
 
     return stories_list
 
@@ -412,12 +414,11 @@ def populate_collections_with_component_stories_1(collections_list, storyobjs_li
     collection_ids = [collection_od['collection-id'] for i, collection_od in enumerate(collections_list)]
 
     for storyobj in storyobjs_list:
-        if storyobj.name.startswith('Collection:'):
-            collection_id = storyobj.name
-            component_story_names = filter(None, storyobj.components.split('\n'))
-            for component_story_name in component_story_names:
-                if collection_id in collection_ids:
-                    collections_list[collection_ids.index(collection_id)]['component-story-ids'].append(component_story_name)
+        collection_id = storyobj.name
+        component_story_names = filter(None, storyobj.components.split('\n'))
+        for component_story_name in component_story_names:
+            if collection_id in collection_ids:
+                collections_list[collection_ids.index(collection_id)]['component-story-ids'].append(component_story_name)
 
     return collections_list
 
@@ -432,12 +433,11 @@ def populate_collections_with_component_stories_2(collections_list, storyobjs_li
     collection_ids = [collection_od['collection-id'] for i, collection_od in enumerate(collections_list)]
 
     for storyobj in storyobjs_list:
-        if not storyobj.name.startswith('Collection:'):
-            story_id = storyobj.name
-            story_collection_ids = filter(None, storyobj.collections.split('\n'))
-            for story_collection_id in story_collection_ids:
-                if story_collection_id in collection_ids:
-                    collections_list[collection_ids.index(story_collection_id)]['component-story-ids'].append(story_id)
+        story_id = storyobj.name
+        story_collection_ids = filter(None, storyobj.collections.split('\n'))
+        for story_collection_id in story_collection_ids:
+            if story_collection_id in collection_ids:
+                collections_list[collection_ids.index(story_collection_id)]['component-story-ids'].append(story_id)
 
     return collections_list
 
