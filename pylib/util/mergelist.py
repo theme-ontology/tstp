@@ -195,7 +195,7 @@ def new_mergelist(listpath, notespath):
     newentries, replacements, deletions, new_themes = get_changes(listpath)
     if '--test' in sys.argv:
         return report_changes(newentries, replacements, deletions, new_themes)
-    to = themeontology.read()
+    to = themeontology.read(notespath)
 
     # delete keywords and replace if needed
     for key in deletions:

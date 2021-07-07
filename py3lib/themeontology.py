@@ -50,7 +50,7 @@ STORY_FIELD_CONFIG = {
     "Other Keywords": {"type": "kwlist"},
     "Collections": {"type": "list"},
     "Component Stories": {"type": "list"},
-    "Genre": {"type": "blob"},
+    ## "Genre": {"type": "blob"},
     "Related Stories": {"type": "list"},
 }
 
@@ -518,7 +518,7 @@ class ThemeOntology(object):
                 if entry.name in lookup[type(entry)]:
                     yield u"{}: Multiple {} with name '{}'".format(path, type(entry), entry.name)
 
-    def write_clean(self):
+    def write_clean(self, verbose=False):
         """
         Write the ontology back to its source file while cleaning up syntax and
         omitting unknown field names.
@@ -529,6 +529,8 @@ class ThemeOntology(object):
                 lines.append(entry.text_canonical())
                 lines.append("")
             with codecs.open(path, "w", encoding='utf-8') as fh:
+                if verbose:
+                    print(path)
                 fh.writelines(x + "\n" for x in lines)
 
 
