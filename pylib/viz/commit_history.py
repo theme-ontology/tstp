@@ -101,10 +101,10 @@ def story_theme_base():
             "fill": "white",
         },
         ".plot .story-theme-relation.datapoint": {
-            'fill': '#ee8866',
+            'fill': '#bbbbbb',
         },
         ".plot .themedstory-theme-relation.datapoint": {
-            'fill': '#ddcc66',
+            'fill': '#ee8866',
         },
         ".plot .date-labels.datapoint": {
             'visibility': 'hidden',
@@ -115,11 +115,11 @@ def story_theme_base():
         },
         ".plot .story-theme-relation.dataline": {
             'stroke-width': '3px',
-            'stroke': '#ee8866',
+            'stroke': '#bbbbbb',
         },
         ".plot .themedstory-theme-relation.dataline": {
             'stroke-width': '3px',
-            'stroke': '#ddcc66',
+            'stroke': '#ee8866',
         },
         ".plot .date-labels.dataline": {
             'visibility': 'hidden',
@@ -232,9 +232,9 @@ def draw_story_theme_relation():
     # draw legend
     svg['annotation'].rect(nx1 + 5, ny1 + 5, 120, 40, cls="background", style={
         "fill": "white", "stroke": "rgba(0,0,0,0.5)"})
-    svg['annotation'].rect(nx1 + 15, ny1 + 15, 8, 8, style={"fill": "#ee8866"})
+    svg['annotation'].rect(nx1 + 15, ny1 + 15, 8, 8, style={"fill": "#bbbbbb"})
     svg['annotation'].text(nx1 + 25, ny1 + 22, "stories defined")
-    svg['annotation'].rect(nx1 + 15, ny1 + 25, 8, 8, style={"fill": "#ddcc66"})
+    svg['annotation'].rect(nx1 + 15, ny1 + 25, 8, 8, style={"fill": "#ee8866"})
     svg['annotation'].text(nx1 + 25, ny1 + 32, "stories themed")
 
     return svg, nx2 + nx1, ny2 + ny1
