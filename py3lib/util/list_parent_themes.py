@@ -26,15 +26,17 @@ def main():
         for parent in theme.get("Parents").iter_parts():
             graph.makeEdge(parent.strip(), theme.name)
     topsort = graph.top_sort()
+    leaves = set(graph.findLeaves())
     for theme in to.themes():
-        data.append([
-            theme.name,
-            theme.get("Parents").text_canonical_contents(),
-            theme.get("Description").text_canonical_contents(),
-            topsort.get(theme.name, -1),
-        ])
+        if theme.name not in leaves:
+            data.append([
+                theme.name,
+                theme.get("Parents").text_canonical_contents(),
+                theme.get("Description").text_canonical_contents(),
+                topsort.get(theme.name, -1),
+            ])
     colnames = ["theme", "parents", "description", "level"]
-    dfthemes = pd.DataFrame(columns=colnames[:4], data=data)
+    dfthemes = pd.DataFrame(columns=colnames, data=data)
     print(dfthemes)
     #import pdb; pdb.set_trace()
     lib.xls.write_themelist(dfthemes, filename, columns=colnames)
