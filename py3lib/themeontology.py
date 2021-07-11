@@ -253,6 +253,14 @@ class TOField(object):
         for part in self.parts:
             yield part
 
+    def text_canonical_contents(self):
+        """
+        Returns:
+            A text blob representing the contents of this field in its canonical format.
+        """
+        parts = [str(x) for x in self.iter_parts()]
+        return u'\n'.join(parts)
+
     def text_canonical(self):
         """
         Returns:

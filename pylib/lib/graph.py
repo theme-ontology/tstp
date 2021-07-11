@@ -65,7 +65,7 @@ class KWGraph(object):
 
         for kw1, kw2, w in self.walkEdgesDF(roots):
             if kw2 not in level:
-                raise ValueError, 'No level for %s' % kw2
+                raise ValueError('No level for %s' % kw2)
 
             if level[kw2] <= th_top:
                 graph.makeEdge(kw1, kw2, w)
@@ -110,10 +110,10 @@ class KWGraph(object):
         return [n.kw for n in nodes]
 
     def findRoots(self):
-        return [nn.kw for nn in self.nodes.itervalues() if not nn.edgein]
+        return [nn.kw for nn in self.nodes.values() if not nn.edgein]
 
     def findLeaves(self):
-        return [nn.kw for nn in self.nodes.itervalues() if not nn.edgeout]
+        return [nn.kw for nn in self.nodes.values() if not nn.edgeout]
 
     def findLeafClusters(self):
         '''
@@ -124,8 +124,8 @@ class KWGraph(object):
         for kw in self.findLeaves():
             node = self.getNode(kw)
             parentstr = '_'.join(e.n1.kw for e in node.edgein)
-            parentstr = u'nodecluster_%s' % parentstr.encode('ascii', 'ignore').replace(' ', '_').translate(None,
-                                                                                                            '.,:\'-').encode(
+            parentstr = u'nodecluster_%s' % parentstr.encode('ascii', 'ignore').replace(
+                ' ', '_').translate(None, '.,:\'-').encode(
                 'utf-8')
             leafclusters[parentstr].add(kw)
 
@@ -188,7 +188,7 @@ class KWGraph(object):
             if len(leafclusters[k]) < 1:
                 del leafclusters[k]
 
-        leafmap = dict((kw, k) for k, vset in leafclusters.iteritems() for kw in vset)
+        leafmap = dict((kw, k) for k, vset in leafclusters.items() for kw in vset)
         clusteredgecount = defaultdict(int)
         clusterused = set()
         nodelines = []
@@ -205,14 +205,14 @@ class KWGraph(object):
                     edgelines.append(u'''\t%s -> %s;''' % (kwid1, kwid2))
 
         ## write all edges going to clusters
-        for (kwid1, clusterid), count in clusteredgecount.iteritems():
+        for (kwid1, clusterid), count in clusteredgecount.items():
             weight = max(2, min(8, count))
             #log.debug(u'%s -> %s [weight=%s]' % (kwid1, clusterid, weight))
             edgelines.append(u'''\t%s -> %s [weight=%d];''' % (kwid1, clusterid, weight))
             clusterused.add(clusterid)
 
         ## write all the clusters of leaf nodes
-        for parentstr, leafset in leafclusters.iteritems():
+        for parentstr, leafset in leafclusters.items():
             if parentstr in clusterused:
                 columns = []
                 rows = []

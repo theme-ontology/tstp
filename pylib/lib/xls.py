@@ -115,7 +115,7 @@ def write_themelist(df, filename, columns=None):
     columns = columns or REVIEW_COLS
 
     for col in columns:
-        if col not in df.columns:
+        if col not in df.columns and col != df.index.name:
             df[col] = ""
 
     writer = pd.ExcelWriter(filename, engine="xlsxwriter")
