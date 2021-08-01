@@ -219,6 +219,9 @@ class TOField(object):
             len(self.data)
         )
 
+    def __str__(self):
+        return self.text_canonical_contents()
+
     def __iter__(self):
         for part in self.iter_parts():
             yield part
@@ -458,6 +461,47 @@ class TOStory(TOEntry):
             if field:
                 for part in field.iter_parts():
                     yield weight, part
+
+    @property
+    def date(self):
+        """
+        Return the date entry as verbatim it is recorded in the text file.
+        """
+        return self.get("Date").text_canonical_contents().strip()
+
+    @property
+    def year(self):
+        """
+        Returns the year of the story, or the earliest year for a collection.
+        A positive number is the year AD.
+        A negative number is the year BC.
+        Zero indicates that the the information is missing (there is no year zero in AD/BC notation).
+        Dates can be entered in a variety of ways but the year should always be present.
+        If this function returns zero for a story the story's data entry is considered to be faulty.
+        """
+        date = self.date
+        yearmatch = re.match("\d+", date)
+        if not yearmatch:
+            return 0
+        year = int(yearmatch.group())
+        if "bc" in date.lower():
+            year *= -1
+        return year
+
+    @property
+    def sid(self):
+        """
+        Shorthand for Story ID, ie. the name of the entry when the entry is a story entry.
+        """
+        return self.name
+
+    @property
+    def title(self):
+        """
+        The title of the story.
+        This should always be present or the data entry is faulty.
+        """
+        return self.get("Title").text_canonical_contents().strip()
 
 
 class ThemeOntology(object):
