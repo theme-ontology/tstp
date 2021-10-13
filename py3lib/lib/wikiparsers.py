@@ -7,6 +7,7 @@ import json
 import sys
 import pdb
 from collections import deque, defaultdict
+from pprint import pprint as pp
 
 REFSTRIPPER = re.compile(r"\[\d+\]")
 
@@ -75,6 +76,34 @@ def get_descriptions(descfield):
     return descs
 
 
+def get_date(datetext):
+    """
+
+    Args:
+        datefield:
+
+    Returns:
+
+    """
+    date = None
+    for regex in [
+        r"(\d{4}-\d{2}-\d{2})",  # yyyy-mm-dd
+        r"(\w+ \d{1,2}, \d{4})",  # MM dd, yyyy
+        r"(\d{1,2} \w+ \d{4})",  # dd MM yyyy
+        r"(\d{4})",  # yyyy
+    ]:
+        try:
+            datematch = re.search(regex, datetext).group(0)
+            date = parser.parse(datematch).strftime("%Y-%m-%d")
+            if len(datematch) <= 4:
+                date = datematch
+            break
+        except AttributeError:  # no regex match
+            pass
+
+    return date
+
+
 def fetch_info(wikipagename):
     resturl = "https://en.wikipedia.org/api/rest_v1/page/summary/"
     descurl = resturl + wikipagename
@@ -110,6 +139,58 @@ def fetch_links_info(url, filter="/wiki/", startafter="/wiki/Help:Maintenance", 
                 title = link.get_text()
                 pagename = url2.rsplit("/")[-1]
                 yield title, pagename, fetch_info(pagename)
+
+
+def fetch_table_list(url, tableclass="wikitable", cols=(0, 1, 5, 2)):
+    """
+
+    Args:
+        url:
+
+    Returns:
+
+    """
+    with urllib.request.urlopen(url) as response:
+        data = response.read()
+    soup = BeautifulSoup(data, "html.parser")
+    sidcounter = defaultdict(int)
+    descriptionfield = None
+
+    for idx, table in enumerate(soup.find_all("table", class_=tableclass)):
+        for row in table.find_all("tr"):
+            tdfields = row.find_all("td")
+
+            if len(tdfields) > max(cols):
+                titlefield = tdfields[cols[0]]
+                byfield_a = tdfields[cols[1]]
+                byfield_b = tdfields[cols[2]]
+                datefield = tdfields[cols[3]]
+
+                title_link = titlefield.find("a")
+                title = titlefield.get_text().strip(" \"").strip()
+                datetext = datefield.get_text().strip()
+                date = get_date(datetext) or "????"
+
+                if title_link:
+                    suffix = title_link.get("href").split("/")[-1].strip()
+                    info = fetch_info(suffix)
+                    description = info['extract']
+                else:
+                    description = ""
+
+                description = description.strip() + "\n\n" + \
+                              "Studio: " + byfield_a.get_text().strip(".").strip() + ".\n\n" + \
+                              "Cinematographer: " + byfield_b.get_text().strip(".").strip() + ".\n"
+                description = REFSTRIPPER.sub(u"", description)
+
+                sid = "movie: {} ({})".format(title, date[:4])
+                sid = re.sub("[^\w:() ]", "", sid)
+                yield webobject.Story(
+                    name=sid,
+                    title=title,
+                    description=description,
+                    date=date,
+                )
 
 
 def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=(1, 3, 4, 6), isterse=False,
@@ -156,28 +237,16 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
 
             if len(tdfields) > max(cols) - coloffset:
                 titlefield = tdfields[cols[0] - coloffset]
-                directorfield = tdfields[cols[1] - coloffset]
-                authorfield = tdfields[cols[2] - coloffset]
+                directorfield = tdfields[cols[1] - coloffset] if cols[1] > 0 else ''
+                authorfield = tdfields[cols[2] - coloffset] if cols[2] > 0 else ''
                 datefield = tdfields[cols[3] - coloffset]
 
                 title_link = titlefield.find("a")
                 title = titlefield.get_text().strip(" \"")
                 datetext = datefield.get_text().strip()
-                author = "Story by: " + get_author(authorfield)
-                director = "Directed by: " + directorfield.get_text()
-                date = None
-
-                for regex in [
-                    r"(\d{4}-\d{2}-\d{2})",  # yyyy-mm-dd
-                    r"(\w+ \d{1,2}, \d{4})",  # MM dd, yyyy
-                    r"(\d{1,2} \w+ \d{4})",  # dd MM yyyy
-                ]:
-                    try:
-                        date1 = re.search(regex, datetext).group(0)
-                        date = parser.parse(date1).strftime("%Y-%m-%d")
-                        break
-                    except AttributeError:  # no regex match
-                        pass
+                author = "Story by: " + get_author(authorfield) if cols[2] > 0 else ''
+                director = "Directed by: " + directorfield.get_text() if cols[1] > 0 else ''
+                date = get_date(datetext)
 
                 # find episode number-in-season
                 if not coloffset:
@@ -226,7 +295,15 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
                     if numstories > 1:
                         sid += chr(ord("a") + sidcounter[sid] - 1)
                     description = description.strip()
-                    description = description + "\n\n" + director.strip(".") + ". " + author.strip(".") + ".\n"
+                    if author or director:
+                        description = description + "\n\n"
+                        if director:
+                            description += director.strip(".")
+                            if author:
+                                description += ". "
+                        if author:
+                            description += author.strip(".")
+                        description += ".\n"
                     description = REFSTRIPPER.sub(u"", description)
 
                     yield webobject.Story(
