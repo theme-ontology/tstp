@@ -236,10 +236,12 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
                     coloffsetstack[ii] += 1
 
             if len(tdfields) > max(cols) - coloffset:
-                titlefield = tdfields[cols[0] - coloffset]
-                directorfield = tdfields[cols[1] - coloffset] if cols[1] > 0 else ''
-                authorfield = tdfields[cols[2] - coloffset] if cols[2] > 0 else ''
-                datefield = tdfields[cols[3] - coloffset]
+                adjcols = [c-coloffset for c in cols]
+                #titlefield = tdfields[adjcols[0]]
+                #directorfield = tdfields[adjcols[1]] if adjcols[1] > 0 else ''
+                #authorfield = tdfields[adjcols[2]] if adjcols[2] > 0 else ''
+                #datefield = tdfields[adjcols[3]] if adjcols[2] > 0 else ''
+                (titlefield, directorfield, authorfield, datefield) = [(tdfields[c] if c >= 0 else '') for c in adjcols]
 
                 title_link = titlefield.find("a")
                 title = titlefield.get_text().strip(" \"")
@@ -273,7 +275,7 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
                     description = info['extract']
 
                 titlestack.append((sid, title, director, author, date))
-                print("ADD", titlestack[-1])
+                #print("ADD", titlestack[-1])
 
             else:
                 descriptionfield = row.find("td", class_="description")
@@ -289,7 +291,7 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
                 for description in desclist:
                     if not titlestack:
                         break
-                    print("POP", titlestack[0])
+                    #print("POP", titlestack[0])
                     sid, title, director, author, date = titlestack.popleft()
                     sidcounter[sid] += 1
                     if numstories > 1:
@@ -315,3 +317,96 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
 
                 sids = []
                 description = ''
+
+
+def title_fix(title):
+    title = title.strip()
+    patts = [
+        r".*(- Wikipedia)$",
+        r".*(\(\d+ film\))$",
+    ]
+    for p in patts:
+        m = re.match(p, title)
+        if m:
+            title = title[:-len(m.group(1))]
+            title = title.strip()
+
+    return title
+
+
+def find_table_story_entries(url, prefix="", tableclass="wikitable", cols=(1, 3, 4, 6), table_idxs=[0]):
+    """
+
+    :param url:
+    :param season_offsset:
+    :param prefix:
+    :param tableclass:
+    :param cols:
+        index of columns (title, director, author, date)
+        counts only <td> and not <th>
+    :param isterse:
+        By default we expect every other row in the list to contain a description that go along with the preceding
+        row's information. If the description row is not present, set this flag.
+    :return:
+    """
+    with urllib.request.urlopen(url) as response:
+        data = response.read()
+    soup = BeautifulSoup(data, "html.parser")
+    sidcounter = defaultdict(int)
+    descriptionfield = None
+
+    for idx, table in enumerate(soup.find_all("table", class_=tableclass)):
+        if idx not in table_idxs:
+            continue
+        sids = []
+        description = None
+        titlestack = deque()
+        coloffsetstack = deque()
+
+        for ridx, row in enumerate(table.find_all("tr")):
+            if ridx < 2:
+                continue
+            tdfields = row.find_all(["td", "th"])
+
+            # no rowspan cols may be in between the indexes given with the "cols" argument, or things will break
+            coloffset = coloffsetstack.popleft() if coloffsetstack else 0
+            for td in tdfields[:min(cols)]:
+                rowspan = int(td.attrs.get('rowspan', 0)) - 1
+                while len(coloffsetstack) < rowspan:
+                    coloffsetstack.append(0)
+                for ii in range(rowspan):
+                    coloffsetstack[ii] += 1
+
+            if len(tdfields) > max(cols) - coloffset:
+                adjcols = [c-coloffset for c in cols]
+                prev = titlestack[-1] if titlestack else ['', '', '', '']
+                (titlefield, directorfield, authorfield, datefield) = [(tdfields[c] if c >= 0 else prev[cidx+1]) for cidx, c in enumerate(adjcols)]
+
+                title_link = titlefield.find("a")
+                title = titlefield.get_text().strip(" \"").strip()
+                datetext = datefield if isinstance(datefield, (str, int)) else datefield.get_text().strip()
+                author = "Story by: " + get_author(authorfield) if cols[2] > 0 else ''
+                director = "Directed by: " + directorfield.get_text() if cols[1] > 0 else ''
+                date = get_date(datetext)
+
+                # sys.stderr.write(str(authorfield).decode("utf-8").encode("ascii", "ignore") + "\n")
+                # f = authorfield
+                # pdb.set_trace()
+
+                if title_link:
+                    suffix = title_link.get("href").split("/")[-1].strip()
+                    info = fetch_info(suffix)
+                    description = info['extract']
+
+                titlestack.append(("", title, director, author, date))
+                print("ADD", titlestack[-1])
+                yield webobject.Story(
+                    name=prefix + title,
+                    title=title,
+                    description=description,
+                    date=date,
+                )
+
+
+
+
