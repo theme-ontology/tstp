@@ -96,6 +96,7 @@
         function reloadData(force=false)
         {
             var fuzzy = $('#fieldFind').val();
+            if (fuzzy.length < 3) fuzzy = "";
 
             if (!force)
                 reloads -= 1;
