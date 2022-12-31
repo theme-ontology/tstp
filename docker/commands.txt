@@ -1,9 +1,12 @@
 
+
 # build local dev linked to local source code
 docker-compose up --build
 
-# locally build prod version for aws snapping source code from git
-docker-compose -f docker-compose-aws.yaml up --build
+# locally build prod version for aws using Swarm
+docker-compose -f docker-compose-aws.yaml build
+docker stack deploy --compose-file=docker-compose-aws.yaml tstp1
+docker stack rm tstp1
 
 # deploy to aws/ecs
 docker context use tstp
@@ -15,4 +18,14 @@ docker secret create pycredentials ..\pylib\credentials.py
 
 # get logs
 docker service logs tstp_test_m4
+
+
+###################### AWS #################
+aws sts get-caller-identity
+
+aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin %AWS_ACCOUNT%.dkr.ecr.eu-west-2.amazonaws.com
+
+aws ecr create-repository --repository-name tstp/m4 --image-scanning-configuration scanOnPush=true --region %AWS_DEFAULT_REGION%
+
+
 
