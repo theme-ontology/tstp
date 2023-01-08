@@ -3,11 +3,11 @@ services:
     image: ${DOCKER_REGISTRY}/totolo-m4
     build:
       context: .
-      dockerfile: ./m4/app/Dockerfile
+      dockerfile: ./m4/Dockerfile
     networks:
       - backend
     volumes:
-#      - ..:/local/tstp:rw
+      - ../..:/local/tstp:rw
       - code_data:/code
       - www_data:/www/pub
     ports:

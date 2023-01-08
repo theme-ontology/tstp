@@ -3,3 +3,4 @@
 /webui/web.log
 /docker/credentials.py
 /docker/test/credentials.py
+*.sqlite3
