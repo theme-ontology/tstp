@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Theme Ontology themes</title>
+
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/DataTables/datatables.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/css/tstp.css' %}">
+    
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/jquery-3.6.3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/DataTables/datatables.js' %}"></script>
+    
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/typeahead.bundle.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/jquery.form.js' %}"></script>
+    
+    <script>
+        $(document).ready(function () {
+            $('#themes_datatable').DataTable();
+        });
+    </script>
+</head>
+
+<body style="overflow-y: scroll;">
+
+<div class="container main-body">
+    <div class="row">
+        <DIV style="float:left;"><IMG src="{% static '/ontologyexplorer/img/icon-idea.svg' %}" height="80em"></DIV>
+        <div style="padding: 0.7em 1em 0em 6.5em;">
+            <form autocomplete="off" onkeypress="return event.keyCode != 13;">
+                <fieldset class="form-group">
+                    <label for="fieldFind">Theme Search:</label>
+                    <input id="fieldFind" type="text" class="form-control search-theme" autofocus 
+                        onchange="scheduleReload()" oninput="scheduleReload()">
+                </fieldset>
+            </form>
+        </div>
+
+        <div id="div_stories_datatable" class="col-md-12 hpad0">
+            <div class="basebox">
+                <table id="themes_datatable" class="display table table-striped" cellspacing="0" width="100%">
+        	        <thead>
+        	            <tr>
+                            <th>Score</th>
+        	                <th>Theme</th>
+        	                <th>Parent</th>
+                            <th>Description</th>
+        	            </tr>
+        	        </thead>
+        	    </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
