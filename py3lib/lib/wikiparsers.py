@@ -194,7 +194,7 @@ def fetch_table_list(url, tableclass="wikitable", cols=(0, 1, 5, 2)):
 
 
 def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=(1, 3, 4, 6), isterse=False,
-                      table_offset=0, singleseason=False):
+                      table_offset=0, table_limit=0, singleseason=False):
     """
 
     :param url:
@@ -218,6 +218,8 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
     for idx, table in enumerate(soup.find_all("table", class_=tableclass)):
         if idx < table_offset:
             continue
+        if table_limit and idx > table_limit:
+            break
         sids = []
         description = None
         titlestack = deque()
@@ -259,7 +261,7 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
 
                 # sys.stderr.write(str(authorfield).decode("utf-8").encode("ascii", "ignore") + "\n")
                 # f = authorfield
-                # pdb.set_trace()
+                #pdb.set_trace()
 
                 for match in re.findall("(\d+)([a-z]*)", epfield):
                     nepid, sepid = int(match[0]), match[1]
