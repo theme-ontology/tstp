@@ -2,8 +2,6 @@
 
 URLGIT_TSTP_MASTER="https://github.com/theme-ontology/tstp/archive/refs/heads/master.tar.gz"
 URLGIT_THEMES_MASTER="https://github.com/theme-ontology/theming/archive/refs/heads/master.tar.gz"
-PATH_LOCALAPP="/local/tstp/totolo/app"
-PATH_GITAPP="/code/tstp/totolo/app"
 
 mkdir /code/tmp
 mkdir /code/tstp
@@ -15,16 +13,28 @@ curl -L $URLGIT_THEMES_MASTER > /code/tmp/theming.tar.gz
 tar -zxf /code/tmp/tstp.tar.gz tstp-master --strip-components 1 -C /code/tstp
 tar -zxf /code/tmp/theming.tar.gz theming-master --strip-components 1 -C /code/theming
 
-tree -L 2 /local/tstp
+tree -L 1 /code/tstp
 
-if [ -d "$PATH_LOCALAPP" ]; then
-    cd $PATH_LOCALAPP
+if [ -d "/local/tstp" ]; then
+    PATH_CODE="/local/tstp"
+    cd /local/tstp/totolo/web
 else
-    cd $PATH_GITAPP
+    PATH_CODE="/code/tstp"
+    cd /code/tstp/totolo/web
 fi
+
 echo ":: STARTING UP AT PATH ::::::::::::::::::::::::::::::::::"
 pwd
 echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+echo ":: TOTOLO ENV :::::::::::::::::::::::::::::::::::::::::::"
+/code/totolo/run env
+echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
-/code/tstp/scripts/runpy python3 manage.py runserver 0.0.0.0:8000
-
+echo "starting cron daemon..."
+nohup /usr/sbin/crond -f -l 8 &
+echo "adjusting database schemas..."
+/code/totolo/run python3 manage.py makemigrations
+/code/totolo/run python3 manage.py migrate
+echo "starting web server..."
+/code/totolo/run python3 manage.py runserver 0.0.0.0:8000
+echo "...web server died!"

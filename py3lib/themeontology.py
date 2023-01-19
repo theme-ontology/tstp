@@ -50,7 +50,6 @@ STORY_FIELD_CONFIG = {
     "Other Keywords": {"type": "kwlist"},
     "Collections": {"type": "list"},
     "Component Stories": {"type": "list"},
-    ## "Genre": {"type": "blob"},
     "Related Stories": {"type": "list"},
 }
 
@@ -445,6 +444,57 @@ class TOTheme(TOEntry):
         """
         pass
 
+    def verbose_description(self):
+        """
+        A description that combines various other fields, including Notes, Examples,
+        Aliases, and References.
+        """
+        description = str(self.get("Description"))
+        examples = str(self.get("Examples")).strip()
+        aliases = str(self.get("Aliases")).strip()
+        notes = str(self.get("Notes")).strip()
+        references = str(self.get("References")).strip()
+        if notes:
+            description += "\n\nNotes:\n" + notes
+        if examples:
+            description += "\n\nExamples:\n" + examples
+        if aliases:
+            description += "\n\nAliases:\n" + aliases
+        if references:
+            description += "\n\nReferences:\n"
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    description += line + "\n"
+        return description
+
+    def html_description(self):
+        """
+        Turn the verbose description into html.
+        """
+        import html
+        description = html.escape(str(self.get("Description")))
+        examples = html.escape(str(self.get("Examples")).strip())
+        aliases = html.escape(str(self.get("Aliases")).strip())
+        notes = html.escape(str(self.get("Notes")).strip())
+        references = html.escape(str(self.get("References")).strip())
+        if notes:
+            description += '<P class="obj-description"><b>Notes:</b><BR>\n' + notes
+            description += "</P>\n"
+        if examples:
+            description += '<P class="obj-description"><b>Examples:</b><BR>\n' + examples
+            description += "</P>\n"
+        if aliases:
+            description += '<P class="obj-description"><b>Aliases:</b><BR>\n' + aliases
+            description += "</P>\n"
+        if references:
+            description += '<P class="obj-description"><b>References:</b><BR>\n'
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    description += line + "<BR>\n"
+            description += "</P>\n"
+        return description
 
 class TOStory(TOEntry):
     def __init__(self, lines=None):
@@ -502,6 +552,37 @@ class TOStory(TOEntry):
         This should always be present or the data entry is faulty.
         """
         return self.get("Title").text_canonical_contents().strip()
+
+    def verbose_description(self):
+        """
+        A description that combines various other fields, including Notes, Examples,
+        Aliases, and References.
+        """
+        description = str(self.get("Description"))
+        references = str(self.get("References")).strip()
+        if references:
+            description += "\n\nReferences:\n"
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    description += line + "\n"
+        return description
+
+    def html_description(self):
+        """
+        Turn the verbose description into html.
+        """
+        import html
+        description = html.escape(str(self.get("Description")))
+        references = html.escape(str(self.get("References")).strip())
+        if references:
+            description += '<P class="obj-description"><b>References:</b><BR>\n'
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    description += line + "<BR>\n"
+            description += "</P>\n"
+        return description
 
 
 class ThemeOntology(object):

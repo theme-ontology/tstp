@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Theme Ontology stories</title>
+
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/DataTables/datatables.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/css/tstp.css' %}">
+    
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/jquery-3.6.3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/DataTables/datatables.js' %}"></script>
+    
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/typeahead.bundle.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/jquery.form.js' %}"></script>
+    
+    <script>
+        $(document).ready(function () {
+            $('#themes_datatable').DataTable();
+        });
+    </script>
+</head>
+
+<body style="overflow-y: scroll;">
+
+<div class="container main-body">
+    <div class="row">
+        <div id="div_maininfo" class="basebox">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div style="float:right;"><H4>
+                            <span class="label label-story"
+                                onmouseover='showPreview("storystatsdiv")'
+                                onmouseout='hidePreview("storystatsdiv")'
+                                onclick='togglePreview("storystatsdiv")'
+                            >story</span><div style="position:relative;">
+                                <div id="storystatsdiv" class="panel panel-default statsbox">
+                                    <div>
+                                        <dl id="statslist" class="row small"></dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </H4></div>
+                        <H4>{{storyobj.sid}}</H4>
+                    </div>
+                    <div class="panel-body">
+                        <dl class="dl-horizontal text-left">
+                            <dt>Title:</dt> <dd><span id="obj_title">{{storyobj.title}}</span></dd>
+                            <dt>Date:</dt> <dd><span id="obj_date">{{storyobj.date}}</span></dd>
+                        </dl>
+                        <P>
+                            <div id="div_description">{{storyobj.description|safe}}</div>
+                        </P>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

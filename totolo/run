@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ -d "/local/tstp" ]; then
+    export PATH_CODE="/local/tstp"
+    cd /local/tstp/totolo/web
+else
+    export PATH_CODE="/code/tstp"
+    cd /code/tstp/totolo/web
+fi
+
+export PATH=$PATH:$PATH_CODE/scripts
+export PYTHONPATH=$PYTHONPATH:$PATH_CODE/py3lib:$PATH_CODE/pylib:$PATH_CODE/totolo/web
+export TSTPPATH=$PATH_CODE
+
+"$@"
+
+

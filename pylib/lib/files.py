@@ -38,7 +38,7 @@ def remove(path, pattern=".*", levels=-1, onlyfiles=False):
     """
     Delete matching files and folders underneath path.
     """
-    paths = list(walk(path, pattern=pattern, levels=-levels, onlyfiles=False))
+    paths = list(walk(path, pattern=pattern, levels=levels, onlyfiles=False))
     for path in paths:
         if os.path.isfile(path):
             os.remove(path)
