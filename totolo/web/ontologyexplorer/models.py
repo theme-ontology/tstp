@@ -11,6 +11,7 @@ class Story(models.Model):
     parents = models.TextField('Parents', default="")
     children = models.TextField('Children', default="")
     description = models.TextField('Description', default="")
+    description_short = models.TextField('Short Description', default="")
     source = models.TextField('source', default="")
     ratings = models.TextField('ratings', default="")
 
@@ -24,6 +25,7 @@ class Theme(models.Model):
     parents = models.TextField('Parents', default="")
     children = models.TextField('Children', default="")
     description = models.TextField('Description', default="")
+    description_short = models.TextField('Short Description', default="")
     source = models.TextField('source', default="")
 
     def __str__(self):
@@ -38,6 +40,16 @@ class StoryTheme(models.Model):
     motivation = models.TextField('Motivation', default="")
     capacity = models.TextField('Capacity', default="")
     notes = models.TextField('Notes', default="")
+
+    def __str__(self):
+        return self.theme
+
+
+class Statistic(models.Model):
+    idx = models.IntegerField('idx', primary_key=True)
+    name = models.CharField('name', max_length=32, unique=True, db_index=True)
+    timestamp = models.CharField('timestamp', max_length=32, unique=True, db_index=True)
+    data = models.BinaryField('data', default=b'')
 
     def __str__(self):
         return self.theme

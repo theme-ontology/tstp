@@ -1,31 +1,21 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Theme Ontology</title>
-</head>
+{% extends "ontologyexplorer/totolo_base.html" %}
 
-<body>
-<div class="container main-body" style="text-align:center;">
-    <div style="max-width:60em; display:inline-block;">
-    	<img src="{% static 'ontologyexplorer/metatheme-triangle.svg' %}"/>
-        <div style="padding:2em; text-align:left;">
-            <P>
-                <A href="http://www.themeontology.org">themeontology.org</A> 
-                is a database of stories and well defined, well organized themes used in the stories.
-                The data is defined in our git repository: 
-                <A href="https://github.com/theme-ontology/theming">https://github.com/theme-ontology/theming</A>.
-                The picture above is a way of visualizing how the types of themes differ between three subsets of the stories,
-                namely the first three Star Trek series.
-            </P>
-            <P>
-                Get in touch with Mikael Onsjö (odinlake) and Paul Sheridan (paul-sheridan) at <A href="https://github.com/theme-ontology">https://github.com/theme-ontology</A>
-                for more information.
-            </P>
-        </div>
-    </div>
-</div>
+{% block page_subtitle %}org{% endblock %}
 
-</body>
-</html>
+{% block page_body %}
+<P>
+    Contains <b class="totolo-frontstat">{{num_themes}}</b> well defined literary themes arranged in a hierarchy. 
+    The hierarchy is a taxonomy with extra features, i.e., an ontology. 
+    Each theme is defined with an average of <b class="totolo-frontstat">{{avg_words_theme_description}}</b> words.
+    The definitions lay out necessary and sufficient conditions for when a theme is considered topical.
+</P>
+
+<P>
+    There are <b class="totolo-frontstat">{{num_stories}}</b> annotated stories, normally defined with a reference to Wikipedia. 
+    Each story has been associated with an average of <b class="totolo-frontstat">{{avg_motivations_per_story}}</b> themes.
+    Each theme designation has been weighted according to it's importance to the story as "minor", "major", or "choice", and provided with a pithy motivation.
+    The average motivation is <b class="totolo-frontstat">{{avg_words_motivation}}</b> words long,
+    though this hides a large variation.
+</P>
+
+{% endblock %}

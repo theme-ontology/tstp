@@ -27,14 +27,14 @@ echo ":: STARTING UP AT PATH ::::::::::::::::::::::::::::::::::"
 pwd
 echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 echo ":: TOTOLO ENV :::::::::::::::::::::::::::::::::::::::::::"
-/code/totolo/run env
+/code/tstp/totolo/run env
 echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
 echo "starting cron daemon..."
 nohup /usr/sbin/crond -f -l 8 &
 echo "adjusting database schemas..."
-/code/totolo/run python3 manage.py makemigrations
-/code/totolo/run python3 manage.py migrate
+/code/tstp/totolo/run python3 manage.py makemigrations
+/code/tstp/totolo/run python3 manage.py migrate
 echo "starting web server..."
-/code/totolo/run python3 manage.py runserver 0.0.0.0:8000
+/code/tstp/totolo/run python3 manage.py runserver 0.0.0.0:8000
 echo "...web server died!"

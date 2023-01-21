@@ -4,14 +4,8 @@ from rest_framework import serializers
 from .models import Theme, Story, StoryTheme
 
 
-class StorySerializer(serializers.ModelSerializer):
+class TOTOLOSerializer(serializers.ModelSerializer):
     weight = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Story
-        fields = (
-            'sid', 'title', 'date', 'parents', 'children', 'description', 'source', 'ratings', 'weight',
-        )
 
     def __init__(self, *args, weight_index=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,20 +14,23 @@ class StorySerializer(serializers.ModelSerializer):
     def get_weight(self, instance):
         if self._weight_index and instance:
             return self._weight_index[instance.idx]
-        return 42
+        return 0
 
 
-class ThemeSerializer(serializers.ModelSerializer):
-    weight = serializers.SerializerMethodField()
+class StorySerializer(TOTOLOSerializer):
+    class Meta:
+        model = Story
+        fields = (
+            'sid', 'title', 'date', 'parents', 'children', 'description', 'source', 'ratings', 'weight',
+        )
 
+
+class ThemeSerializer(TOTOLOSerializer):
     class Meta:
         model = Theme
         fields = (
             'name', 'parents', 'children', 'description', 'source', 'weight',
         )
-
-    def get_weight(self, instance):
-        return 42
 
 
 class StoryThemeSerializer(serializers.ModelSerializer):
@@ -41,4 +38,24 @@ class StoryThemeSerializer(serializers.ModelSerializer):
         model = StoryTheme
         fields = (
             'sid', 'theme', 'weight', 'motivation', 'capacity', 'notes',
+        )
+
+
+class StoryDTSerializer(TOTOLOSerializer):
+    description = serializers.CharField(source='description_short')
+
+    class Meta:
+        model = Story
+        fields = (
+            'weight', 'sid', 'title', 'date', 'description',
+        )
+
+
+class ThemeDTSerializer(TOTOLOSerializer):
+    description = serializers.CharField(source='description_short')
+
+    class Meta:
+        model = Theme
+        fields = (
+            'weight', 'name', 'parents', 'description',
         )

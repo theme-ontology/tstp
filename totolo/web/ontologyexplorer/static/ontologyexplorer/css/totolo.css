@@ -1,0 +1,149 @@
+@media screen and (max-width: 991px){
+    .flexible{
+        min-height: 150px;
+    }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  padding-top: 80px;
+  margin-bottom: 250px;
+}
+
+#totolo-body .navbar {
+  background-color: rgba(255, 255, 255, 0.75);
+  border-bottom: 1px solid #000000;
+  padding: 1px;
+}
+
+#totolo-body .navbar-toggler,
+#totolo-body .navbar-toggler:focus,
+#totolo-body .navbar-toggler:active,
+#totolo-body .navbar-toggler-icon:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+#totolo-body .active > a {
+  color:  black;
+  background-color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
+}
+
+#totolo-body .nav-link
+{
+  color: black;
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+
+td.tstp-sid-cell {
+    font-family: monospace;
+    word-break: break-word;
+}
+td.tstp-theme-cell {
+}
+td.tstp-date-cell {
+    font-family: monospace;
+    font-size: 12px;
+}
+td.tstp-description-cell {
+	font-weight: normal;
+	font-family: Arial;
+}
+td.tstp-gitid-cell {
+    font-family: monospace;
+    word-break: break-word;
+}
+td.tstp-code-cell {
+    font-family: monospace;
+    word-break: break-word;
+}
+
+span.totolo-label {
+  opacity: 0.5;
+  border-radius: 4px;
+  cursor: default;
+  padding: 3px 8px 4px 8px;
+}
+span.label-theme {
+  background: #ffccee;
+  color: #774466;
+}
+span.label-story {
+  background: #6677aa;
+  color: #ddeeff;
+}
+input.search-theme {
+  background: #fff2e0;
+  color: #6f6660;
+}
+input.search-story {
+  background: #fff2e0;
+  color: #6f6660;
+}
+
+.hpad0 {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.hpad1 {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.basebox {
+    padding: 15px 0px;
+    min-height: 100px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+}
+
+.previewer {
+    display:none;
+    position:absolute;
+    top: 20px;
+    left: 0px;
+    z-index: 9999;
+    border:0px solid #000;
+    width:200%;
+    min-width: 300px;
+    max-width: 800px;
+    height:600px;
+    pointer-events: none;
+}
+
+.statsbox {
+    display:none;
+    position:absolute;
+    top: 5px;
+    right: 2px;
+    z-index: 9999;
+    border:0px solid #000;
+    background: white;
+    width:200%;
+    min-width: 400px;
+    max-width: 800px;
+    box-shadow: 0 0 10px;
+}
+
+.statsbox div {
+  padding: 10px;
+}
+
+.statsbox dl {
+  margin: 2px;
+}
+
+dl#statslist dt {
+  white-space: nowrap;
+}
+
+
+

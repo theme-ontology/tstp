@@ -9,6 +9,7 @@ import re
 from collections import defaultdict
 from itertools import chain, combinations, product
 from ontologyexplorer.models import Story, Theme
+from unidecode import unidecode
 
 
 RE_WORD = "[^\W_]+"
@@ -24,6 +25,9 @@ def do(query, indexname, queryoptions, obj):
     with gzip.open("/code/tmp/totolo_corpus.pickle.gz", "r") as fh:
         corpus = pickle.load(fh)
         spell = Speller(nlp_data=corpus)
+    with gzip.open("/code/tmp/totolo_diacritics.pickle.gz", "r") as fh:
+        diacritics = pickle.load(fh)
+        dspell = Speller(nlp_data=diacritics)
     conn = pymysql.connect(
         host=credentials.SERVER_SPHINX,
         port=credentials.PORT_SPHINX,
@@ -40,6 +44,10 @@ def do(query, indexname, queryoptions, obj):
         acwords = []
         for word in words:
             acw = spell.autocorrect_word(word)
+            if word == acw:
+                dword = unidecode(word)
+                ac_dword = dspell.autocorrect_word(dword)
+                acw = diacritics.get(ac_dword, set(word)).pop()
             acwords.append([word, acw] if acw != word else [word])
             # TODO: wrap this in error handling as autocorrect is unlikely to be robust
         if len(acwords) < 5:
@@ -62,6 +70,10 @@ def do(query, indexname, queryoptions, obj):
             result = list(cur)
 
     idx2weight = dict(result)
+    maxw = max(idx2weight.values()) if idx2weight else 0
+    if maxw > 0:
+        for idx in idx2weight:
+            idx2weight[idx] = int(idx2weight[idx] / maxw * 100)
     objects = obj.objects.filter(idx__in=idx2weight.keys())
     objects = sorted(objects, key=lambda t: idx2weight[t.idx], reverse=True)
     return [(oo, idx2weight[oo.idx]) for oo in objects]

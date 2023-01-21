@@ -496,6 +496,15 @@ class TOTheme(TOEntry):
             description += "</P>\n"
         return description
 
+    def html_short_description(self):
+        """
+        A limited length short description without embelishments like "references".
+        """
+        import html
+        description = str(self.get("Description"))[:256]
+        return html.escape(description)
+
+
 class TOStory(TOEntry):
     def __init__(self, lines=None):
         self.cfg = STORY_FIELD_CONFIG
@@ -583,6 +592,14 @@ class TOStory(TOEntry):
                     description += line + "<BR>\n"
             description += "</P>\n"
         return description
+
+    def html_short_description(self):
+        """
+        A limited length short description without embelishments like "references".
+        """
+        import html
+        description = str(self.get("Description"))[:256]
+        return html.escape(description)
 
 
 class ThemeOntology(object):

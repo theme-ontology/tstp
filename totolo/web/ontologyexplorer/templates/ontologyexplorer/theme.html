@@ -1,40 +1,22 @@
-<!DOCTYPE html>
-<html>
+{% extends "ontologyexplorer/totolo_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Theme Ontology stories</title>
+{% block page_subtitle %}{{themeobj.name}}{% endblock %}
 
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/DataTables/datatables.min.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/css/tstp.css' %}">
-    
-    <script type="text/javascript" src="{% static '/ontologyexplorer/js/jquery-3.6.3.min.js' %}"></script>
-    <script type="text/javascript" src="{% static '/ontologyexplorer/js/bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static '/ontologyexplorer/DataTables/datatables.js' %}"></script>
-    
-    <script type="text/javascript" src="{% static '/ontologyexplorer/js/typeahead.bundle.js' %}"></script>
-    <script type="text/javascript" src="{% static '/ontologyexplorer/js/jquery.form.js' %}"></script>
-    
+{% block page_scripts %}
     <script>
         $(document).ready(function () {
             $('#themes_datatable').DataTable();
         });
     </script>
-</head>
+{% endblock %}
 
-<body style="overflow-y: scroll;">
-
-<div class="container main-body">
-    <div class="row">
+{% block page_body %}
         <div id="div_maininfo" class="basebox">
-
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div style="float:right;"><H4>
-                            <span class="label label-theme"
+                            <span class="totolo-label label-theme"
                                 onmouseover='showPreview("themestatsdiv")'
                                 onmouseout='hidePreview("themestatsdiv")'
                                 onclick='togglePreview("themestatsdiv")'
@@ -46,19 +28,15 @@
                                 </div>
                             </div>
                         </H4></div>
-                        <H4>{{themeobj.name}}</H4>
+                        <H2>{{themeobj.name}}</H2>
                     </div>
                     <div class="panel-body"><div id="div_description">{{themeobj.description|safe}}</div></div>
                 </div>
             </div>
 
-            <div class="col-md-12">
-                <H4>List of Parent Themes</H4>
+            <div class="col-md-12 mt-3">
+                <H5>List of Parent Themes</H5>
                 <div id="div_parents">{{themeobj.parents}}</div>
             </div>
         </div>
-    </div>
-</div>
-
-</body>
-</html>
+{% endblock %}
