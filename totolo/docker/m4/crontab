@@ -1,0 +1,12 @@
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7)  OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  *  command to be executed
+# *  *  *  *  *  command --arg1 --arg2 file1 file2 2>&1
+
+# must be ended with a new line "LF" (Unix) and not "CRLF" (Windows)
+* * * * * echo "Hello world" >> /var/log/cron.log 2>&1
+# An empty line is required at the end of this file for a valid cron file.

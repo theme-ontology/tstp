@@ -30,6 +30,9 @@ def ontology_to_django(to):
     stcount = defaultdict(int)
     wordcount = defaultdict(int)
     children = defaultdict(set)
+    themed_stories = 0
+    defined_themes = 0
+    motivationwordcounts = []
 
     for theme in to.themes():
         for parent in theme.get("Parents"):
@@ -50,6 +53,7 @@ def ontology_to_django(to):
     with transaction.atomic():
         Theme.objects.all().delete()
         for theme in to.themes():
+            defined_themes += 1
             Theme(
                 name=theme.name,
                 parents=', '.join(theme.get("Parents")),
@@ -60,12 +64,17 @@ def ontology_to_django(to):
     with transaction.atomic():
         StoryTheme.objects.all().delete()
         for story in to.stories():
+            is_themed = False
             sid = story.sid
             for weight in ["choice", "major", "minor", "not"]:
                 field = "{} Themes".format(weight.capitalize())
                 for kw in story.get(field):
-                    stcount[weight] += 1
-                    wordcount["motivation"] += len(re.findall(RE_WORD, kw.motivation))
+                    is_themed = True
+                    numwords = len(re.findall(RE_WORD, kw.motivation))
+                    if numwords:
+                        stcount[weight] += 1
+                        wordcount["motivation"] += numwords
+                        motivationwordcounts.append(numwords)
                     StoryTheme(
                         sid=sid,
                         theme=kw.keyword,
@@ -74,8 +83,17 @@ def ontology_to_django(to):
                         capacity=kw.capacity,
                         notes=kw.notes,
                     ).save()
+            if is_themed:
+                themed_stories += 1
 
-    return stcount, wordcount
+    motivationwordcounts.sort()
+    return {
+        "num_stories": themed_stories,
+        "num_themes": defined_themes,
+        "num_storythemes": dict(stcount),
+        "num_words": wordcount,
+        "motivation_wordcount_10pct": motivationwordcounts[len(motivationwordcounts)*9//10],
+    }
 
 
 def django_to_sphinx(wordcount):
@@ -149,27 +167,23 @@ class Command(BaseCommand):
             timestamp = head_version_info["commit"]["commit"]["committer"]["date"]
 
         # do the heavy lifting
-        stcount, wordcount = ontology_to_django(to)
-        corpus, diacritics = django_to_sphinx(wordcount)
+        stats = ontology_to_django(to)
+        corpus, diacritics = django_to_sphinx(stats["num_words"])
 
         # Store some extra information on disk and in Django DB
-        stats = {
-            "num_stories": len(to.story),
-            "num_themes": len(to.theme),
-            "num_storythemes": dict(stcount),
-            "num_words": wordcount,
-        }
         with gzip.open("/code/tmp/totolo_corpus.pickle.gz", "w+") as fh:
             pickle.dump(dict(corpus), fh)
         with gzip.open("/code/tmp/totolo_diacritics.pickle.gz", "w+") as fh:
             pickle.dump(dict(diacritics), fh)
         with gzip.open("/code/tmp/totolo_statistics.pickle.gz", "w+") as fh:
             pickle.dump(dict(stats), fh)
-        Statistic(
+        Statistic.objects.update_or_create(
             name="general_stats",
             timestamp=timestamp,
-            data=gzip.compress(pickle.dumps(stats))
-        ).save()
+            defaults={
+                "data": gzip.compress(pickle.dumps(stats)),
+            },
+        )
 
         # clean up and exit
         shutil.rmtree(base, True)

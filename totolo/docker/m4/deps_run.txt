@@ -1,0 +1,7 @@
+git
+curl
+bash
+socat
+graphviz
+tree
+gpg

@@ -27,7 +27,8 @@ def index(request):
         "avg_motivations_per_story": num_motivations // stats["num_stories"],
         "avg_words_story_description": stats["num_words"]["story_description"] // stats["num_stories"],
         "avg_words_theme_description": stats["num_words"]["theme_description"] // stats["num_themes"],
-        "avg_words_motivation": stats["num_words"]["motivation"] // num_motivations
+        "avg_words_motivation": stats["num_words"]["motivation"] // num_motivations,
+        "motivation_wordcount_10pct": stats["motivation_wordcount_10pct"],
     }
     template = loader.get_template("ontologyexplorer/index.html")
     return HttpResponse(template.render(context, request))
