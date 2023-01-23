@@ -47,8 +47,8 @@ class StoryTheme(models.Model):
 
 class Statistic(models.Model):
     idx = models.IntegerField('idx', primary_key=True)
-    name = models.CharField('name', max_length=32, unique=True, db_index=True)
-    timestamp = models.CharField('timestamp', max_length=32, unique=True, db_index=True)
+    name = models.CharField('name', max_length=32, db_index=True)
+    timestamp = models.CharField('timestamp', max_length=32, db_index=True)
     data = models.BinaryField('data', default=b'')
 
     def __str__(self):

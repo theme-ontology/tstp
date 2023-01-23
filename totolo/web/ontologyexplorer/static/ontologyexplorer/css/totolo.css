@@ -59,6 +59,14 @@ body {
   padding: 0.1em;
 }
 
+.totolo-search,
+.totolo-search:focus
+{
+  background: #fff2e0;
+  color: #6f6660;
+}
+
+
 td.tstp-sid-cell {
     font-family: monospace;
     word-break: break-word;
@@ -96,15 +104,6 @@ span.label-story {
   background: #6677aa;
   color: #ddeeff;
 }
-input.search-theme {
-  background: #fff2e0;
-  color: #6f6660;
-}
-input.search-story {
-  background: #fff2e0;
-  color: #6f6660;
-}
-
 .hpad0 {
   padding-left: 0px;
   padding-right: 0px;

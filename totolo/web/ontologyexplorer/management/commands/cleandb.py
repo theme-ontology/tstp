@@ -1,7 +1,7 @@
 # Copyright 2023, themeontology.org
 # Tests:
 from django.core.management.base import BaseCommand, CommandError
-from ontologyexplorer.models import Story, Theme, StoryTheme
+import ontologyexplorer.models as oms
 
 
 class Command(BaseCommand):
@@ -11,8 +11,9 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        Story.objects.all().delete()
-        Theme.objects.all().delete()
-        StoryTheme.objects.all().delete()
+        oms.Story.objects.all().delete()
+        oms.Theme.objects.all().delete()
+        oms.StoryTheme.objects.all().delete()
+        oms.Statistic.objects.all().delete()
         self.stdout.write(self.style.SUCCESS('Ran command: {}'.format(__name__)))
         return
