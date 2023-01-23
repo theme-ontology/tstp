@@ -1,9 +1,12 @@
 # Copyright 2023, themeontology.org
 # Tests:
 import os.path
-from credentials import TEMP_PATH
 import lib.files
 import subprocess
+import tempfile
+
+
+TEMP_PATH = tempfile.gettempdir()
 
 
 def download_headversion(ownerurl, reponame, targetpath):
