@@ -1,7 +1,6 @@
 # Copyright 2023, themeontology.org
 # Tests:
 import pymysql
-import credentials
 import gzip
 import pickle
 from autocorrect import Speller
@@ -10,6 +9,7 @@ from collections import defaultdict
 from itertools import chain, combinations, product
 from ontologyexplorer.models import Story, Theme
 from unidecode import unidecode
+import totolo.deployment
 
 
 RE_WORD = "[^\W_]+"
@@ -29,8 +29,8 @@ def do(query, indexname, queryoptions, obj):
         diacritics = pickle.load(fh)
         dspell = Speller(nlp_data=diacritics)
     conn = pymysql.connect(
-        host=credentials.SERVER_SPHINX,
-        port=credentials.PORT_SPHINX,
+        host=totolo.deployment.SPHINX.HOST,
+        port=totolo.deployment.SPHINX.PORT,
         user='', passwd='', charset='utf8', db='',
     )
     cur = conn.cursor()

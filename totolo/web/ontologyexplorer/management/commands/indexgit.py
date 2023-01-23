@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from ontologyexplorer.models import Story, Theme, StoryTheme, Statistic
 import lib.git
-import credentials
+import totolo.deployment
 import os.path
 import lib.files
 import shutil
@@ -103,8 +103,8 @@ def django_to_sphinx(wordcount):
     corpus = defaultdict(int)
     diacritics = defaultdict(set)
     conn = pymysql.connect(
-        host=credentials.SERVER_SPHINX,
-        port=credentials.PORT_SPHINX,
+        host=totolo.deployment.SPHINX.HOST,
+        port=totolo.deployment.SPHINX.PORT,
         user='', passwd='', charset='utf8', db='',
     )
     cur = conn.cursor()
@@ -153,7 +153,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # prepare, get repository and read data
-        base = os.path.join(credentials.TEMP_PATH, "gitmonitor")
+        base = os.path.join(totolo.deployment.TEMP_PATH, "gitmonitor")
         repo = os.path.join(base, "theming")
         shutil.rmtree(base, True)
         lib.files.mkdirs(repo)
