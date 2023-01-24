@@ -1,0 +1,4 @@
+services:
+  m4:
+    ports:
+      - "80:80"

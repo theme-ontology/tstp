@@ -50,7 +50,7 @@ def do(query, indexname, queryoptions, obj):
                 acw = diacritics.get(ac_dword, set(word)).pop()
             acwords.append([word, acw] if acw != word else [word])
             # TODO: wrap this in error handling as autocorrect is unlikely to be robust
-        if len(acwords) < 4:
+        if len(acwords) < 5:
             delta_result = defaultdict(float)
             for wordset in _powerset(acwords):
                 if wordset:

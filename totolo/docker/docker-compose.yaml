@@ -10,8 +10,7 @@ services:
     volumes:
       - code_data:/code
       - www_data:/www/pub
-    ports:
-      - "8000:8000"
+
 
   sphinx:
     image: ${DOCKER_REGISTRY}/totolo-sphinx
@@ -20,7 +19,7 @@ services:
       dockerfile: ./sphinx/Dockerfile
     networks:
       - backend
-    ports:
+    expose:
     - "9306:9306"
 
   sqldb:
@@ -32,7 +31,7 @@ services:
       - POSTGRES_DB=totolo_db
     networks:
       - backend
-    ports:
+    expose:
       - '5432:5432'
     volumes: 
       - sqldb_data:/var/lib/postgresql/data

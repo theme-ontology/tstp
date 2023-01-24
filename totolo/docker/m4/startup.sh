@@ -37,5 +37,5 @@ echo "adjusting database schemas..."
 /code/tstp/totolo/run python3 manage.py migrate
 nohup /code/tstp/totolo/run python3 manage.py indexgit >> /var/log/indexgit.log &
 echo "starting web server..."
-/code/tstp/totolo/run python3 manage.py runserver 0.0.0.0:8000
+/code/tstp/totolo/run python3 manage.py runserver 0.0.0.0:80
 echo "...web server died!"
