@@ -50,7 +50,7 @@ def do(query, indexname, queryoptions, obj):
                 acw = diacritics.get(ac_dword, set(word)).pop()
             acwords.append([word, acw] if acw != word else [word])
             # TODO: wrap this in error handling as autocorrect is unlikely to be robust
-        if len(acwords) < 5:
+        if len(acwords) < 4:
             delta_result = defaultdict(float)
             for wordset in _powerset(acwords):
                 if wordset:
@@ -71,10 +71,26 @@ def do(query, indexname, queryoptions, obj):
 
     idx2weight = dict(result)
     maxw = max(idx2weight.values()) if idx2weight else 0
+    objects = obj.objects.filter(idx__in=idx2weight.keys())
+
+    # seemed clever but was probably worse than not doing it
+    """
+    targetfield = 'name' if 'themes' in indexname else 'title' if 'stories' in indexname else None
+    if targetfield:
+        qwords = re.findall(RE_WORD, query)
+        for obj in objects:
+            twords = ' '.join(re.findall(RE_WORD, getattr(obj, targetfield)))
+            stops = sorted(combinations(range(len(qwords)), r=2), key=lambda x: x[1] - x[0], reverse=True)
+            for idx_from, idx_to in stops:
+                qsubwords = qwords[idx_from:idx_to]
+                if ' '.join(qsubwords) in twords:
+                    #idx2weight[obj.idx] += maxw * len(qwords) / len(qsubwords)
+                    break
+        maxw = max(idx2weight.values()) if idx2weight else 0
+    """
     if maxw > 0:
         for idx in idx2weight:
             idx2weight[idx] = int(idx2weight[idx] / maxw * 100)
-    objects = obj.objects.filter(idx__in=idx2weight.keys())
     objects = sorted(objects, key=lambda t: idx2weight[t.idx], reverse=True)
     return [(oo, idx2weight[oo.idx]) for oo in objects]
 

@@ -11,3 +11,10 @@ class SPHINX:
     PORT = 9306
 
 
+class SQLDB:
+    HOST = 'sqldb'
+    PORT = 5432
+    db = 'totolo_db'
+    user = 'totolo'
+    secret = 'totolo'
+

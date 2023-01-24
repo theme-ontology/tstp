@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: ./m4/Dockerfile
-    hostname: totolo-m4
     networks:
       - backend
       - frontend
@@ -21,11 +20,26 @@ services:
       dockerfile: ./sphinx/Dockerfile
     networks:
       - backend
-    hostname: totolo-sphinx
     ports:
     - "9306:9306"
 
+  sqldb:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=totolo
+      - POSTGRES_PASSWORD=totolo
+      - POSTGRES_DB=totolo_db
+    networks:
+      - backend
+    ports:
+      - '5432:5432'
+    volumes: 
+      - sqldb_data:/var/lib/postgresql/data
+
 volumes:
+  sqldb_data:
+    driver: local
   sphinx_data:
     driver: local
   sphinx_code:

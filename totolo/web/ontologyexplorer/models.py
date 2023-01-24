@@ -4,7 +4,7 @@ from django.db import models
 
 
 class Story(models.Model):
-    idx = models.IntegerField('idx', primary_key=True)
+    idx = models.BigAutoField('idx', primary_key=True, editable=False)
     sid = models.CharField('sid', max_length=255, default="", db_index=True)
     title = models.CharField('Title', max_length=255, default="")
     date = models.CharField('Date', max_length=32, default="")
@@ -20,7 +20,7 @@ class Story(models.Model):
 
 
 class Theme(models.Model):
-    idx = models.IntegerField('idx', primary_key=True)
+    idx = models.BigAutoField('idx', primary_key=True, editable=False)
     name = models.CharField('Name', max_length=255, default="", db_index=True)
     parents = models.TextField('Parents', default="")
     children = models.TextField('Children', default="")
@@ -33,7 +33,7 @@ class Theme(models.Model):
 
 
 class StoryTheme(models.Model):
-    idx = models.IntegerField('idx', primary_key=True)
+    idx = models.BigAutoField('idx', primary_key=True, editable=False)
     sid = models.CharField('sid', max_length=255, default="", db_index=True)
     theme = models.TextField('Theme', default="", db_index=True)
     weight = models.CharField('Weight', max_length=16, default="")
@@ -46,7 +46,7 @@ class StoryTheme(models.Model):
 
 
 class Statistic(models.Model):
-    idx = models.IntegerField('idx', primary_key=True)
+    idx = models.BigAutoField('idx', primary_key=True, editable=False)
     name = models.CharField('name', max_length=32, db_index=True)
     timestamp = models.CharField('timestamp', max_length=32, db_index=True)
     data = models.BinaryField('data', default=b'')
