@@ -77,7 +77,7 @@ def theme(request, name):
 
 
 class StoryViewSet(viewsets.ModelViewSet):
-    queryset = Story.objects.all().order_by("date")
+    queryset = Story.objects.all().order_by("date")[:100]
     serializer_class = s.StorySerializer
 
     def list(self, request):
@@ -111,7 +111,7 @@ class StoryViewSet(viewsets.ModelViewSet):
 
 
 class ThemeViewSet(viewsets.ModelViewSet):
-    queryset = Theme.objects.all()
+    queryset = Theme.objects.all().order_by("name")[:100]
     serializer_class = s.ThemeSerializer
 
     def list(self, request):
