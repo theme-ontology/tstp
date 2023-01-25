@@ -7,6 +7,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register('search/stories', views.StoryViewSet)
 router.register('search/themes', views.ThemeViewSet)
+router.register('search/storythemes', views.StoryThemeViewSet)
 
 
 urlpatterns = [

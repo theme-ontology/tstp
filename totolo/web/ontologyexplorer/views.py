@@ -1,11 +1,11 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.template import loader
 from rest_framework.response import Response
 from rest_framework import status
 
 from rest_framework import viewsets
-from .models import Theme, Story, Statistic
-from .serializers import StorySerializer, ThemeSerializer, StoryDTSerializer, ThemeDTSerializer
+from .models import Story, Theme, StoryTheme, Statistic
+import ontologyexplorer.serializers as s
 import totolo.search
 import gzip
 import pickle
@@ -78,34 +78,96 @@ def theme(request, name):
 
 class StoryViewSet(viewsets.ModelViewSet):
     queryset = Story.objects.all()
-    serializer_class = StorySerializer
+    serializer_class = s.StorySerializer
 
     def list(self, request):
         if request.GET.get('format', None) == "datatables":
-            self.serializer_class = StoryDTSerializer
+            self.serializer_class = s.StorySearchDTSerializer
+
         query = request.GET.get('query', None)
+        featuringtheme = request.GET.get('featuringtheme', None)
+
         if query:
             idx2weight = {t.idx: w for (t, w) in totolo.search.stories(query)}
             query_set = Story.objects.filter(idx__in=idx2weight.keys())
             serial = self.serializer_class(query_set, many=True, weight_index=idx2weight)
             return Response(serial.data, status=status.HTTP_200_OK)
+
+        elif featuringtheme:
+            stobjs = StoryTheme.objects.all.filter(theme=featuringtheme)
+            sids = stobjs.values_list('sid')
+            query_set = Story.objects.all.filter(sid__in=sids)
+            serial = self.serializer_class(query_set, many=True)
+            return Response(serial.data, status=status.HTTP_200_OK)
+
         else:
             return super().list(request)
 
 
 class ThemeViewSet(viewsets.ModelViewSet):
     queryset = Theme.objects.all()
-    serializer_class = ThemeSerializer
+    serializer_class = s.ThemeSerializer
 
     def list(self, request):
         if request.GET.get('format', None) == "datatables":
-            self.serializer_class = ThemeDTSerializer
+            self.serializer_class = s.ThemeSearchDTSerializer
+
         query = request.GET.get('query', None)
-        if query:
+        parentsof = request.GET.get('parentsof', None)
+        childrenof = request.GET.get('childrenof', None)
+        relativesof = request.GET.get('relativesof', None)
+
+        if query:  ## text search
             idx2weight = {t.idx: w for (t, w) in totolo.search.themes(query)}
             query_set = Theme.objects.filter(idx__in=idx2weight.keys())
             serial = self.serializer_class(query_set, many=True, weight_index=idx2weight)
             return Response(serial.data, status=status.HTTP_200_OK)
+
+        elif parentsof or childrenof or relativesof:  ## get relatives of a theme
+            if request.GET.get('format', None) == "datatables":
+                self.serializer_class = s.ThemeRelativesDTSerializer
+            try:
+                themeobj = Theme.objects.get(name=parentsof or childrenof or relativesof)
+            except Exception:
+                print(traceback.format_exc())
+                return HttpResponseBadRequest('Oops, something went wrong with that request.')
+            idx2relation = {}
+            if parentsof:
+                parents = themeobj.parents.split(", ")
+                parentset = set(parents)
+                query_set = Theme.objects.filter(name__in=parents)
+            elif childrenof:
+                children = themeobj.children.split(", ")
+                parentset = set()
+                query_set = Theme.objects.filter(name__in=children)
+            else:
+                parents = themeobj.parents.split(", ")
+                parentset = set(parents)
+                children = themeobj.children.split(", ")
+                query_set = Theme.objects.filter(name__in=sorted(set(parents+children)))
+            for obj in query_set:
+                idx2relation[obj.idx] = 'parent' if obj.name in parentset else 'child'
+            serial = self.serializer_class(query_set, relation_index=idx2relation, many=True)
+            return Response(serial.data, status=status.HTTP_200_OK)
+
         else:
             return super().list(request)
+
+
+class StoryThemeViewSet(viewsets.ModelViewSet):
+    queryset = StoryTheme.objects.all()
+    serializer_class = s.StoryThemeSerializer
+
+    def list(self, request):
+        featuringtheme = request.GET.get('featuringtheme', None)
+
+        if featuringtheme:
+            query_set = StoryTheme.objects.all().filter(theme=featuringtheme)
+            serial = self.serializer_class(query_set, many=True)
+            return Response(serial.data, status=status.HTTP_200_OK)
+
+        else:
+            return super().list(request)
+
+
 

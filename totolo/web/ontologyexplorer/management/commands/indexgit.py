@@ -163,8 +163,8 @@ class Command(BaseCommand):
         # get some info about the state of our repository
         with urllib.request.urlopen(URL_GIT_INFO) as url:
             head_version_info = json.load(url)
-            print(json.dumps(head_version_info, indent=4))
             timestamp = head_version_info["commit"]["commit"]["committer"]["date"]
+            print("downloaded head version as of: {}".format(timestamp))
 
         # do the heavy lifting
         stats = ontology_to_django(to)

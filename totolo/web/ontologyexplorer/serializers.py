@@ -6,15 +6,22 @@ from .models import Theme, Story, StoryTheme
 
 class TOTOLOSerializer(serializers.ModelSerializer):
     weight = serializers.SerializerMethodField()
+    relation = serializers.SerializerMethodField()
 
-    def __init__(self, *args, weight_index=None, **kwargs):
+    def __init__(self, *args, weight_index=None, relation_index=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._weight_index = weight_index
+        self._relation_index = relation_index
 
     def get_weight(self, instance):
         if self._weight_index and instance:
             return self._weight_index[instance.idx]
         return 0
+
+    def get_relation(self, instance):
+        if self._relation_index and instance:
+            return self._relation_index.get(instance.idx, '')
+        return ''
 
 
 class StorySerializer(TOTOLOSerializer):
@@ -41,7 +48,7 @@ class StoryThemeSerializer(serializers.ModelSerializer):
         )
 
 
-class StoryDTSerializer(TOTOLOSerializer):
+class StorySearchDTSerializer(TOTOLOSerializer):
     description = serializers.CharField(source='description_short')
 
     class Meta:
@@ -51,7 +58,7 @@ class StoryDTSerializer(TOTOLOSerializer):
         )
 
 
-class ThemeDTSerializer(TOTOLOSerializer):
+class ThemeSearchDTSerializer(TOTOLOSerializer):
     description = serializers.CharField(source='description_short')
 
     class Meta:
@@ -59,3 +66,15 @@ class ThemeDTSerializer(TOTOLOSerializer):
         fields = (
             'weight', 'name', 'parents', 'description',
         )
+
+
+class ThemeRelativesDTSerializer(TOTOLOSerializer):
+    description = serializers.CharField(source='description_short')
+
+    class Meta:
+        model = Theme
+        fields = (
+            'relation', 'name', 'parents', 'description',
+        )
+
+

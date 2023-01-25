@@ -478,6 +478,8 @@ class TOTheme(TOEntry):
         aliases = html.escape(str(self.get("Aliases")).strip())
         notes = html.escape(str(self.get("Notes")).strip())
         references = html.escape(str(self.get("References")).strip())
+        description = '<P class="obj-description"><BR>\n' + description
+        description += "</P>\n"
         if notes:
             description += '<P class="obj-description"><b>Notes:</b><BR>\n' + notes
             description += "</P>\n"
@@ -492,7 +494,8 @@ class TOTheme(TOEntry):
             for line in references.split("\n"):
                 line = line.strip()
                 if line:
-                    description += line + "<BR>\n"
+                    aline = '<A href="{}">{}</A>'.format(line, line)
+                    description += aline + "\n"
             description += "</P>\n"
         return description
 
@@ -569,12 +572,15 @@ class TOStory(TOEntry):
         """
         description = str(self.get("Description"))
         references = str(self.get("References")).strip()
+        description = '<P class="obj-description"><BR>\n' + description
+        description += "</P>\n"
         if references:
             description += "\n\nReferences:\n"
             for line in references.split("\n"):
                 line = line.strip()
                 if line:
-                    description += line + "\n"
+                    aline = '<A href="{}">{}</A>'.format(line, line)
+                    description += aline + "\n"
         return description
 
     def html_description(self):

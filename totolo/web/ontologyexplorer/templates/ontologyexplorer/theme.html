@@ -4,39 +4,117 @@
 
 {% block page_scripts %}
     <script>
+        var dataUrlThemes = '/api/search/themes/?format=datatables&relativesof={{themeobj.name}}';
+        var dataUrlStoryThemes = '/api/search/storythemes/?format=datatables&featuringtheme={{themeobj.name}}';
+
         $(document).ready(function () {
-            $('#themes_datatable').DataTable();
+            loadDataOnReady();
         });
+
+        function loadDataOnReady() {
+            $(document).ready(function() {
+                $('#storythemes_datatable').DataTable( {
+                    "ajax": dataUrlStoryThemes,
+                    "paging" : false,
+                    "dom": "ltpr",
+                    "order": [
+                        [ 0, "desc" ],
+                        [ 1, "asc" ],
+                    ],
+                    "columnDefs" : [
+                        {
+                            "render": function ( data, type, row ) {
+                                return makeStoryLink(data);
+                            },
+                            "className": "tstp-sid-cell",
+                            "targets": 0,
+                        },
+                        {
+                            "targets": 1,
+                        },
+                        {
+                            "width": "60%",
+                            "className": "tstp-description-cell",
+                            "targets": 2,
+                        },
+                    ],
+                } );
+                $('#themes_datatable').DataTable( {
+                    "ajax": dataUrlThemes,
+                    "paging" : false,
+                    "dom": "ltpr",
+                    "order": [
+                        [ 0, "desc" ],
+                        [ 1, "asc" ],
+                    ],
+                    "columnDefs" : [
+                        { 
+                            "targets": 0,
+                            "visible": false,
+                        },
+                        {
+                            "render": function ( data, type, row ) {
+                                return makeThemeLink(data);
+                            },
+                            "className": "tstp-theme-cell",
+                            "targets": 1,
+                            "width": "20%",
+                        },
+                        {
+                            "render": function ( data, type, row ) {
+                                return makeThemeLinkList(data, "black");
+                            },
+                            "targets": 2,
+                            "width": "15%",
+                        },
+                        {
+                            "className": "tstp-description-cell",
+                            "targets": 3,
+                        },
+                    ],
+                    "createdRow": function( row, data, dataIndex) {
+                        if( data["relation"].includes("parent") ) {
+                            $(row).addClass('totolo-parent-theme-row');
+                        }
+                    }
+                } );
+            } );
+        }
+
+
     </script>
 {% endblock %}
 
 {% block page_body %}
-        <div id="div_maininfo" class="basebox">
-            <div class="col-md-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div style="float:right;"><H4>
-                            <span class="totolo-label label-theme"
-                                onmouseover='showPreview("themestatsdiv")'
-                                onmouseout='hidePreview("themestatsdiv")'
-                                onclick='togglePreview("themestatsdiv")'
-                            >theme</span><div style="position:relative;">
-                                <div id="themestatsdiv" class="panel panel-default statsbox">
-                                    <div>
-                                        <dl id="statslist" class="row small"></dl>
-                                    </div>
-                                </div>
-                            </div>
-                        </H4></div>
-                        <H2>{{themeobj.name}}</H2>
-                    </div>
-                    <div class="panel-body"><div id="div_description">{{themeobj.description|safe}}</div></div>
-                </div>
-            </div>
+        <H2><span class="totolo-titleword">Theme:</span> {{themeobj.name}}</H2>
 
-            <div class="col-md-12 mt-3">
-                <H5>List of Parent Themes</H5>
-                <div id="div_parents">{{themeobj.parents}}</div>
-            </div>
+        <div class="panel-body">
+            {{themeobj.description|safe}}
         </div>
+
+        <H4 class="mt-4">Parents and Children of the Theme</H4>
+
+        <table id="themes_datatable" class="display table cell-border" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th data-data="relation">Rel</th>
+                    <th data-data="name">Name</th>
+                    <th data-data="parents">Parents</th>
+                    <th data-data="description">Description</th>
+                </tr>
+            </thead>
+        </table>
+
+        <H4 class="mt-5">Stories Featuring the Theme</H4>
+
+        <table id="storythemes_datatable" class="display table cell-border" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th data-data="sid">ID</th>
+                    <th data-data="weight">Weight</th>
+                    <th data-data="motivation">Motivation</th>
+                </tr>
+            </thead>
+        </table>
+
 {% endblock %}

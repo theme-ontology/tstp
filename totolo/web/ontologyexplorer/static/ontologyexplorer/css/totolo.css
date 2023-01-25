@@ -9,8 +9,7 @@ html {
 }
 
 body {
-  padding-top: 80px;
-  margin-bottom: 250px;
+  padding: 80px 1px 250px 1px;
 }
 
 #totolo-body .navbar {
@@ -59,6 +58,17 @@ body {
   padding: 0.1em;
 }
 
+#totolo-body .totolo-parent-theme-row
+{
+  background-color: #f0f0ff;
+}
+.totolo-titleword
+{
+  font-variant: small-caps;
+  font-variant-caps: all-petite-caps;
+  font-size-adjust: 0.3;
+
+}
 .totolo-search,
 .totolo-search:focus
 {
@@ -66,6 +76,10 @@ body {
   color: #6f6660;
 }
 
+#themes_datatable ul
+{
+  list-style-type: "\203A  ";
+}
 
 td.tstp-sid-cell {
     font-family: monospace;
