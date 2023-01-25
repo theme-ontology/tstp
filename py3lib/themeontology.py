@@ -572,15 +572,12 @@ class TOStory(TOEntry):
         """
         description = str(self.get("Description"))
         references = str(self.get("References")).strip()
-        description = '<P class="obj-description"><BR>\n' + description
-        description += "</P>\n"
         if references:
             description += "\n\nReferences:\n"
             for line in references.split("\n"):
                 line = line.strip()
                 if line:
-                    aline = '<A href="{}">{}</A>'.format(line, line)
-                    description += aline + "\n"
+                    description += line + "\n"
         return description
 
     def html_description(self):
@@ -590,12 +587,15 @@ class TOStory(TOEntry):
         import html
         description = html.escape(str(self.get("Description")))
         references = html.escape(str(self.get("References")).strip())
+        description = '<P class="obj-description"><BR>\n' + description
+        description += "</P>\n"
         if references:
             description += '<P class="obj-description"><b>References:</b><BR>\n'
             for line in references.split("\n"):
                 line = line.strip()
                 if line:
-                    description += line + "<BR>\n"
+                    aline = '<A href="{}">{}</A>'.format(line, line)
+                    description += aline + "\n"
             description += "</P>\n"
         return description
 
@@ -609,10 +609,11 @@ class TOStory(TOEntry):
 
 
 class ThemeOntology(object):
-    def __init__(self, paths=None):
+    def __init__(self, paths=None, imply_collection=False):
         self.theme = {}
         self.story = {}
         self.entries = defaultdict(list)
+        self._imply_collection = imply_collection
         if paths:
             if isinstance(paths, (list, tuple)):
                 for path in paths:
@@ -651,7 +652,8 @@ class ThemeOntology(object):
             elif path.endswith(".st.txt"):
                 entrytype = TOStory
             with codecs.open(path, "r", encoding='utf-8') as fh:
-                for entrylines in TOParser.iter_entries(fh):
+                collection_entry = None
+                for idx, entrylines in enumerate(TOParser.iter_entries(fh)):
                     entry = entrytype(entrylines)
                     entry.ontology = self
                     self.entries[path].append(entry)
@@ -659,6 +661,14 @@ class ThemeOntology(object):
                         self.theme[entry.name] = entry
                     elif isinstance(entry, TOStory):
                         self.story[entry.name] = entry
+                        if idx == 0:
+                            mycols = entry.get("Collections").parts
+                            if mycols and mycols[0] == entry.sid:
+                                collection_entry = entry
+                        if idx > 0 and self._imply_collection and collection_entry:
+                            #print("{}  --->  {}".format(entry.sid, collection_entry.sid))
+                            field = collection_entry.get("Component Stories")
+                            field.parts.append(entry.sid)
                     else:
                         raise
 
@@ -690,9 +700,9 @@ class ThemeOntology(object):
                 fh.writelines(x + "\n" for x in lines)
 
 
-def read(paths=None):
+def read(paths=None, imply_collection=False):
     if not paths:
         import credentials
         paths = os.path.join(credentials.GIT_THEMING_PATH, "notes")
-    return ThemeOntology(paths)
+    return ThemeOntology(paths, imply_collection=imply_collection)
 

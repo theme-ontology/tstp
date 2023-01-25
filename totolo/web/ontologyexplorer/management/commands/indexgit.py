@@ -30,22 +30,29 @@ def ontology_to_django(to):
     stcount = defaultdict(int)
     wordcount = defaultdict(int)
     children = defaultdict(set)
+    collections = defaultdict(set)
     themed_stories = 0
     defined_themes = 0
     motivationwordcounts = []
 
+    for story in to.stories():
+        for child in story.get("Component Stories"):
+            collections[child].add(story.sid)
     for theme in to.themes():
         for parent in theme.get("Parents"):
             children[parent].add(theme.name)
+
     with transaction.atomic():
         Story.objects.all().delete()
         for story in to.stories():
+            all_collections = set(story.get("Collections"))
+            all_collections.update(collections[story.sid])
             Story(
                 sid=story.sid,
                 title=story.title,
                 date=story.date,
-                parents=story.get("Collections"),
-                children=story.get("Component Stories"),
+                parents=', '.join(sorted(all_collections)),
+                children=', '.join(story.get("Component Stories")),
                 description=story.html_description(),
                 description_short=story.html_short_description(),
                 ratings=story.get("Ratings"),
@@ -158,7 +165,7 @@ class Command(BaseCommand):
         shutil.rmtree(base, True)
         lib.files.mkdirs(repo)
         lib.git.download_headversion("https://github.com/theme-ontology", "theming", repo)
-        to = themeontology.read(os.path.join(repo, "notes"))
+        to = themeontology.read(os.path.join(repo, "notes"), imply_collection=True)
 
         # get some info about the state of our repository
         with urllib.request.urlopen(URL_GIT_INFO) as url:

@@ -77,7 +77,7 @@ def theme(request, name):
 
 
 class StoryViewSet(viewsets.ModelViewSet):
-    queryset = Story.objects.all()
+    queryset = Story.objects.all().order_by("date")
     serializer_class = s.StorySerializer
 
     def list(self, request):
@@ -85,7 +85,7 @@ class StoryViewSet(viewsets.ModelViewSet):
             self.serializer_class = s.StorySearchDTSerializer
 
         query = request.GET.get('query', None)
-        featuringtheme = request.GET.get('featuringtheme', None)
+        relativesof = request.GET.get('relativesof', None)
 
         if query:
             idx2weight = {t.idx: w for (t, w) in totolo.search.stories(query)}
@@ -93,10 +93,16 @@ class StoryViewSet(viewsets.ModelViewSet):
             serial = self.serializer_class(query_set, many=True, weight_index=idx2weight)
             return Response(serial.data, status=status.HTTP_200_OK)
 
-        elif featuringtheme:
-            stobjs = StoryTheme.objects.all.filter(theme=featuringtheme)
-            sids = stobjs.values_list('sid')
-            query_set = Story.objects.all.filter(sid__in=sids)
+        if relativesof:
+            try:
+                storyobj = Story.objects.get(sid=relativesof)
+            except Exception:
+                print(traceback.format_exc())
+                return HttpResponseBadRequest('Oops, something went wrong with that request.')
+            parents = storyobj.parents.split(", ")
+            parentset = set(parents)
+            children = storyobj.children.split(", ")
+            query_set = Story.objects.filter(sid__in=sorted(set(parents+children)))
             serial = self.serializer_class(query_set, many=True)
             return Response(serial.data, status=status.HTTP_200_OK)
 
@@ -160,9 +166,13 @@ class StoryThemeViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         featuringtheme = request.GET.get('featuringtheme', None)
+        featuringstory = request.GET.get('featuringstory', None)
 
-        if featuringtheme:
-            query_set = StoryTheme.objects.all().filter(theme=featuringtheme)
+        if featuringtheme or featuringstory:
+            if featuringtheme:
+                query_set = StoryTheme.objects.all().filter(theme=featuringtheme)
+            elif featuringstory:
+                query_set = StoryTheme.objects.all().filter(sid=featuringstory)
             serial = self.serializer_class(query_set, many=True)
             return Response(serial.data, status=status.HTTP_200_OK)
 
