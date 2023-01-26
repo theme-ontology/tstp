@@ -36,7 +36,7 @@ class ThemeSerializer(TOTOLOSerializer):
     class Meta:
         model = Theme
         fields = (
-            'name', 'parents', 'children', 'description', 'source', 'weight',
+            'name', 'parents', 'children', 'description', 'source', 'weight', 'level'
         )
 
 
@@ -54,7 +54,7 @@ class StorySearchDTSerializer(TOTOLOSerializer):
     class Meta:
         model = Story
         fields = (
-            'weight', 'sid', 'title', 'date', 'description',
+            'relation', 'weight', 'sid', 'title', 'date', 'description',
         )
 
 
@@ -64,17 +64,6 @@ class ThemeSearchDTSerializer(TOTOLOSerializer):
     class Meta:
         model = Theme
         fields = (
-            'weight', 'name', 'parents', 'description',
+            'relation', 'weight', 'level', 'name', 'parents', 'description',
         )
-
-
-class ThemeRelativesDTSerializer(TOTOLOSerializer):
-    description = serializers.CharField(source='description_short')
-
-    class Meta:
-        model = Theme
-        fields = (
-            'relation', 'name', 'parents', 'description',
-        )
-
 

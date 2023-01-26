@@ -17,10 +17,7 @@
                     "ajax": dataUrlThemes,
                     "paging" : false,
                     "dom": "ltpr",
-                    "order": [
-                        [ 0, "desc" ],
-                        [ 1, "asc" ],
-                    ],
+                    "order": [ [ 0, "desc" ], [ 1, "asc" ], ],
                     "columnDefs" : [
                         { 
                             "targets": 0,
@@ -33,6 +30,11 @@
                             "className": "tstp-theme-cell",
                             "targets": 1,
                             "width": "20%",
+                            "createdCell": function( td, cellData, rowData, row, col ) {
+                                if( rowData["relation"].includes("parent") ) {
+                                    $(td).addClass('totolo-parent-theme-cell');
+                                }
+                            },
                         },
                         {
                             "render": function ( data, type, row ) {
@@ -88,7 +90,7 @@
 {% block page_body %}
         <H2><span class="totolo-titleword">Theme:</span> {{themeobj.name}}</H2>
 
-        <div class="panel-body">
+        <div>
             {{themeobj.description|safe}}
         </div>
 

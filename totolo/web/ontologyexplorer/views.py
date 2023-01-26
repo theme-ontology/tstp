@@ -87,13 +87,17 @@ class StoryViewSet(viewsets.ModelViewSet):
         query = request.GET.get('query', None)
         relativesof = request.GET.get('relativesof', None)
 
-        if query:
+        if query == "" and relativesof is None:
+            relativesof = "Collection: William Shakespeare Plays"
+
+        if query:  ## text search
             idx2weight = {t.idx: w for (t, w) in totolo.search.stories(query)}
             query_set = Story.objects.filter(idx__in=idx2weight.keys())
             serial = self.serializer_class(query_set, many=True, weight_index=idx2weight)
             return Response(serial.data, status=status.HTTP_200_OK)
 
-        if relativesof:
+        idx2relation = {}
+        if relativesof:  ## get relatives of a story
             try:
                 storyobj = Story.objects.get(sid=relativesof)
             except Exception:
@@ -103,7 +107,9 @@ class StoryViewSet(viewsets.ModelViewSet):
             parentset = set(parents)
             children = storyobj.children.split(", ")
             query_set = Story.objects.filter(sid__in=sorted(set(parents+children)))
-            serial = self.serializer_class(query_set, many=True)
+            for obj in query_set:
+                idx2relation[obj.idx] = 'parent' if obj.sid in parentset else 'child'
+            serial = self.serializer_class(query_set, relation_index=idx2relation, many=True)
             return Response(serial.data, status=status.HTTP_200_OK)
 
         else:
@@ -111,7 +117,7 @@ class StoryViewSet(viewsets.ModelViewSet):
 
 
 class ThemeViewSet(viewsets.ModelViewSet):
-    queryset = Theme.objects.all().order_by("name")[:100]
+    queryset = Theme.objects.all().order_by("level", "parents", "name")[:20]
     serializer_class = s.ThemeSerializer
 
     def list(self, request):
@@ -130,8 +136,6 @@ class ThemeViewSet(viewsets.ModelViewSet):
             return Response(serial.data, status=status.HTTP_200_OK)
 
         elif parentsof or childrenof or relativesof:  ## get relatives of a theme
-            if request.GET.get('format', None) == "datatables":
-                self.serializer_class = s.ThemeRelativesDTSerializer
             try:
                 themeobj = Theme.objects.get(name=parentsof or childrenof or relativesof)
             except Exception:

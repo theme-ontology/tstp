@@ -17,46 +17,49 @@
                     "ajax": dataUrlStories,
                     "paging" : false,
                     "dom": "ltpr",
-                    "order": [
-                        [ 2, "asc" ],
-                        [ 1, "asc" ],
-                    ],
+                    "order": [ [ 0, "desc" ], [ 1, "asc" ], ],
                     "columnDefs" : [
+                        { 
+                            "targets": 0,
+                            "visible": false,
+                        },
                         {
                             "render": function ( data, type, row ) {
                                 return makeStoryLink(data);
                             },
                             "width": "9%",
                             "className": "tstp-sid-cell",
-                            "targets": 0,
+                            "targets": 1,
+                            "createdCell": function( td, cellData, rowData, row, col ) {
+                                if( rowData["relation"].includes("parent") ) {
+                                    $(td).addClass('totolo-parent-theme-cell');
+                                }
+                            },
                         },
                         {
                             "width": "20%",
-                            "targets": 1,
-                        },
-                        {
-                            "className": "tstp-date-cell",
                             "targets": 2,
                         },
                         {
-                            "className": "tstp-description-cell",
+                            "className": "tstp-date-cell",
                             "targets": 3,
                         },
+                        {
+                            "className": "tstp-description-cell",
+                            "targets": 4,
+                        },
                     ],
-                    "createdRow": function( row, data, dataIndex) {
-                        /*if( data["relation"].includes("parent") ) {
+                    "createdRow": function( row, data, dataIndex ) {
+                        if( data["relation"].includes("parent") ) {
                             $(row).addClass('totolo-parent-theme-row');
-                        }*/
-                    }
+                        }
+                    },
                 } );
                 $('#storythemes_datatable').DataTable( {
                     "ajax": dataUrlStoryThemes,
                     "paging" : false,
                     "dom": "ltpr",
-                    "order": [
-                        [ 1, "asc" ],
-                        [ 0, "asc" ],
-                    ],
+                    "order": [ [ 1, "asc" ], [ 0, "asc" ], ],
                     "columnDefs" : [
                         {
                             "render": function ( data, type, row ) {
@@ -85,15 +88,16 @@
 {% block page_body %}
         <H2><span class="totolo-titleword">Story:</span> {{storyobj.sid}}</H2>
 
-        <div class="panel-body">
+        <div>
             {{storyobj.description|safe}}
         </div>
 
-        <H4 class="mt-4">Collections and Components of the Story</H4>
+        <H4 class="mt-4">Collections and Components</H4>
 
-        <table id="stories_datatable" class="display table cell-border" cellspacing="0" width="100%">
+        <table id="stories_datatable" class="display table cell-border hpad0" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th data-data="relation">Rel</th>
                     <th data-data="sid">ID</th>
                     <th data-data="title">Title</th>
                     <th data-data="date">Date</th>

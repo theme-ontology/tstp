@@ -1,26 +1,28 @@
 # Copyright 2023, themeontology.org
 # Tests:
-from django.core.management.base import BaseCommand, CommandError
-from ontologyexplorer.models import Story, Theme, StoryTheme, Statistic
-import lib.git
-import totolo.deployment
-import os.path
-import lib.files
-import shutil
-import themeontology
-from django.db import transaction
-from collections import defaultdict
-import pymysql
-import re
 import gzip
+import json
+import os.path
 import pickle
-from unidecode import unidecode
-import urllib.request, json
+import re
+import shutil
+import urllib.request
+from collections import defaultdict
 
+import pymysql
+from django.core.management.base import BaseCommand
+from django.db import transaction
+from unidecode import unidecode
+
+import lib.files
+import lib.git
+import lib.graph
+import themeontology
+import totolo.deployment
+from ontologyexplorer.models import Story, Theme, StoryTheme, Statistic
 
 URL_GIT_INFO = "https://api.github.com/repos/theme-ontology/theming/branches/master"
 RE_WORD = "[^\W_]+"
-
 
 
 def ontology_to_django(to):
@@ -29,18 +31,20 @@ def ontology_to_django(to):
     """
     stcount = defaultdict(int)
     wordcount = defaultdict(int)
-    children = defaultdict(set)
     collections = defaultdict(set)
     themed_stories = 0
     defined_themes = 0
     motivationwordcounts = []
+    theme_graph = lib.graph.KWGraph()
 
     for story in to.stories():
         for child in story.get("Component Stories"):
             collections[child].add(story.sid)
     for theme in to.themes():
         for parent in theme.get("Parents"):
-            children[parent].add(theme.name)
+            theme_graph.makeEdge(parent, theme.name)
+    levels = theme_graph.top_sort()
+    print("Theme roots:", theme_graph.findRoots())
 
     with transaction.atomic():
         Story.objects.all().delete()
@@ -64,7 +68,8 @@ def ontology_to_django(to):
             Theme(
                 name=theme.name,
                 parents=', '.join(theme.get("Parents")),
-                children=', '.join(sorted(children[theme.name])),
+                children=', '.join(sorted(theme_graph.children_of(theme.name))),
+                level=levels[theme.name],
                 description=theme.html_description(),
                 description_short=theme.html_short_description(),
             ).save()

@@ -24,6 +24,7 @@ class Theme(models.Model):
     name = models.CharField('Name', max_length=255, default="", db_index=True)
     parents = models.TextField('Parents', default="")
     children = models.TextField('Children', default="")
+    level = models.IntegerField('level', default=0)
     description = models.TextField('Description', default="")
     description_short = models.TextField('Short Description', default="")
     source = models.TextField('source', default="")

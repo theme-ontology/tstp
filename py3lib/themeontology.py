@@ -487,6 +487,7 @@ class TOTheme(TOEntry):
             description += '<P class="obj-description"><b>Examples:</b><BR>\n' + examples
             description += "</P>\n"
         if aliases:
+            aliases = ', '.join(aliases.split("\n"))
             description += '<P class="obj-description"><b>Aliases:</b><BR>\n' + aliases
             description += "</P>\n"
         if references:
@@ -666,7 +667,6 @@ class ThemeOntology(object):
                             if mycols and mycols[0] == entry.sid:
                                 collection_entry = entry
                         if idx > 0 and self._imply_collection and collection_entry:
-                            #print("{}  --->  {}".format(entry.sid, collection_entry.sid))
                             field = collection_entry.get("Component Stories")
                             field.parts.append(entry.sid)
                     else:

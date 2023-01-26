@@ -5,6 +5,7 @@
 {% block page_search_scripts %}
     <script>
         var dataUrl = '/api/search/themes/?format=datatables&query=';
+        var defaultOrder = [ [ 1, "asc" ], [ 3, "asc" ], [ 2, "asc" ] ];
 
         function loadDataOnReady() {
             $(document).ready(function() {
@@ -14,40 +15,36 @@
                     "paging" : true,
                     "lengthMenu": [ 10, 100, 1000, 10000 ],
 
-                    "order": [
-                        [ 2, "asc" ],
-                        [ 1, "asc" ],
-                    ],
+                    "order": defaultOrder,
                     "dom": '<"top">rt<"bottom"flip><"clear">',
                     "language": {
                         "search": "filter:"
                     },
                     "columnDefs" : [
                         { 
-                            "render": function ( data, type, row ) {
-                                return parseInt(data);
-                            },
+                            "render": function ( data, type, row ) { return parseInt(data); },
                             "targets": 0, 
                             "visible": false,
                         },
+                        { 
+                            "targets": 1, 
+                            "visible": false,
+                        },
                         {
-                            "render": function ( data, type, row ) {
-                                return makeThemeLink(data);
-                            },
+                            "render": function ( data, type, row ) { return makeThemeLink(data); },
                             "className": "tstp-theme-cell",
-                            "targets": 1,
+                            "targets": 2,
                             "width": "20%",
                         },
                         {
-                            "render": function ( data, type, row ) {
-                                return makeThemeLinkList(data, "black");
-                            },
-                            "targets": 2,
+                            "render": function ( data, type, row ) { 
+                                return makeThemeLinkList(data, "black"); },
+                            "targets": 3,
                             "width": "15%",
                         },
                         {
                             "className": "tstp-description-cell",
-                            "targets": 3,
+                            "targets": 4,
                         },
                     ]
                 } );
@@ -74,10 +71,7 @@
                     ]);
                     table.column(0).visible(true);
                 } else {
-                    table.order([
-                        [ 2, "asc" ],
-                        [ 1, "asc" ],
-                    ]);
+                    table.order(defaultOrder);
                     table.column(0).visible(false);
                 }
                 table.clear().draw();
@@ -100,6 +94,7 @@
         	        <thead>
         	            <tr>
                             <th data-data="weight">Score</th>
+                            <th data-data="level">Level</th>
         	                <th data-data="name">Theme</th>
         	                <th data-data="parents">Parent</th>
                             <th data-data="description">Description</th>
