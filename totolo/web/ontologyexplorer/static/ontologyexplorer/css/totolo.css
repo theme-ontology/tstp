@@ -39,21 +39,21 @@ body {
 
 #totolo-frontpage P
 {
-  font-size: 1.5em;
+  font-size: calc(.75em + 1.25vw);
   line-height: 2.2em;
   margin: 1em 0em 2em 0em;
 }
 #totolo-frontpage .totolo-frontstat
 {
   color: #FFCC88;
-  font-size: 1.7em;
+  font-size: calc(1.0em + 1.25vw);
   vertical-align: bottom;
   padding: 0.1em;
 }
 #totolo-frontpage .totolo-frontstat-story
 {
   color: #88CCFF;
-  font-size: 1.7em;
+  font-size: calc(1.0em + 1.25vw);
   vertical-align: bottom;
   padding: 0.1em;
 }
