@@ -2,23 +2,18 @@ services:
   m4:
     env_file:
       - ./.env.prod
-    ports:
-      - "8000:8000"
-    volumes:
-      - ../..:/local/tstp:rw
-      - staticfiles_data:/local/tstp/totolo/web/staticfiles
+    expose:
+      - 8000
 
   nginx:
+    image: ${DOCKER_REGISTRY}/totolo-nginx
     build: ./nginx
     ports:
-      - "8001:80"
+      - "80:80"
     depends_on:
       - m4
     networks:
       - backend
       - frontend
     volumes:
-      - staticfiles_data:/home/app/web/staticfiles
-
-volumes:
-  staticfiles_data:
+      - www_data:/www/pub

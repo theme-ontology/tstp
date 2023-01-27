@@ -39,15 +39,8 @@ services:
 
 volumes:
   sqldb_data:
-    driver: local
-  sphinx_data:
-    driver: local
-  sphinx_code:
-    driver: local
   code_data:
-    driver: local
   www_data:
-    driver: local
 
 networks:
   frontend:

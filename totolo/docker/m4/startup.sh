@@ -6,6 +6,7 @@ URLGIT_THEMES_MASTER="https://github.com/theme-ontology/theming/archive/refs/hea
 mkdir -p /code/tmp
 mkdir -p /code/tstp
 mkdir -p /code/theming
+mkdir -p /www/pub/staticfiles
 
 curl -L $URLGIT_TSTP_MASTER > /code/tmp/tstp.tar.gz
 curl -L $URLGIT_THEMES_MASTER > /code/tmp/theming.tar.gz
@@ -40,7 +41,10 @@ nohup /code/tstp/totolo/run python3 manage.py indexgit >> /var/log/indexgit.log 
 
 echo "starting web server..."
 if [ -n "$IS_PROD" ]; then
-    /code/tstp/totolo/run python3 manage.py collectstatic
+    /code/tstp/totolo/run python3 manage.py collectstatic -c --noinput
+    ls -l /www/pub/staticfiles
+    chmod -R u=rwx,go=rx /www/pub
+    ls -l /www/pub/staticfiles/ontologyexplorer/img
     /code/tstp/totolo/run gunicorn website.wsgi:application --bind 0.0.0.0:8000
 else
     /code/tstp/totolo/run python3 manage.py runserver 0.0.0.0:8000
