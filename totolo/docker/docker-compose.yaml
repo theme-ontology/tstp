@@ -4,9 +4,10 @@ services:
     build:
       context: .
       dockerfile: ./m4/Dockerfile
+    env_file:
+      - ./.env.dev
     networks:
       - backend
-      - frontend
     volumes:
       - code_data:/code
       - www_data:/www/pub

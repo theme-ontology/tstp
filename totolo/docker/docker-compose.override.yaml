@@ -4,3 +4,8 @@ services:
       - ../..:/local/tstp:rw
     ports:
       - "8000:80"
+    networks:
+      - frontend
+
+
+
