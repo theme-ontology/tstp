@@ -1,4 +1,4 @@
-aws-ecr-push.bat
+cmd /c aws-ecr-push.bat
 
 docker context use totolo
 docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up
