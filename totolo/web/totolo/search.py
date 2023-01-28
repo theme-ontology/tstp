@@ -47,7 +47,9 @@ def do(query, indexname, queryoptions, obj):
             if word == acw:
                 dword = unidecode(word)
                 ac_dword = dspell.autocorrect_word(dword)
-                acw = diacritics.get(ac_dword, set(word)).pop()
+                suggestions = diacritics.get(ac_dword, set([word]))
+                if suggestions:
+                    acw = suggestions.pop()
             acwords.append([word, acw] if acw != word else [word])
             # TODO: wrap this in error handling as autocorrect is unlikely to be robust
         if len(acwords) < 5:
