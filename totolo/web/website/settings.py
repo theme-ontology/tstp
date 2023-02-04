@@ -11,27 +11,22 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 from pathlib import Path
 import totolo.deployment
+import os
+from django.core.management.utils import get_random_secret_key
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ba(s0f0b_lr@#^%nsfxw9kx3o1r8c$&_&5d(e!60ec3g!tu9=9'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
+DEBUG = True if os.getenv("DEBUG", False) else False
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if DEBUG:
+    SECRET_KEY = 'django-insecure-ba(s0f0b_lr@#^%nsfxw9kx3o1r8c$&_&5d(e!60ec3g!tu9=9'
+else:
+    SECRET_KEY = get_random_secret_key()
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'ontologyexplorer.apps.OntologyexplorerConfig',
     'rest_framework',
