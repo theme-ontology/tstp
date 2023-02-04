@@ -5,3 +5,4 @@ socat
 graphviz
 tree
 gpg
+shadow

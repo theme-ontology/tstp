@@ -1,0 +1,358 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  Cluster: arn:aws:ecs:eu-west-1:777087578287:cluster/totolo-cluster
+Resources:
+  CloudMap:
+    Properties:
+      Description: Service Map for Docker Compose project docker
+      Name: docker.local
+      Vpc: vpc-5320ee34
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+  CodedataAccessPoint:
+    Properties:
+      AccessPointTags:
+      - Key: com.docker.compose.project
+        Value: docker
+      - Key: com.docker.compose.volume
+        Value: code_data
+      - Key: Name
+        Value: docker_code_data
+      FileSystemId: fs-035ff5b6059353b85
+    Type: AWS::EFS::AccessPoint
+  CodedataNFSMountTargetOnSubnet85a26ce2:
+    Properties:
+      FileSystemId: fs-035ff5b6059353b85
+      SecurityGroups:
+      - Ref: FrontendNetwork
+      SubnetId: subnet-85a26ce2
+    Type: AWS::EFS::MountTarget
+  CodedataNFSMountTargetOnSubnetbccbc1e4:
+    Properties:
+      FileSystemId: fs-035ff5b6059353b85
+      SecurityGroups:
+      - Ref: FrontendNetwork
+      SubnetId: subnet-bccbc1e4
+    Type: AWS::EFS::MountTarget
+  CodedataNFSMountTargetOnSubnete0eb3ea9:
+    Properties:
+      FileSystemId: fs-035ff5b6059353b85
+      SecurityGroups:
+      - Ref: FrontendNetwork
+      SubnetId: subnet-e0eb3ea9
+    Type: AWS::EFS::MountTarget
+  Frontend80Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: tan-ru:80/tcp on frontend network
+      FromPort: 80
+      GroupId:
+        Ref: FrontendNetwork
+      IpProtocol: TCP
+      ToPort: 80
+    Type: AWS::EC2::SecurityGroupIngress
+  FrontendNetwork:
+    Properties:
+      GroupDescription: docker Security Group for frontend network
+      Tags:
+      - Key: com.docker.compose.project
+        Value: docker
+      - Key: com.docker.compose.network
+        Value: docker_frontend
+      VpcId: vpc-5320ee34
+    Type: AWS::EC2::SecurityGroup
+  FrontendNetworkIngress:
+    Properties:
+      Description: Allow communication within network frontend
+      GroupId:
+        Ref: FrontendNetwork
+      IpProtocol: "-1"
+      SourceSecurityGroupId:
+        Ref: FrontendNetwork
+    Type: AWS::EC2::SecurityGroupIngress
+  LoadBalancer:
+    Properties:
+      Scheme: internet-facing
+      SecurityGroups:
+      - Ref: FrontendNetwork
+      Subnets:
+      - subnet-85a26ce2
+      - subnet-bccbc1e4
+      - subnet-e0eb3ea9
+      Tags:
+      - Key: com.docker.compose.project
+        Value: docker
+      Type: application
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  LogGroup:
+    Properties:
+      LogGroupName: /docker-compose/docker
+    Type: AWS::Logs::LogGroup
+  TanruService:
+    DependsOn:
+    - TanruTCP80Listener
+    - CodedataNFSMountTargetOnSubnet85a26ce2
+    - CodedataNFSMountTargetOnSubnetbccbc1e4
+    - CodedataNFSMountTargetOnSubnete0eb3ea9
+    - WwwdataNFSMountTargetOnSubnet85a26ce2
+    - WwwdataNFSMountTargetOnSubnetbccbc1e4
+    - WwwdataNFSMountTargetOnSubnete0eb3ea9
+    Properties:
+      Cluster: arn:aws:ecs:eu-west-1:777087578287:cluster/totolo-cluster
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+      - ContainerName: tan-ru
+        ContainerPort: 80
+        TargetGroupArn:
+          Ref: TanruTCP80TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - Ref: FrontendNetwork
+          Subnets:
+          - subnet-85a26ce2
+          - subnet-bccbc1e4
+          - subnet-e0eb3ea9
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+      - RegistryArn:
+          Fn::GetAtt:
+          - TanruServiceDiscoveryEntry
+          - Arn
+      Tags:
+      - Key: com.docker.compose.project
+        Value: docker
+      - Key: com.docker.compose.service
+        Value: tan-ru
+      TaskDefinition:
+        Ref: TanruTaskDefinition
+    Type: AWS::ECS::Service
+  TanruServiceDiscoveryEntry:
+    Properties:
+      Description: '"tan-ru" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+        - TTL: 60
+          Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: tan-ru
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  TanruTCP80Listener:
+    Properties:
+      DefaultActions:
+      - ForwardConfig:
+          TargetGroups:
+          - TargetGroupArn:
+              Ref: TanruTCP80TargetGroup
+        Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 80
+      Protocol: HTTP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  TanruTCP80TargetGroup:
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      Tags:
+      - Key: com.docker.compose.project
+        Value: docker
+      TargetType: ip
+      VpcId: vpc-5320ee34
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  TanruTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+      - Command:
+        - eu-west-1.compute.internal
+        - docker.local
+        Essential: false
+        Image: docker/ecs-searchdomain-sidecar:1.0
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: docker
+        Name: Tanru_ResolvConf_InitContainer
+      - DependsOn:
+        - Condition: SUCCESS
+          ContainerName: Tanru_ResolvConf_InitContainer
+        Environment:
+        - Name: DEBUG
+          Value: "1"
+        - Name: DJANGO_ALLOWED_HOSTS
+          Value: localhost 127.0.0.1 [::1]
+        - Name: POSTGRES_DB
+          Value: totolo_db
+        - Name: POSTGRES_PASSWORD
+          Value: totolo
+        - Name: POSTGRES_USER
+          Value: totolo
+        - Name: SECRET_KEY
+          Value: foo
+        Essential: true
+        Image: public.ecr.aws/m8o2v6v7/totolo-tanru:latest@sha256:c7eca6cb49af7a38f6a58c7dbb21136ab25c96bbbc2a2a79749fd6faa7489812
+        LinuxParameters: {}
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: docker
+        MountPoints:
+        - ContainerPath: /code
+          SourceVolume: code_data
+        - ContainerPath: /www/pub
+          SourceVolume: www_data
+        Name: tan-ru
+        PortMappings:
+        - ContainerPort: 80
+          HostPort: 80
+          Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: TanruTaskExecutionRole
+      Family: docker-tan-ru
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+      TaskRoleArn:
+        Ref: TanruTaskRole
+      Volumes:
+      - EFSVolumeConfiguration:
+          AuthorizationConfig:
+            AccessPointId:
+              Ref: CodedataAccessPoint
+            IAM: ENABLED
+          FilesystemId: fs-035ff5b6059353b85
+          TransitEncryption: ENABLED
+        Name: code_data
+      - EFSVolumeConfiguration:
+          AuthorizationConfig:
+            AccessPointId:
+              Ref: WwwdataAccessPoint
+            IAM: ENABLED
+          FilesystemId: fs-0059989da251895ae
+          TransitEncryption: ENABLED
+        Name: www_data
+    Type: AWS::ECS::TaskDefinition
+  TanruTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Condition: {}
+          Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+      - Key: com.docker.compose.project
+        Value: docker
+      - Key: com.docker.compose.service
+        Value: tan-ru
+    Type: AWS::IAM::Role
+  TanruTaskRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Condition: {}
+          Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - elasticfilesystem:ClientMount
+            - elasticfilesystem:ClientWrite
+            - elasticfilesystem:ClientRootAccess
+            Condition:
+              StringEquals:
+                elasticfilesystem:AccessPointArn:
+                  Ref: CodedataAccessPoint
+            Effect: Allow
+            Principal: {}
+            Resource:
+            - arn:aws:elasticfilesystem:eu-west-1:777087578287:file-system/fs-035ff5b6059353b85
+          Version: 2012-10-17
+        PolicyName: TanruCodedataVolumeMountPolicy
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - elasticfilesystem:ClientMount
+            - elasticfilesystem:ClientWrite
+            - elasticfilesystem:ClientRootAccess
+            Condition:
+              StringEquals:
+                elasticfilesystem:AccessPointArn:
+                  Ref: WwwdataAccessPoint
+            Effect: Allow
+            Principal: {}
+            Resource:
+            - arn:aws:elasticfilesystem:eu-west-1:777087578287:file-system/fs-0059989da251895ae
+          Version: 2012-10-17
+        PolicyName: TanruWwwdataVolumeMountPolicy
+      Tags:
+      - Key: com.docker.compose.project
+        Value: docker
+      - Key: com.docker.compose.service
+        Value: tan-ru
+    Type: AWS::IAM::Role
+  WwwdataAccessPoint:
+    Properties:
+      AccessPointTags:
+      - Key: com.docker.compose.project
+        Value: docker
+      - Key: com.docker.compose.volume
+        Value: www_data
+      - Key: Name
+        Value: docker_www_data
+      FileSystemId: fs-0059989da251895ae
+    Type: AWS::EFS::AccessPoint
+  WwwdataNFSMountTargetOnSubnet85a26ce2:
+    Properties:
+      FileSystemId: fs-0059989da251895ae
+      SecurityGroups:
+      - Ref: FrontendNetwork
+      SubnetId: subnet-85a26ce2
+    Type: AWS::EFS::MountTarget
+  WwwdataNFSMountTargetOnSubnetbccbc1e4:
+    Properties:
+      FileSystemId: fs-0059989da251895ae
+      SecurityGroups:
+      - Ref: FrontendNetwork
+      SubnetId: subnet-bccbc1e4
+    Type: AWS::EFS::MountTarget
+  WwwdataNFSMountTargetOnSubnete0eb3ea9:
+    Properties:
+      FileSystemId: fs-0059989da251895ae
+      SecurityGroups:
+      - Ref: FrontendNetwork
+      SubnetId: subnet-e0eb3ea9
+    Type: AWS::EFS::MountTarget
