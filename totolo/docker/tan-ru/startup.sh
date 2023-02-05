@@ -27,11 +27,15 @@ else
     cd /code/tstp/totolo/web
 fi
 
+## execute startup script from git repo
+bash $PATH_CODE/totolo/docker/tan-ru/startup-ext.sh
+
+
 echo ":: STARTING UP AT PATH ::::::::::::::::::::::::::::::::::"
 pwd
 echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 echo ":: TOTOLO ENV :::::::::::::::::::::::::::::::::::::::::::"
-/code/tstp/totolo/run env
+$PATH_CODE/totolo/run env
 echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
 echo "starting cron daemon..."
@@ -47,19 +51,19 @@ echo "starting nginx web server..."
 nohup nginx -g 'daemon off;' &
 
 echo "adjusting database schemas..."
-/code/tstp/totolo/run python3 manage.py makemigrations
-/code/tstp/totolo/run python3 manage.py migrate
+$PATH_CODE/totolo/run python3 manage.py makemigrations
+$PATH_CODE/totolo/run python3 manage.py migrate
 nohup /code/tstp/totolo/run python3 manage.py indexgit >> /var/log/indexgit.log &
 
 echo "starting web server..."
 if [ -n "$IS_PROD" ]; then
-    /code/tstp/totolo/run python3 manage.py collectstatic -c --noinput
+    $PATH_CODE/totolo/run python3 manage.py collectstatic -c --noinput
     ls -l /www/pub/staticfiles
     chmod -R u=rwx,go=rx /www/pub
     ls -l /www/pub/staticfiles/ontologyexplorer/img
-    /code/tstp/totolo/run gunicorn website.wsgi:application --bind 0.0.0.0:8000
+    $PATH_CODE/totolo/run gunicorn website.wsgi:application --bind 0.0.0.0:8000
 else
-    /code/tstp/totolo/run python3 manage.py runserver 0.0.0.0:8000
+    $PATH_CODE/totolo/run python3 manage.py runserver 0.0.0.0:8000
 fi
 
 echo "...web server died!"

@@ -4,3 +4,4 @@
 /docker/credentials.py
 /docker/test/credentials.py
 *.sqlite3
+*.py
