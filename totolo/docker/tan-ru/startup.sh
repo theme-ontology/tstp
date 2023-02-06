@@ -29,6 +29,7 @@ fi
 
 ## execute startup script from git repo
 bash $PATH_CODE/totolo/docker/tan-ru/startup-ext.sh
+##
 
 echo ":: STARTING UP AT PATH ::::::::::::::::::::::::::::::::::"
 pwd
