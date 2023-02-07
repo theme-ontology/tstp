@@ -50,6 +50,16 @@ nohup sh /opt/sphinx/start.sh &
 echo "starting nginx web server..."
 nohup nginx -g 'daemon off;' &
 
+for ii in {1..10}
+do
+    if pg_isready -h localhost -p 5432 -U totolo
+    then
+        break
+    fi
+    echo "Waiting for postgres..."
+    sleep 2
+done
+
 echo "adjusting database schemas..."
 $PATH_CODE/totolo/run python3 manage.py makemigrations
 $PATH_CODE/totolo/run python3 manage.py migrate
