@@ -52,8 +52,9 @@ nohup nginx -g 'daemon off;' &
 
 for ii in {1..10}
 do
-    if pg_isready -h localhost -p 5432 -U totolo
+    if pg_isready -h localhost -p 5432 -U $POSTGRES_USER
     then
+        echo "postgres is ready on localhost:5432."
         break
     fi
     echo "Waiting for postgres..."
