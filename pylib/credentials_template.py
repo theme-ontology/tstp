@@ -1,5 +1,16 @@
-#: define (my)sql dbs and local paths here
 #: this file should be copied to credentials.py and edited
+from tstp_settings import *
+# left for legacy reasons; should be imported directly from tstp_settings going forwards
+assert(
+	SERVER_URL,
+	SERVER_PUB_URL,
+	GIT_THEMING_PATH_HIST,
+	GIT_THEMING_PATH,
+	GIT_THEMING_PATH_M4,
+	PUBLIC_DIR,
+	TEMP_PATH,
+	EMAIL_ADMIN,
+)
 
 DBS = {
 	'tstp@aws' : dict(
@@ -19,32 +30,11 @@ DBS = {
 #: "tstp" will be used by the web scripts
 DBS['tstp'] = DBS['tstp@aws']
 
-#: the url used to test this deployment, must end with /
-SERVER_URL = "http://127.0.0.1/tstp/webui/"
-SERVER_PUB_URL = "http://127.0.0.1/pub/"
-
-#: where is the theming git repository located?
-GIT_THEMING_PATH = "c:\\repos\\theming"
-GIT_THEMING_PATH_HIST = "c:\\repos\\theming-hist"
-GIT_THEMING_PATH_M4 = "c:\\repos\\theming-m4"
-
-#: public directory
-PUBLIC_DIR = "f:\\www\\pub"
-
 #: Apache Solr server URL base, must end with /
 SOLR_URL = "http://localhost:8983/solr/"
 
 #: Elasticsearch server if available
 ES_HOSTS = []
-
-#: where to keep temporary data files (useful for debugging)
-import tempfile
-TEMP_PATH = tempfile.gettempdir()
-
-#: email distribution
-EMAIL_ADMIN = [
-	"example@foo.bar",
-]
 
 #: how to post to slack
 SLACK_WEBHOOK_URL = None

@@ -4,11 +4,9 @@ additional JSON file containing the LTO contents for the latest commit (i.e. the
 also generated.
     pyrun webtask.cache_data (from inside the scripts directory)
 """
-
 from __future__ import print_function
 import os
-from credentials import GIT_THEMING_PATH_HIST
-from credentials import PUBLIC_DIR
+from tstp_settings import GIT_THEMING_PATH_HIST, PUBLIC_DIR
 import lib.commits
 import lib.files
 import lib.dataparse
@@ -20,6 +18,7 @@ import pytz
 import lib.log
 import subprocess
 import dateutil.parser
+
 
 def get_lto_data(version, basepath):
     """
@@ -76,6 +75,7 @@ def get_lto_data(version, basepath):
 
     return themeobjs_list, storyobjs_list, storythemeobjs_list, timestamp, commit_id
 
+
 def init_metadata_od(version, timestamp, commit_id, category, count):
     """
     Store LTO meta data in an ordered dictionary.
@@ -94,6 +94,7 @@ def init_metadata_od(version, timestamp, commit_id, category, count):
     metadata_od['encoding'] = 'UTF-8'
     metadata_od[category + '-count'] = count
     return metadata_od
+
 
 def init_theme_od(themeobj, basepath):
     """
@@ -195,6 +196,7 @@ def init_story_od(storyobj, basepath):
 
     return story_od
 
+
 def init_collection_od(storyobj, basepath):
     """
     Initialize an ordered dictionary and populate its entries with the preprocessed fields of a
@@ -250,6 +252,7 @@ def init_collection_od(storyobj, basepath):
         collection_od = None
 
     return collection_od
+
 
 def init_thematic_annotation_od(storythemeobj, templated_themes_list):
     """
@@ -315,6 +318,7 @@ def init_themes_list(themeobjs_list, basepath):
 
     return themes_list, templated_themes_list
 
+
 def init_stories_list(storyobjs_list, basepath):
     """
     Create a list of stories, where each story is represented by an ordered dictionary, for a given
@@ -336,6 +340,7 @@ def init_stories_list(storyobjs_list, basepath):
     stories_list = sorted(stories_list, key=lambda i: i['date'])
 
     return stories_list
+
 
 def init_collections_list(storyobjs_list, basepath):
     """
@@ -359,6 +364,7 @@ def init_collections_list(storyobjs_list, basepath):
     collections_list = sorted(collections_list, key=lambda i: i['title'])
 
     return collections_list
+
 
 def add_root_theme(themes_list):
     """
@@ -384,6 +390,7 @@ def add_root_theme(themes_list):
     #' return updated theme list
     return themes_list
 
+
 def populate_stories_with_themes(stories_list, storythemeobjs_list, templated_themes_list):
     """
     Initialize an ordered dictionary and populate its entries with the preprocessed fields of a
@@ -402,6 +409,7 @@ def populate_stories_with_themes(stories_list, storythemeobjs_list, templated_th
             stories_list[story_ids.index(storythemeobj.name1)]['themes'].append(thematic_annotation_od)
 
     return stories_list
+
 
 def populate_stories_with_collections_1(storyobjs_list, stories_list):
     """
@@ -422,6 +430,7 @@ def populate_stories_with_collections_1(storyobjs_list, stories_list):
 
     return stories_list
 
+
 def populate_stories_with_collections_2(storyobjs_list, stories_list):
     """
     Add collection IDs to stories for any collections defined implicity by a story having
@@ -441,6 +450,7 @@ def populate_stories_with_collections_2(storyobjs_list, stories_list):
                     stories_list[story_ids.index(component_story_id)]['collections'].append('Collection: ' + storyobj.name)
 
     return stories_list
+
 
 def populate_collections_with_component_stories(collections_list, storyobjs_list):
     """
@@ -602,6 +612,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
 
     return collections_list
 
+
 def populate_collections_with_themes(collections_list, storythemeobjs_list, templated_themes_list):
     """
     Initialize an ordered dictionary and populate its entries with the preprocessed fields of a
@@ -620,6 +631,7 @@ def populate_collections_with_themes(collections_list, storythemeobjs_list, temp
             collections_list[collection_ids.index(storythemeobj.name1)]['themes'].append(thematic_annotation_od)
 
     return collections_list
+
 
 def write_lto_data_to_json_file(lto_json, version, output_dir, category, overwrite=False):
     """
@@ -643,6 +655,7 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, category, overwri
         with io.open(path, 'w', encoding='utf-8') as f:
             f.write(lto_json)
 
+
 def generate_lto_file_path(output_dir, version, category):
     """
     Generate file path for storing LTO theme, story, or collection data to JSON file.
@@ -662,27 +675,28 @@ def generate_lto_file_path(output_dir, version, category):
 
     return file_path
 
-def main(test_run=False):
-    #' preliminaries
-    basepath = GIT_THEMING_PATH_HIST
-    output_dir = os.path.join(PUBLIC_DIR, 'data')
+
+def main(
+    test_run=False,
+    basepath=GIT_THEMING_PATH_HIST,
+    output_dir=os.path.join(PUBLIC_DIR, 'data'),
+):
     lib.files.mkdirs(output_dir)
     os.chdir(basepath)
-
-    #' setup git repository
     subprocess.check_output('git reset --hard origin/master'.split(), stderr=subprocess.STDOUT)
-    #' The first two versions (i.e. v0.1.0 and v0.1.1) are skipped on account that neither contains
-    #' any themes. The tags exist for historical reasons that are unimportant here.
+
+    # The first two versions (i.e. v0.1.0 and v0.1.1) are skipped on account that neither contains
+    # any themes. The tags exist for historical reasons that are unimportant here.
     versions = subprocess.check_output('git tag'.split()).decode("utf-8").rstrip().split('\n')[2:]
     versions.append('dev')
 
-    #' use version v0.3.2 for testing purposes
+    # use version v0.3.2 for testing purposes
     if test_run:
         versions = ['v0.3.2']
 
-    #' create a JSON file for each named version of LTO catalogued in the repository
+    # create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:
-        #' check if cached files already exist for non "dev" versions
+        # check if cached files already exist for non "dev" versions
         cached_files_exist = False
         if version != 'dev':
             themes_file_path = generate_lto_file_path(output_dir, version, category='theme')
@@ -690,26 +704,26 @@ def main(test_run=False):
             collections_file_path = generate_lto_file_path(output_dir, version, category='collection')
             cached_files_exist = os.path.isfile(themes_file_path) and os.path.isfile(stories_file_path) and os.path.isfile(collections_file_path)
 
-        #' cache LTO data
-        #' if test_run is true, then only LTO v0.3.2 is cached
-        #' if test_run is false, then
-        #' 1) the "dev" version of LTO is always cached, and
-        #' 2) tagged LTO version data is cached if and only if the corresponding JSON files do not
-        #' already exist
+        # cache LTO data
+        # if test_run is true, then only LTO v0.3.2 is cached
+        # if test_run is false, then
+        # 1) the "dev" version of LTO is always cached, and
+        # 2) tagged LTO version data is cached if and only if the corresponding JSON files do not
+        # already exist
         if not test_run and not cached_files_exist:
             lib.log.info('Caching LTO %s data...', version)
 
-            #' retrieve theme, story, collection, and metadata for a given LTO version
+            # retrieve theme, story, collection, and metadata for a given LTO version
             themeobjs_list, storyobjs_list, storythemeobjs_list, timestamp, commit_id = get_lto_data(version, basepath)
 
-            #' prepare theme data and write to JSON file
+            # prepare theme data and write to JSON file
             themes_list, templated_themes_list = init_themes_list(themeobjs_list, basepath)
             themes_od = OrderedDict()
             themes_od['lto'] = init_metadata_od(version, timestamp, commit_id, category='theme', count=len(themes_list))
             themes_od['themes'] = themes_list
             themes_json = json.dumps(themes_od, ensure_ascii=False, indent=4)
 
-            #' prepare story data and write to JSON file
+            # prepare story data and write to JSON file
             stories_list = init_stories_list(storyobjs_list, basepath)
             stories_list = populate_stories_with_collections_1(storyobjs_list, stories_list)
             stories_list = populate_stories_with_collections_2(storyobjs_list, stories_list)
@@ -719,7 +733,7 @@ def main(test_run=False):
             stories_od['stories'] = stories_list
             stories_json = json.dumps(stories_od, ensure_ascii=False, indent=4)
 
-            #' prepare collection data and write to JSON file
+            # prepare collection data and write to JSON file
             collections_list = init_collections_list(storyobjs_list, basepath)
             collections_list = populate_collections_with_component_stories(collections_list, storyobjs_list)
             collections_list = populate_collections_with_themes(collections_list, storythemeobjs_list, templated_themes_list)
@@ -728,9 +742,9 @@ def main(test_run=False):
             collection_od['collections'] = collections_list
             collections_json = json.dumps(collection_od, ensure_ascii=False, indent=4)
 
-            #' write theme, story, and collection JSON objects to file
-            #' set overwrite to True to force existing files to be overwritten
-            #' only the developmental version should be written to file by default
+            # write theme, story, and collection JSON objects to file
+            # set overwrite to True to force existing files to be overwritten
+            # only the developmental version should be written to file by default
             if not test_run:
                 if version == 'dev':
                     write_lto_data_to_json_file(themes_json, version, output_dir, category='theme', overwrite=True)
