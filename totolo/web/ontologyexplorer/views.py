@@ -19,36 +19,48 @@ def index(request):
         statsobj = Statistic.objects.filter(name="general_stats").order_by("-timestamp")[0]
         stats = pickle.loads(gzip.decompress(statsobj.data))
     except Exception:
-        print(traceback.format_exc())
         stats = {}
-
-    num_motivations = sum(stats.get("num_storythemes", ERR).values())
-    nst_stats = stats.get("num_storythemes", {})
-    nw_stats = stats.get("num_words", {})
-    num_words_story_description = nw_stats.get("story_description", ERR)
-    num_words_theme_description = nw_stats.get("theme_description", ERR)
-
-    context = {
-        "num_stories": stats.get("num_stories", ERR),
-        "num_themes": stats.get("num_themes", ERR),
-        "num_motivations": num_motivations,
-        "num_motivations_choice": nst_stats.get("choice", ERR),
-        "num_motivations_major": nst_stats.get("major", ERR),
-        "num_motivations_minor": nst_stats.get("minor", ERR),
-        "num_words_story_description": num_words_story_description,
-        "num_words_theme_description": num_words_theme_description,
-    }
-    try:
-        context.update({
-            "avg_motivations_per_story": num_motivations // stats["num_stories"],
-            "avg_words_story_description": num_words_story_description // stats["num_stories"],
-            "avg_words_theme_description": num_words_theme_description // stats["num_themes"],
-            "avg_words_motivation": nw_stats["motivation"] // num_motivations,
-            "motivation_wordcount_10pct": stats.get("motivation_wordcount_10pct", ERR),
-        })
-    except Exception:
-        print(traceback.format_exc())
-
+        context = {
+            "num_stories": "(calculating...)",
+            "num_themes": "(calculating...)",
+            "num_motivations": "(calculating...)",
+            "num_motivations_choice": "(calculating...)",
+            "num_motivations_major": "(calculating...)",
+            "num_motivations_minor": "(calculating...)",
+            "num_words_story_description": "(calculating...)",
+            "num_words_theme_description": "(calculating...)",
+            "avg_motivations_per_story": "(calculating...)",
+            "avg_words_story_description": "(calculating...)",
+            "avg_words_theme_description": "(calculating...)",
+            "avg_words_motivation": "(calculating...)",
+            "motivation_wordcount_10pct": "(calculating...)",
+        }
+    else:
+        num_motivations = sum(stats.get("num_storythemes", ERR).values())
+        nst_stats = stats.get("num_storythemes", {})
+        nw_stats = stats.get("num_words", {})
+        num_words_story_description = nw_stats.get("story_description", ERR)
+        num_words_theme_description = nw_stats.get("theme_description", ERR)
+        context = {
+            "num_stories": stats.get("num_stories", ERR),
+            "num_themes": stats.get("num_themes", ERR),
+            "num_motivations": num_motivations,
+            "num_motivations_choice": nst_stats.get("choice", ERR),
+            "num_motivations_major": nst_stats.get("major", ERR),
+            "num_motivations_minor": nst_stats.get("minor", ERR),
+            "num_words_story_description": num_words_story_description,
+            "num_words_theme_description": num_words_theme_description,
+        }
+        try:
+            context.update({
+                "avg_motivations_per_story": num_motivations // stats["num_stories"],
+                "avg_words_story_description": num_words_story_description // stats["num_stories"],
+                "avg_words_theme_description": num_words_theme_description // stats["num_themes"],
+                "avg_words_motivation": nw_stats["motivation"] // num_motivations,
+                "motivation_wordcount_10pct": stats.get("motivation_wordcount_10pct", ERR),
+            })
+        except Exception:
+            print(traceback.format_exc())
     template = loader.get_template("ontologyexplorer/index.html")
     return HttpResponse(template.render(context, request))
 
