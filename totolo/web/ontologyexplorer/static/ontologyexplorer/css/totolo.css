@@ -85,6 +85,11 @@ body {
   list-style-type: "\203A  ";
 }
 
+ul
+{
+  list-style-type: "\203A  ";
+}
+
 td.tstp-sid-cell {
     font-family: monospace;
     word-break: break-word;

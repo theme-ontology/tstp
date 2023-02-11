@@ -16,6 +16,7 @@ urlpatterns = [
     url('^api/', include(router.urls)),
     path('stories', views.stories, name='stories'),
     path('themes', views.themes, name='themes'),
+    path('data', views.data, name='data'),
     url('story/(?P<sid>.+)$', views.story, name='story'),
     url('theme/(?P<name>.+)$', views.theme, name='theme'),
 ]

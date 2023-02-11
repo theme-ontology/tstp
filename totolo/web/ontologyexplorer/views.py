@@ -4,12 +4,13 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from rest_framework import viewsets
-from .models import Story, Theme, StoryTheme, Statistic
+from .models import Story, Theme, StoryTheme, Statistic, S3Link
 import ontologyexplorer.serializers as s
 import totolo.search
 import gzip
 import pickle
 import traceback
+from collections import defaultdict
 
 
 def index(request):
@@ -60,6 +61,29 @@ def stories(request):
 def themes(request):
     template = loader.get_template("ontologyexplorer/themes.html")
     return HttpResponse(template.render({}, request))
+
+
+def data(request):
+    bucket = request.GET.get('bucket', None)
+    bybucket = defaultdict(list)
+    if bucket:
+        links = S3Link.objects.filter(bucket=bucket).order_by("bucket", "name")
+    else:
+        links = S3Link.objects.all().order_by("bucket", "name")
+    for link in links:
+        bybucket[link.bucket].append(link)
+    links_in_buckets = [
+        (
+            bucket,
+            bybucket[bucket],
+        )
+        for bucket in sorted(bybucket.keys())
+    ]
+    context = {
+        "links_in_buckets": links_in_buckets,
+    }
+    template = loader.get_template("ontologyexplorer/data.html")
+    return HttpResponse(template.render(context, request))
 
 
 def story(request, sid):
