@@ -1,6 +1,6 @@
 from __future__ import print_function
 from collections import defaultdict
-from credentials import GIT_THEMING_PATH_HIST
+from tstp_settings import GIT_THEMING_PATH_HIST
 import os
 import subprocess
 from lib.dates import iter_days

@@ -7,7 +7,6 @@ also generated.
 from __future__ import print_function
 import os
 from tstp_settings import GIT_THEMING_PATH_HIST, PUBLIC_DIR
-import lib.commits
 import lib.files
 import lib.dataparse
 import lib.textformat
