@@ -64,7 +64,9 @@ done
 echo "adjusting database schemas..."
 $PATH_CODE/totolo/run python3 manage.py makemigrations
 $PATH_CODE/totolo/run python3 manage.py migrate
-#nohup $PATH_CODE/totolo/run python3 manage.py indexgit
+echo "running indexgit in background..."
+nohup $PATH_CODE/totolo/run python3 manage.py indexgit
+echo "running cache_lto in background..."
 nohup $PATH_CODE/totolo/run python3 manage.py cache_lto
 
 echo "starting web server..."
@@ -75,10 +77,6 @@ if [ -n "$IS_PROD" ]; then
     ls -l /www/pub/staticfiles/ontologyexplorer/img
     $PATH_CODE/totolo/run gunicorn website.wsgi:application --bind 0.0.0.0:8000
 else
-#    $PATH_CODE/totolo/run python3 manage.py collectstatic -c --noinput
-#    ls -l /www/pub/staticfiles
-#    chmod -R u=rwx,go=rx /www/pub
-#    ls -l /www/pub/staticfiles/ontologyexplorer/img
     $PATH_CODE/totolo/run python3 manage.py runserver 0.0.0.0:8000
 fi
 
