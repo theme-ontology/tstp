@@ -129,15 +129,15 @@ def init_theme_od(themeobj, basepath):
     theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(themeobj.meta)['source'])
     extra_fields = set(themeobj.extra_fields)
     if 'aliases' in extra_fields:
-        theme_od['aliases'] = filter(None, themeobj.aliases.split('\n'))
+        theme_od['aliases'] = list(filter(None, themeobj.aliases.split('\n')))
     if 'notes' in extra_fields:
-        theme_od['notes'] = filter(None, lib.textformat.remove_wordwrap(themeobj.notes).split('\n\n'))
+        theme_od['notes'] = list(filter(None, lib.textformat.remove_wordwrap(themeobj.notes).split('\n\n')))
     if 'template' in extra_fields:
         theme_od['template'] = [themeobj.template]
     if 'references' in extra_fields:
-        theme_od['references'] = filter(None, themeobj.references.split('\n'))
+        theme_od['references'] = list(filter(None, themeobj.references.split('\n')))
     if 'examples' in extra_fields:
-        theme_od['examples'] = filter(None, lib.textformat.remove_wordwrap(themeobj.examples).split('\n\n'))
+        theme_od['examples'] = list(filter(None, lib.textformat.remove_wordwrap(themeobj.examples).split('\n\n')))
 
     return theme_od
 
@@ -181,18 +181,18 @@ def init_story_od(storyobj, basepath):
         #' included at the end of the description
         story_od['description'] = lib.textformat.remove_wordwrap(storyobj.description.rstrip().split('\n\n\n')[0])
         collection_ids = []
-        raw_collection_ids = filter(None, storyobj.collections.split('\n'))
+        raw_collection_ids = list(filter(None, storyobj.collections.split('\n')))
         for raw_collection_id in raw_collection_ids:
             if not raw_collection_id.startswith('Collection: '):
                 collection_ids.append('Collection: ' + raw_collection_id)
             else:
                 collection_ids.append(raw_collection_id)
         story_od['collections'] = collection_ids
-        story_od['component-story-ids'] = filter(None, storyobj.components.split('\n'))
+        story_od['component-story-ids'] = list(filter(None, storyobj.components.split('\n')))
         story_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
         extra_fields = set(storyobj.extra_fields)
         if 'references' in extra_fields:
-            story_od['references'] = filter(None, storyobj.references.split('\n'))
+            story_od['references'] = list(filter(None, storyobj.references.split('\n')))
 
     return story_od
 
@@ -212,7 +212,7 @@ def init_collection_od(storyobj, basepath):
     #' 3) its name is not prefixed with "Collection: " but it has component stories
 
     is_collection = True
-    component_story_ids = filter(None, storyobj.components.split('\n'))
+    component_story_ids = list(filter(None, storyobj.components.split('\n')))
     fields = [
         'collection-id',
         'title',
@@ -239,7 +239,7 @@ def init_collection_od(storyobj, basepath):
     collection_od['themes'] = []
     extra_fields = set(storyobj.extra_fields)
     if 'references' in extra_fields:
-        collection_od['references'] = filter(None, storyobj.references.split('\n'))
+        collection_od['references'] = list(filter(None, storyobj.references.split('\n')))
 
     if storyobj.name.startswith('Collection: '):
         collection_od['collection-id'] = storyobj.name
@@ -355,7 +355,7 @@ def init_collections_list(storyobjs_list, basepath):
     collections_list = list()
     for storyobj in storyobjs_list:
         story_id = storyobj.name
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         if story_id.startswith('Collection: ') or (not story_id.startswith('Collection: ') and (storyobj.name == storyobj.collections or len(component_story_ids) > 0)):
             collection_od = init_collection_od(storyobj, basepath)
             collections_list.append(collection_od)
@@ -423,7 +423,7 @@ def populate_stories_with_collections_1(storyobjs_list, stories_list):
 
     for storyobj in storyobjs_list:
         if storyobj.name.startswith('Collection: '):
-            component_story_ids = filter(None, storyobj.components.split('\n'))
+            component_story_ids = list(filter(None, storyobj.components.split('\n')))
             for component_story_id in component_story_ids:
                 if component_story_id in story_ids:
                     stories_list[story_ids.index(component_story_id)]['collections'].append(storyobj.name)
@@ -443,7 +443,7 @@ def populate_stories_with_collections_2(storyobjs_list, stories_list):
     story_ids = [story_od['story-id'] for i, story_od in enumerate(stories_list)]
 
     for storyobj in storyobjs_list:
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         if not storyobj.name.startswith('Collection: ') and len(component_story_ids) > 0:
             for component_story_id in component_story_ids:
                 if component_story_id in story_ids:
@@ -466,7 +466,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #' Make list of frame story component story IDs
     all_frame_story_component_story_ids = []
     for storyobj in storyobjs_list:
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         candidate_story_collection_id = 'Collection: ' + storyobj.name
         if not storyobj.name.startswith('Collection: ') and len(component_story_ids) > 0 and candidate_story_collection_id in collection_ids:
             all_frame_story_component_story_ids.extend(component_story_ids)
@@ -519,7 +519,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #'
     #' These are the non-frame stories in the ./notes/stories/* subfolders.
     for storyobj in storyobjs_list:
-        story_collection_ids = filter(None, storyobj.collections.split('\n'))
+        story_collection_ids = list(filter(None, storyobj.collections.split('\n')))
         for story_collection_id in story_collection_ids:
             if story_collection_id in collection_ids and story_collection_id != storyobj.name and not storyobj.name in all_frame_story_component_story_ids:
                 collections_list[collection_ids.index(story_collection_id)]['component-story-ids'].append(storyobj.name)
@@ -542,7 +542,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #'
     #' These are found in the ./notes/collections folder.
     for storyobj in storyobjs_list:
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         if storyobj.name.startswith('Collection: ') and len(component_story_ids) > 0:
             story_collection_id = storyobj.name
             for component_story_id in component_story_ids:
@@ -583,7 +583,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #' occur in other folders.
     for storyobj in storyobjs_list:
         if not storyobj.name.startswith('Collection: ') and len(storyobj.collections) > 0:
-            story_collection_ids = filter(None, storyobj.collections.split('\n'))
+            story_collection_ids = list(filter(None, storyobj.collections.split('\n')))
             for story_collection_id in story_collection_ids:
                 if 'Collection: ' + story_collection_id in collection_ids and story_collection_id != storyobj.name:
                     collections_list[collection_ids.index('Collection: ' + story_collection_id)]['component-story-ids'].append(storyobj.name)
@@ -603,7 +603,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #'
     #' See ./notes/stories/literature/novel-apuleius.st.txt for a concrete example.
     for storyobj in storyobjs_list:
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         candidate_story_collection_id = 'Collection: ' + storyobj.name
         if not storyobj.name.startswith('Collection: ') and len(component_story_ids) > 0:
             if candidate_story_collection_id in collection_ids:
@@ -642,11 +642,12 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, category, overwri
         version: string
         overwrite: boolean
     """
+    import sys
 
     #' ensure JSOn object is encoded as UTF-8
     #' failing to do so may result in an error in the case when an Ordered Dictionary of themes,
     #' stories, or collections is empty
-    if isinstance(lto_json, str):
+    if isinstance(lto_json, str) and sys.version_info[0] < 3:
         lto_json = str(lto_json, 'UTF-8')
 
     #' write JSON object to file
@@ -676,10 +677,12 @@ def generate_lto_file_path(output_dir, version, category):
     return file_path
 
 
+
 def main(
     test_run=False,
     basepath=GIT_THEMING_PATH_HIST,
     output_dir=os.path.join(PUBLIC_DIR, 'data'),
+    versions=None,
 ):
     lib.files.mkdirs(output_dir)
     os.chdir(basepath)
@@ -687,12 +690,13 @@ def main(
 
     # The first two versions (i.e. v0.1.0 and v0.1.1) are skipped on account that neither contains
     # any themes. The tags exist for historical reasons that are unimportant here.
-    versions = subprocess.check_output('git tag'.split()).decode("utf-8").rstrip().split('\n')[2:]
-    versions.append('dev')
-
-    # use version v0.3.2 for testing purposes
-    if test_run:
+    if versions:
+        versions = versions.split(",") if isinstance(versions, str) else versions
+    elif test_run:
         versions = ['v0.3.2']
+    else:
+        versions = subprocess.check_output('git tag'.split()).decode("utf-8").rstrip().split('\n')[2:]
+        versions.append('dev')
 
     # create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:

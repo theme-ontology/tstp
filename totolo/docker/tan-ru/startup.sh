@@ -64,7 +64,8 @@ done
 echo "adjusting database schemas..."
 $PATH_CODE/totolo/run python3 manage.py makemigrations
 $PATH_CODE/totolo/run python3 manage.py migrate
-nohup /code/tstp/totolo/run python3 manage.py indexgit >> /var/log/indexgit.log &
+nohup $PATH_CODE/totolo/run python3 manage.py indexgit
+nohup $PATH_CODE/totolo/run python3 manage.py cache_lto
 
 echo "starting web server..."
 if [ -n "$IS_PROD" ]; then

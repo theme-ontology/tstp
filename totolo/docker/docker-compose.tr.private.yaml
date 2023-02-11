@@ -1,0 +1,13 @@
+services:
+  tan-ru:
+    env_file:
+      - ./.env.tr.private.dev
+    volumes:
+      - ../..:/local/tstp:rw
+    ports:
+      - "8000:8000"
+      - "8080:80"
+      - "443:443"
+
+
+

@@ -8,5 +8,6 @@
 # *  *  *  *  *  command --arg1 --arg2 file1 file2 2>&1
 
 # must be ended with a new line "LF" (Unix) and not "CRLF" (Windows)
-* * * * * echo "Hello world" >> /var/log/cron.log 2>&1
+14 3  *  *  *  /code/tstp/totolo/run python3 manage.py cache_lto >> /var/log/cache_lto.log 2>&1
+45 *  *  *  *  /code/tstp/totolo/run python3 manage.py indexgit >> /var/log/indexgit.log 2>&1
 # An empty line is required at the end of this file for a valid cron file.

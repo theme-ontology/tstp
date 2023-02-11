@@ -5,3 +5,4 @@
 /docker/test/credentials.py
 *.sqlite3
 *.py
+/totolo/docker/.env.private

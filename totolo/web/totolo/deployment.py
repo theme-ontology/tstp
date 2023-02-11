@@ -20,5 +20,3 @@ class SQLDB:
     user = 'totolo'
     secret = 'totolo'
 
-
-print("::: {} ::: {} ::: {} :::".format(IS_MONOLITH, SPHINX.HOST, SQLDB.HOST))

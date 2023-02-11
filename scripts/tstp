@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export PYTHONPATH=$PYTHONPATH:$DIR/../py3lib:$DIR/../pylib
+export TSTPPATH=$DIR/..
+export PATH=$PATH:$DIR
+
+if [ -z "$1" ]
+then
+    python
+else
+    python -c "import util.tstprun; util.tstprun.main();" "$@"
+fi
+
+
