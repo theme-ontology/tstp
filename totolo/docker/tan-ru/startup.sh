@@ -66,8 +66,8 @@ $PATH_CODE/totolo/run python3 manage.py makemigrations
 $PATH_CODE/totolo/run python3 manage.py migrate
 echo "running indexgit in background..."
 nohup $PATH_CODE/totolo/run python3 manage.py indexgit
-echo "running cache_lto in background..."
-nohup $PATH_CODE/totolo/run python3 manage.py cache_lto
+#echo "running cache_lto in background..."
+#nohup $PATH_CODE/totolo/run python3 manage.py cache_lto
 
 echo "starting web server..."
 if [ -n "$IS_PROD" ]; then
