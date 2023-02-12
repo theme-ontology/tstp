@@ -19,9 +19,6 @@ fi
 echo ":: STARTING UP AT PATH ::::::::::::::::::::::::::::::::::"
 pwd
 echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
-echo ":: TOTOLO ENV :::::::::::::::::::::::::::::::::::::::::::"
-$PATH_CODE/totolo/run env
-echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
 echo "starting cron daemon..."
 nohup /usr/sbin/crond -f -l 8 &
@@ -50,7 +47,6 @@ echo "running indexgit in background..."
 $PATH_CODE/totolo/run python3 manage.py indexgit &
 echo "running index_s3 in background..."
 $PATH_CODE/totolo/run python3 manage.py index_s3 &
-
 echo "adjusting database schemas..."
 $PATH_CODE/totolo/run python3 manage.py makemigrations
 $PATH_CODE/totolo/run python3 manage.py migrate
