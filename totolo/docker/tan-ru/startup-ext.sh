@@ -46,14 +46,14 @@ do
     sleep 2
 done
 
+echo "running indexgit in background..."
+$PATH_CODE/totolo/run python3 manage.py indexgit &
+echo "running index_s3 in background..."
+$PATH_CODE/totolo/run python3 manage.py index_s3 &
+
 echo "adjusting database schemas..."
 $PATH_CODE/totolo/run python3 manage.py makemigrations
 $PATH_CODE/totolo/run python3 manage.py migrate
-echo "running indexgit in background..."
-nohup $PATH_CODE/totolo/run python3 manage.py indexgit &
-echo "running index_s3 in background..."
-nohup $PATH_CODE/totolo/run python3 manage.py index_s3 &
-
 echo "starting web server..."
 if [ -n "$IS_PROD" ]; then
     $PATH_CODE/totolo/run python3 manage.py collectstatic -c --noinput
