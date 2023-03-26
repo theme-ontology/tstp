@@ -171,6 +171,7 @@ class Command(BaseCommand):
         lib.files.mkdirs(repo)
         lib.git.download_headversion("https://github.com/theme-ontology", "theming", repo)
         to = themeontology.read(os.path.join(repo, "notes"), imply_collection=True)
+        to.print_warnings()
 
         # get some info about the state of our repository
         with urllib.request.urlopen(URL_GIT_INFO) as url:

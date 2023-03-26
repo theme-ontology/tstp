@@ -684,6 +684,14 @@ class ThemeOntology(object):
                 if entry.name in lookup[type(entry)]:
                     yield u"{}: Multiple {} with name '{}'".format(path, type(entry), entry.name)
 
+        for story in self.stories():
+            for weight in ["choice", "major", "minor", "not"]:
+                field = "{} Themes".format(weight.capitalize())
+                for kw in story.get(field):
+                    if kw.keyword not in self.theme:
+                        yield u"{}: Undefined '{} theme' with name '{}'".format(
+                            story.name, weight, kw.keyword)
+
     def write_clean(self, verbose=False):
         """
         Write the ontology back to its source file while cleaning up syntax and
@@ -698,6 +706,13 @@ class ThemeOntology(object):
                 if verbose:
                     print(path)
                 fh.writelines(x + "\n" for x in lines)
+
+    def print_warnings(self):
+        """
+        Run validate and print warnings to stdout.
+        """
+        for msg in self.validate():
+            print(msg)
 
 
 def read(paths=None, imply_collection=False):
