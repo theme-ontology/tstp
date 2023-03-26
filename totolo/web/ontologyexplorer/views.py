@@ -11,6 +11,8 @@ import gzip
 import pickle
 import traceback
 from collections import defaultdict
+import os.path
+import time
 
 
 def index(request):
@@ -73,6 +75,30 @@ def stories(request):
 def themes(request):
     template = loader.get_template("ontologyexplorer/themes.html")
     return HttpResponse(template.render({}, request))
+
+
+def logs(request, name=None):
+    choices = [
+        "cache_lto",
+        "indexgit",
+        "query",
+    ]
+    context = {
+        "choices": choices,
+        "logname": "",
+        "logcontent": "",
+        "logmodified": "",
+    }
+    filename = "/var/log/{}.log".format(name)
+    if name in choices:
+        context["logname"] = name
+        if os.path.isfile(filename):
+            dtmod = os.path.getmtime(filename)
+            with open(filename, "r") as fh:
+                context["logcontent"] = fh.read()
+            context["logmodified"] = time.ctime(dtmod)
+    template = loader.get_template("ontologyexplorer/logs.html")
+    return HttpResponse(template.render(context, request))
 
 
 def data(request):

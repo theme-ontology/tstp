@@ -19,6 +19,7 @@ urlpatterns = [
     path('data', views.data, name='data'),
     url('story/(?P<sid>.+)$', views.story, name='story'),
     url('theme/(?P<name>.+)$', views.theme, name='theme'),
+    url('logs/(?P<name>.+)$', views.logs, name='logname'),
 ]
 
 
