@@ -13,6 +13,7 @@ import totolo.deployment
 
 
 RE_WORD = "[^\W_]+"
+SAFE_WORDS = {"the", "to", "too", "for", "of"}
 
 
 def _powerset(iterable):
@@ -43,13 +44,15 @@ def do(query, indexname, queryoptions, obj):
         words = re.findall(RE_WORD, query)
         acwords = []
         for word in words:
-            acw = spell.autocorrect_word(word)
-            if word == acw:
-                dword = unidecode(word)
-                ac_dword = dspell.autocorrect_word(dword)
-                suggestions = diacritics.get(ac_dword, set([word]))
-                if suggestions:
-                    acw = suggestions.pop()
+            acw = word
+            if word not in SAFE_WORDS:
+                acw = spell.autocorrect_word(word)
+                if word == acw:
+                    dword = unidecode(word)
+                    ac_dword = dspell.autocorrect_word(dword)
+                    suggestions = diacritics.get(ac_dword, set([word]))
+                    if suggestions:
+                        acw = suggestions.pop()
             acwords.append([word, acw] if acw != word else [word])
             # TODO: wrap this in error handling as autocorrect is unlikely to be robust
         if len(acwords) < 5:

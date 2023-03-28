@@ -21,9 +21,11 @@ class Command(BaseCommand):
         if options.get('t') and not options.get('s'):
             for theme, weight in totolo.search.themes(query):
                 print("{}: {}: {}".format(theme.idx, weight, theme.name))
+                #break
         elif options.get('s') and not options.get('t'):
-            for story, weight in totolo.search.story(query):
+            for story, weight in totolo.search.stories(query):
                 print("{}: {}: {}".format(story.idx, weight, story.title))
+                #break
         else:
             raise CommandError('Must choose either -t (search themes) or -s (search stories), but not both.')
 
