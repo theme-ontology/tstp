@@ -58,6 +58,7 @@ def do(query, indexname, queryoptions, obj):
         if len(acwords) < 5:
             delta_result = defaultdict(float)
             for wordset in _powerset(acwords):
+                print(wordset)
                 if wordset:
                     for wordlist in product(*wordset):
                         query = " ".join(wordlist)
@@ -77,25 +78,35 @@ def do(query, indexname, queryoptions, obj):
     idx2weight = dict(result)
     maxw = max(idx2weight.values()) if idx2weight else 0
     objects = obj.objects.filter(idx__in=idx2weight.keys())
-
-    # seemed clever but was probably worse than not doing it
-    """
-    targetfield = 'name' if 'themes' in indexname else 'title' if 'stories' in indexname else None
-    if targetfield:
-        qwords = re.findall(RE_WORD, query)
-        for obj in objects:
-            twords = ' '.join(re.findall(RE_WORD, getattr(obj, targetfield)))
-            stops = sorted(combinations(range(len(qwords)), r=2), key=lambda x: x[1] - x[0], reverse=True)
-            for idx_from, idx_to in stops:
-                qsubwords = qwords[idx_from:idx_to]
-                if ' '.join(qsubwords) in twords:
-                    #idx2weight[obj.idx] += maxw * len(qwords) / len(qsubwords)
-                    break
-        maxw = max(idx2weight.values()) if idx2weight else 0
-    """
     if maxw > 0:
         for idx in idx2weight:
             idx2weight[idx] = int(idx2weight[idx] / maxw * 100)
+
+    # Sphinx' scoring sucks so we have to boost words that are matched in the title
+    # to not yield certain silly result oversights.
+    word_in_name = defaultdict(set)
+    fieldattr = "name" if indexname == "totolo_themes" else "title"
+    for obj in objects:
+        idx = obj.idx
+        for wordlist in acwords:
+            for word in wordlist:
+                if word in getattr(obj, fieldattr).lower().split():
+                    word_in_name[idx].add(word)
+                    break
+    if word_in_name:
+        qq = len(acwords)
+        for obj in objects:
+            idx = obj.idx
+            name = getattr(obj, fieldattr).lower()
+            if name == query:
+                idx2weight[idx] = 100.0
+            else:
+                # Jaccard index scoring
+                nn = len(name.split())
+                mm = len(word_in_name[idx])
+                ss = mm / (nn + qq - mm)
+                idx2weight[idx] = idx2weight[idx] * 0.1 + 80.0 + 10 * ss
+
     objects = sorted(objects, key=lambda t: idx2weight[t.idx], reverse=True)
     return [(oo, idx2weight[oo.idx]) for oo in objects]
 
