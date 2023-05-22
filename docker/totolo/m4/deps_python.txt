@@ -1,4 +1,0 @@
-Django==3.2.13
-environs==7.3.1
-djangorestframework==3.14.0
-celery==5.2.7

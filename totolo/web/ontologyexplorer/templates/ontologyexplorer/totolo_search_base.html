@@ -1,0 +1,48 @@
+{% extends "ontologyexplorer/totolo_base.html" %}
+
+{% block page_scripts %}
+    <script>
+        var dataUrl = '/api/search/*/?format=datatables&query=';
+        var reloads = 0;
+        var prevsearch = "";
+
+        $(document).ready(function () {
+            loadDataOnReady();
+        });
+
+        function scheduleReload()
+        {
+            reloads += 1;
+            setTimeout(reloadData, 500);
+        }
+
+        $(document).keyup(function(e) {
+            if (e.keyCode == 27) {
+                $('#fieldFind').val("");
+                reloadData(true);
+            }
+        });
+
+    </script>
+    {% block page_search_scripts %}{% endblock %}
+{% endblock %}
+
+
+{% block page_body %}
+        <div class="d-flex flex-row bd-highlight">
+            <div class="w-100 mx-2">
+                <form autocomplete="off" onkeypress="return event.keyCode != 13;">
+                    <fieldset class="form-group">
+                        <label for="fieldFind">
+                            {% block page_subtitle %}{% endblock %} Search:
+                        </label>
+                        <input id="fieldFind" type="text" class="form-control totolo-search" 
+                            autofocus onchange="scheduleReload()" oninput="scheduleReload()">
+                    </fieldset>
+                </form>
+            </div>
+            <div class="mx-2">{% block page_icon %}{% endblock %}</div>
+        </div>
+
+    {% block page_datatable %}{% endblock %}
+{% endblock %}

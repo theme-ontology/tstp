@@ -1,0 +1,8 @@
+services:
+  tan-ru:
+    env_file:
+      - ./.env.tr.prod
+    ports:
+      - "80:80"
+      - "443:443"
+

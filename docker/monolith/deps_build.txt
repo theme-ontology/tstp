@@ -1,9 +1,0 @@
-python2
-curl
---virtual .build-deps
-gcc
-libffi-dev
-openssl-dev
-python2-dev
-musl-dev
-

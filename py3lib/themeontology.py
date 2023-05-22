@@ -50,7 +50,6 @@ STORY_FIELD_CONFIG = {
     "Other Keywords": {"type": "kwlist"},
     "Collections": {"type": "list"},
     "Component Stories": {"type": "list"},
-    ## "Genre": {"type": "blob"},
     "Related Stories": {"type": "list"},
 }
 
@@ -445,6 +444,70 @@ class TOTheme(TOEntry):
         """
         pass
 
+    def verbose_description(self):
+        """
+        A description that combines various other fields, including Notes, Examples,
+        Aliases, and References.
+        """
+        description = str(self.get("Description"))
+        examples = str(self.get("Examples")).strip()
+        aliases = str(self.get("Aliases")).strip()
+        notes = str(self.get("Notes")).strip()
+        references = str(self.get("References")).strip()
+        if notes:
+            description += "\n\nNotes:\n" + notes
+        if examples:
+            description += "\n\nExamples:\n" + examples
+        if aliases:
+            description += "\n\nAliases:\n" + aliases
+        if references:
+            description += "\n\nReferences:\n"
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    description += line + "\n"
+        return description
+
+    def html_description(self):
+        """
+        Turn the verbose description into html.
+        """
+        import html
+        description = html.escape(str(self.get("Description")))
+        examples = html.escape(str(self.get("Examples")).strip())
+        aliases = html.escape(str(self.get("Aliases")).strip())
+        notes = html.escape(str(self.get("Notes")).strip())
+        references = html.escape(str(self.get("References")).strip())
+        description = '<P class="obj-description"><BR>\n' + description
+        description += "</P>\n"
+        if notes:
+            description += '<P class="obj-description"><b>Notes:</b><BR>\n' + notes
+            description += "</P>\n"
+        if examples:
+            description += '<P class="obj-description"><b>Examples:</b><BR>\n' + examples
+            description += "</P>\n"
+        if aliases:
+            aliases = ', '.join(aliases.split("\n"))
+            description += '<P class="obj-description"><b>Aliases:</b><BR>\n' + aliases
+            description += "</P>\n"
+        if references:
+            description += '<P class="obj-description"><b>References:</b><BR>\n'
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    aline = '<A href="{}">{}</A>'.format(line, line)
+                    description += aline + "\n"
+            description += "</P>\n"
+        return description
+
+    def html_short_description(self):
+        """
+        A limited length short description without embelishments like "references".
+        """
+        import html
+        description = str(self.get("Description"))[:256]
+        return html.escape(description)
+
 
 class TOStory(TOEntry):
     def __init__(self, lines=None):
@@ -503,12 +566,55 @@ class TOStory(TOEntry):
         """
         return self.get("Title").text_canonical_contents().strip()
 
+    def verbose_description(self):
+        """
+        A description that combines various other fields, including Notes, Examples,
+        Aliases, and References.
+        """
+        description = str(self.get("Description"))
+        references = str(self.get("References")).strip()
+        if references:
+            description += "\n\nReferences:\n"
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    description += line + "\n"
+        return description
+
+    def html_description(self):
+        """
+        Turn the verbose description into html.
+        """
+        import html
+        description = html.escape(str(self.get("Description")))
+        references = html.escape(str(self.get("References")).strip())
+        description = '<P class="obj-description"><BR>\n' + description
+        description += "</P>\n"
+        if references:
+            description += '<P class="obj-description"><b>References:</b><BR>\n'
+            for line in references.split("\n"):
+                line = line.strip()
+                if line:
+                    aline = '<A href="{}">{}</A>'.format(line, line)
+                    description += aline + "\n"
+            description += "</P>\n"
+        return description
+
+    def html_short_description(self):
+        """
+        A limited length short description without embelishments like "references".
+        """
+        import html
+        description = str(self.get("Description"))[:256]
+        return html.escape(description)
+
 
 class ThemeOntology(object):
-    def __init__(self, paths=None):
+    def __init__(self, paths=None, imply_collection=False):
         self.theme = {}
         self.story = {}
         self.entries = defaultdict(list)
+        self._imply_collection = imply_collection
         if paths:
             if isinstance(paths, (list, tuple)):
                 for path in paths:
@@ -547,7 +653,8 @@ class ThemeOntology(object):
             elif path.endswith(".st.txt"):
                 entrytype = TOStory
             with codecs.open(path, "r", encoding='utf-8') as fh:
-                for entrylines in TOParser.iter_entries(fh):
+                collection_entry = None
+                for idx, entrylines in enumerate(TOParser.iter_entries(fh)):
                     entry = entrytype(entrylines)
                     entry.ontology = self
                     self.entries[path].append(entry)
@@ -555,6 +662,13 @@ class ThemeOntology(object):
                         self.theme[entry.name] = entry
                     elif isinstance(entry, TOStory):
                         self.story[entry.name] = entry
+                        if idx == 0:
+                            mycols = entry.get("Collections").parts
+                            if mycols and mycols[0] == entry.sid:
+                                collection_entry = entry
+                        if idx > 0 and self._imply_collection and collection_entry:
+                            field = collection_entry.get("Component Stories")
+                            field.parts.append(entry.sid)
                     else:
                         raise
 
@@ -569,6 +683,14 @@ class ThemeOntology(object):
                     yield u"{}: {}".format(path, warning)
                 if entry.name in lookup[type(entry)]:
                     yield u"{}: Multiple {} with name '{}'".format(path, type(entry), entry.name)
+
+        for story in self.stories():
+            for weight in ["choice", "major", "minor", "not"]:
+                field = "{} Themes".format(weight.capitalize())
+                for kw in story.get(field):
+                    if kw.keyword not in self.theme:
+                        yield u"{}: Undefined '{} theme' with name '{}'".format(
+                            story.name, weight, kw.keyword)
 
     def write_clean(self, verbose=False):
         """
@@ -585,10 +707,17 @@ class ThemeOntology(object):
                     print(path)
                 fh.writelines(x + "\n" for x in lines)
 
+    def print_warnings(self):
+        """
+        Run validate and print warnings to stdout.
+        """
+        for msg in self.validate():
+            print(msg)
 
-def read(paths=None):
+
+def read(paths=None, imply_collection=False):
     if not paths:
         import credentials
         paths = os.path.join(credentials.GIT_THEMING_PATH, "notes")
-    return ThemeOntology(paths)
+    return ThemeOntology(paths, imply_collection=imply_collection)
 

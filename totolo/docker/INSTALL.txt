@@ -1,0 +1,21 @@
+themeontology.org
+=================
+
+This is a Dockerized set-up to run the themeontology website.
+
+The folders m4/nginx/sphinx are not currently used. 
+They represent components that, for cost reasons, were integrate into
+a single monolith called tan-ru.
+
+To build and run tan-ru locally, install docker and do e.g.:
+
+> cd tstp/totolo/docker
+> set DOCKER_REGISTRY=public.ecr.aws/m8o2v6v7
+> docker compose -f docker-compose.tr.yaml -f docker-compose.tr.override.yaml up --build -d --remove-orphans
+
+The following services should become available:
+
+    https://127.0.0.1/
+    http://127.0.0.1:8000/
+
+The first runs on port 443.

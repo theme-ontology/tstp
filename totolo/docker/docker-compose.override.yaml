@@ -1,0 +1,11 @@
+services:
+  m4:
+    volumes:
+      - ../..:/local/tstp:rw
+    ports:
+      - "8000:8000"
+    networks:
+      - frontend
+
+
+

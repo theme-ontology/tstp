@@ -1,0 +1,106 @@
+{% extends "ontologyexplorer/totolo_search_base.html" %}
+
+{% block page_subtitle %}Themes{% endblock %}
+
+{% block page_search_scripts %}
+    <script>
+        var dataUrl = '/api/search/themes/?format=datatables&query=';
+        var defaultOrder = [ [ 1, "asc" ], [ 3, "asc" ], [ 2, "asc" ] ];
+
+        function loadDataOnReady() {
+            $(document).ready(function() {
+                $('#themes_datatable').DataTable( {
+                    "ajax": dataUrl,
+                    "pageLength" : 100,
+                    "paging" : true,
+                    "lengthMenu": [ 10, 100, 1000, 10000 ],
+
+                    "order": defaultOrder,
+                    "dom": '<"top">rt<"bottom"flip><"clear">',
+                    "language": {
+                        "search": "filter:"
+                    },
+                    "columnDefs" : [
+                        { 
+                            "render": function ( data, type, row ) { return parseInt(data); },
+                            "targets": 0, 
+                            "visible": false,
+                        },
+                        { 
+                            "targets": 1, 
+                            "visible": false,
+                        },
+                        {
+                            "render": function ( data, type, row ) { return makeThemeLink(data); },
+                            "className": "tstp-theme-cell",
+                            "targets": 2,
+                            "width": "20%",
+                        },
+                        {
+                            "render": function ( data, type, row ) { 
+                                return makeThemeLinkList(data, "black"); },
+                            "targets": 3,
+                            "width": "15%",
+                        },
+                        {
+                            "className": "tstp-description-cell",
+                            "targets": 4,
+                        },
+                    ]
+                } );
+            } );
+        }
+
+        function reloadData(force=false)
+        {
+            var fuzzy = $('#fieldFind').val();
+            if (fuzzy.length < 3) fuzzy = "";
+
+            if (!force)
+                reloads -= 1;
+
+            if ((reloads == 0 && fuzzy != prevsearch) || force)
+            {
+                table = $('#themes_datatable').DataTable();
+                var url = dataUrl + fuzzy;
+
+                if (fuzzy)
+                {
+                    table.order([
+                        [ 0, "desc" ],
+                    ]);
+                    table.column(0).visible(true);
+                } else {
+                    table.order(defaultOrder);
+                    table.column(0).visible(false);
+                }
+                table.clear().draw();
+                table.ajax.url(fuzzy ? url : dataUrl).load();
+                prevsearch = fuzzy;
+            }
+        }
+    </script>
+{% endblock %}
+
+{% load static %}
+{% block page_icon %}
+<IMG src="{% static '/ontologyexplorer/img/icon-idea.svg' %}" height="80em">
+{% endblock %}
+
+{% block page_datatable %}
+        <div id="div_themes_datatable" class="col-md-12 hpad0">
+            <div class="basebox">
+                <table id="themes_datatable" class="display table cell-border" cellspacing="0" width="100%">
+        	        <thead>
+        	            <tr>
+                            <th data-data="weight">Score</th>
+                            <th data-data="level">Level</th>
+        	                <th data-data="name">Theme</th>
+        	                <th data-data="parents">Parent</th>
+                            <th data-data="description">Description</th>
+        	            </tr>
+        	        </thead>
+        	    </table>
+            </div>
+        </div>
+{% endblock %}

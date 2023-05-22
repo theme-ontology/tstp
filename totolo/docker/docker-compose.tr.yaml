@@ -1,0 +1,18 @@
+x-aws-vpc: "vpc-5320ee34"
+x-aws-cluster: "totolo-cluster"
+
+services:
+  tan-ru:
+    image: ${DOCKER_REGISTRY}/totolo-tanru
+    build:
+      context: .
+      dockerfile: ./tan-ru/Dockerfile
+    environment:
+      - POSTGRES_USER=totolo
+      - POSTGRES_PASSWORD=totolo
+      - POSTGRES_DB=totolo_db
+    networks:
+      - frontend
+
+networks:
+  frontend:

@@ -10,7 +10,7 @@ import json
 import re
 import datetime
 import importlib
-import credentials
+import tstp_settings
 import traceback
 
 
@@ -24,7 +24,7 @@ def get_public_path(name, *args):
     """
     Get public path for this data and make sure it exists.
     """
-    path = os.path.join(credentials.PUBLIC_DIR, name, *args)
+    path = os.path.join(tstp_settings.PUBLIC_DIR, name, *args)
     log.debug("Testing: %s", path)
     if not os.path.exists(path):
         log.debug("Creating: %s", path)
@@ -36,7 +36,7 @@ def get_data_path(name, *args):
     """
     Get temp path for this data and make sure it exists.
     """
-    path = os.path.join(credentials.TEMP_PATH, name, *args)
+    path = os.path.join(tstp_settings.TEMP_PATH, name, *args)
     if not os.path.exists(path):
         os.makedirs(path)
     return path

@@ -1,0 +1,41 @@
+{% extends "ontologyexplorer/totolo_base.html" %}
+
+{% block page_subtitle %}org{% endblock %}
+
+{% load static %}
+{% block page_body %}
+<div id="totolo-frontpage">
+
+    <div class="mt-5 d-flex align-items-center justify-content-center" width=100%>
+        <IMG src="{% static '/ontologyexplorer/img/logo2021.svg' %}" height="160em">
+    </div>
+    <div class="d-flex align-items-center justify-content-center" width=100%>
+        <H1 class="mt-5">Theme Ontology</H1>
+    </div>
+
+    <P>
+        Contains <b class="totolo-frontstat">{{num_themes}}</b> well defined literary themes arranged in a hierarchy. 
+        The hierarchy is a tree-like graph, a <i>directed acyclic graph</i>, or a taxonomy - with extra features, i.e., an ontology. 
+        Each theme is defined with an average of <b class="totolo-frontstat">{{avg_words_theme_description}}</b> words.
+        The definitions lay out necessary and sufficient conditions for when a theme is present in a story.
+    </P>
+
+    <P>
+        There are <b class="totolo-frontstat-story">{{num_stories}}</b> annotated stories, normally defined with a reference to Wikipedia. 
+        Each story has been associated with an average of <b class="totolo-frontstat-story">{{avg_motivations_per_story}}</b> themes.
+        Each theme designation has been weighted according to it's importance to the story as "minor", "major", or "choice", and provided with a concise motivation.
+        The average motivation is <b class="totolo-frontstat-story">{{avg_words_motivation}}</b> words,
+        with the longest 10% being <b class="totolo-frontstat-story">{{motivation_wordcount_10pct}}</b> or more.
+    </P>
+
+    <P>
+        Search the 
+        <A href="/stories">stories</A>, search the 
+        <A href="/themes">themes</A>, or go to the 
+        <A href="https://github.com/theme-ontology/theming">github&raquo;</A> repository for more information.
+        Download, explore, and analyze data with the R package 
+        <A href="https://github.com/theme-ontology/stoRy">stoRy</A>.
+    </P>
+</div>
+
+{% endblock %}

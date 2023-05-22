@@ -1,0 +1,114 @@
+{% extends "ontologyexplorer/totolo_search_base.html" %}
+
+{% block page_subtitle %}Stories{% endblock %}
+
+{% block page_search_scripts %}
+    <script>
+        var dataUrl = '/api/search/stories/?format=datatables&query=';
+
+        function loadDataOnReady() {
+            $(document).ready(function() {
+                $('#stories_datatable').DataTable( {
+                    "ajax": dataUrl,
+                    "pageLength" : 100,
+                    "paging" : true,
+                    "lengthMenu": [ 10, 100, 1000, 10000 ],
+                    "order": [
+                        [ 3, "desc" ],
+                        [ 2, "asc" ],
+                    ],
+                    "dom": '<"top">rt<"bottom"flip><"clear">',
+                    "language": {
+                        "search": "filter:"
+                    },
+
+                    "columnDefs" : [
+                        { 
+                            "render": function ( data, type, row ) {
+                                return parseFloat(data).toFixed(2);
+                            },
+                            "targets": 0, 
+                            "visible": false,
+                        },
+                        {
+                            "render": function ( data, type, row ) {
+                                return makeStoryLink(data);
+                            },
+                            "width": "10%",
+                            "className": "tstp-sid-cell",
+                            "targets": 1,
+                        },
+                        {
+                            "width": "20%",
+                            "targets": 2,
+                        },
+                        {
+                            "className": "tstp-date-cell",
+                            "targets": 3,
+                        },
+                        {
+                            "className": "tstp-description-cell",
+                            "targets": 4,
+                        },
+                    ]
+                } );
+            } );
+        }
+
+        function reloadData(force=false)
+        {
+            var fuzzy = $('#fieldFind').val();
+            if (fuzzy.length < 3) fuzzy = "";
+
+            if (!force)
+                reloads -= 1;
+
+            if ((reloads == 0 && fuzzy != prevsearch) || force)
+            {
+                table = $('#stories_datatable').DataTable();
+                var url = dataUrl + fuzzy;
+
+                if (fuzzy)
+                {
+                    table.order([
+                        [ 0, "desc" ],
+                    ]);
+                    table.column(0).visible(true);
+                } else {
+                    table.order([
+                        [ 3, "desc" ],
+                        [ 2, "asc" ],
+                    ]);
+                    table.column(0).visible(false);
+                }
+                table.clear().draw();
+                table.ajax.url(fuzzy ? url : dataUrl).load();
+                prevsearch = fuzzy;
+            }
+        }
+    </script>
+{% endblock %}
+
+{% load static %}
+{% block page_icon %}
+<IMG src="{% static '/ontologyexplorer/img/icon-book.svg' %}" height="80em">
+{% endblock %}
+
+{% block page_datatable %}
+        <div id="div_stories_datatable" class="col-md-12 hpad0">
+            <div class="basebox">
+                <table id="stories_datatable" class="display table cell-border" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th data-data="weight">Score</th>
+                            <th data-data="sid">ID</th>
+                            <th data-data="title">Title</th>
+                            <th data-data="date">Date</th>
+                            <th data-data="description">Description</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+{% endblock %}
+

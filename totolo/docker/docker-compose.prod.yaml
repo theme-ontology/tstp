@@ -1,0 +1,19 @@
+services:
+  m4:
+    env_file:
+      - ./.env.prod
+    expose:
+      - 8000
+
+  nginx:
+    image: ${DOCKER_REGISTRY}/totolo-nginx
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - m4
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - www_data:/www/pub

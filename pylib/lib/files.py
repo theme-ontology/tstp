@@ -1,7 +1,6 @@
 import os
 import os.path
 import re
-import credentials
 import shutil
 
 
@@ -38,7 +37,7 @@ def remove(path, pattern=".*", levels=-1, onlyfiles=False):
     """
     Delete matching files and folders underneath path.
     """
-    paths = list(walk(path, pattern=pattern, levels=-levels, onlyfiles=False))
+    paths = list(walk(path, pattern=pattern, levels=levels, onlyfiles=False))
     for path in paths:
         if os.path.isfile(path):
             os.remove(path)
@@ -78,6 +77,7 @@ def path2url(path):
     accessible, assuming it lies in the public dir.
     Returns: url
     """
+    import credentials
     basepath = os.path.join(credentials.PUBLIC_DIR, "m4")
     if path.startswith(basepath):
         urlobj = path[len(basepath):].replace("\\", "/").strip("/")

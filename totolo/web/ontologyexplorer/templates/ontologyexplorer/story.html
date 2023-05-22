@@ -1,0 +1,121 @@
+{% extends "ontologyexplorer/totolo_base.html" %}
+
+{% block page_subtitle %}{{storyobj.sid}}{% endblock %}
+
+{% block page_scripts %}
+    <script>
+        var dataUrlStories = "/api/search/stories/?format=datatables&relativesof={{storyobj.sid|safe}}";
+        var dataUrlStoryThemes = "/api/search/storythemes/?format=datatables&featuringstory={{storyobj.sid|safe}}";
+
+        $(document).ready(function () {
+            loadDataOnReady();
+        });
+
+        function loadDataOnReady() {
+            $(document).ready(function() {
+                $('#stories_datatable').DataTable( {
+                    "ajax": dataUrlStories,
+                    "paging" : false,
+                    "dom": "ltpr",
+                    "order": [ [ 0, "desc" ], [ 1, "asc" ], ],
+                    "columnDefs" : [
+                        { 
+                            "targets": 0,
+                            "visible": false,
+                        },
+                        {
+                            "render": function ( data, type, row ) {
+                                return makeStoryLink(data);
+                            },
+                            "width": "9%",
+                            "className": "tstp-sid-cell",
+                            "targets": 1,
+                            "createdCell": function( td, cellData, rowData, row, col ) {
+                                if( rowData["relation"].includes("parent") ) {
+                                    $(td).addClass('totolo-parent-theme-cell');
+                                }
+                            },
+                        },
+                        {
+                            "width": "20%",
+                            "targets": 2,
+                        },
+                        {
+                            "className": "tstp-date-cell",
+                            "targets": 3,
+                        },
+                        {
+                            "className": "tstp-description-cell",
+                            "targets": 4,
+                        },
+                    ],
+                    "createdRow": function( row, data, dataIndex ) {
+                        if( data["relation"].includes("parent") ) {
+                            $(row).addClass('totolo-parent-theme-row');
+                        }
+                    },
+                } );
+                $('#storythemes_datatable').DataTable( {
+                    "ajax": dataUrlStoryThemes,
+                    "paging" : false,
+                    "dom": "ltpr",
+                    "order": [ [ 1, "asc" ], [ 0, "asc" ], ],
+                    "columnDefs" : [
+                        {
+                            "render": function ( data, type, row ) {
+                                return makeThemeLink(data);
+                            },
+                            "className": "tstp-sid-cell",
+                            "targets": 0,
+                        },
+                        {
+                            "targets": 1,
+                        },
+                        {
+                            "width": "60%",
+                            "className": "tstp-description-cell",
+                            "targets": 2,
+                        },
+                    ],
+                } );
+            } );
+        }
+
+
+    </script>
+{% endblock %}
+
+{% block page_body %}
+        <H2><span class="totolo-titleword">Story:</span> {{storyobj.sid}}</H2>
+
+        <div>
+            {{storyobj.description|safe}}
+        </div>
+
+        <H4 class="mt-4">Collections and Components</H4>
+
+        <table id="stories_datatable" class="display table cell-border hpad0" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th data-data="relation">Rel</th>
+                    <th data-data="sid">ID</th>
+                    <th data-data="title">Title</th>
+                    <th data-data="date">Date</th>
+                    <th data-data="description">Description</th>
+                </tr>
+            </thead>
+        </table>
+
+        <H4 class="mt-5">Themes of the Story</H4>
+
+        <table id="storythemes_datatable" class="display table cell-border" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th data-data="theme">Theme</th>
+                    <th data-data="weight">Level</th>
+                    <th data-data="motivation">Motivation</th>
+                </tr>
+            </thead>
+        </table>
+
+{% endblock %}

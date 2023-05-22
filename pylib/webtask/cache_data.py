@@ -4,12 +4,9 @@ additional JSON file containing the LTO contents for the latest commit (i.e. the
 also generated.
     pyrun webtask.cache_data (from inside the scripts directory)
 """
-
 from __future__ import print_function
 import os
-from credentials import GIT_THEMING_PATH_HIST
-from credentials import PUBLIC_DIR
-import lib.commits
+from tstp_settings import GIT_THEMING_PATH_HIST, PUBLIC_DIR
 import lib.files
 import lib.dataparse
 import lib.textformat
@@ -20,6 +17,7 @@ import pytz
 import lib.log
 import subprocess
 import dateutil.parser
+
 
 def get_lto_data(version, basepath):
     """
@@ -76,6 +74,7 @@ def get_lto_data(version, basepath):
 
     return themeobjs_list, storyobjs_list, storythemeobjs_list, timestamp, commit_id
 
+
 def init_metadata_od(version, timestamp, commit_id, category, count):
     """
     Store LTO meta data in an ordered dictionary.
@@ -94,6 +93,7 @@ def init_metadata_od(version, timestamp, commit_id, category, count):
     metadata_od['encoding'] = 'UTF-8'
     metadata_od[category + '-count'] = count
     return metadata_od
+
 
 def init_theme_od(themeobj, basepath):
     """
@@ -128,15 +128,15 @@ def init_theme_od(themeobj, basepath):
     theme_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(themeobj.meta)['source'])
     extra_fields = set(themeobj.extra_fields)
     if 'aliases' in extra_fields:
-        theme_od['aliases'] = filter(None, themeobj.aliases.split('\n'))
+        theme_od['aliases'] = list(filter(None, themeobj.aliases.split('\n')))
     if 'notes' in extra_fields:
-        theme_od['notes'] = filter(None, lib.textformat.remove_wordwrap(themeobj.notes).split('\n\n'))
+        theme_od['notes'] = list(filter(None, lib.textformat.remove_wordwrap(themeobj.notes).split('\n\n')))
     if 'template' in extra_fields:
         theme_od['template'] = [themeobj.template]
     if 'references' in extra_fields:
-        theme_od['references'] = filter(None, themeobj.references.split('\n'))
+        theme_od['references'] = list(filter(None, themeobj.references.split('\n')))
     if 'examples' in extra_fields:
-        theme_od['examples'] = filter(None, lib.textformat.remove_wordwrap(themeobj.examples).split('\n\n'))
+        theme_od['examples'] = list(filter(None, lib.textformat.remove_wordwrap(themeobj.examples).split('\n\n')))
 
     return theme_od
 
@@ -180,20 +180,21 @@ def init_story_od(storyobj, basepath):
         #' included at the end of the description
         story_od['description'] = lib.textformat.remove_wordwrap(storyobj.description.rstrip().split('\n\n\n')[0])
         collection_ids = []
-        raw_collection_ids = filter(None, storyobj.collections.split('\n'))
+        raw_collection_ids = list(filter(None, storyobj.collections.split('\n')))
         for raw_collection_id in raw_collection_ids:
             if not raw_collection_id.startswith('Collection: '):
                 collection_ids.append('Collection: ' + raw_collection_id)
             else:
                 collection_ids.append(raw_collection_id)
         story_od['collections'] = collection_ids
-        story_od['component-story-ids'] = filter(None, storyobj.components.split('\n'))
+        story_od['component-story-ids'] = list(filter(None, storyobj.components.split('\n')))
         story_od['source'] = '.' + lib.files.abspath2relpath(basepath, json.loads(storyobj.meta)['source'])
         extra_fields = set(storyobj.extra_fields)
         if 'references' in extra_fields:
-            story_od['references'] = filter(None, storyobj.references.split('\n'))
+            story_od['references'] = list(filter(None, storyobj.references.split('\n')))
 
     return story_od
+
 
 def init_collection_od(storyobj, basepath):
     """
@@ -210,7 +211,7 @@ def init_collection_od(storyobj, basepath):
     #' 3) its name is not prefixed with "Collection: " but it has component stories
 
     is_collection = True
-    component_story_ids = filter(None, storyobj.components.split('\n'))
+    component_story_ids = list(filter(None, storyobj.components.split('\n')))
     fields = [
         'collection-id',
         'title',
@@ -237,7 +238,7 @@ def init_collection_od(storyobj, basepath):
     collection_od['themes'] = []
     extra_fields = set(storyobj.extra_fields)
     if 'references' in extra_fields:
-        collection_od['references'] = filter(None, storyobj.references.split('\n'))
+        collection_od['references'] = list(filter(None, storyobj.references.split('\n')))
 
     if storyobj.name.startswith('Collection: '):
         collection_od['collection-id'] = storyobj.name
@@ -250,6 +251,7 @@ def init_collection_od(storyobj, basepath):
         collection_od = None
 
     return collection_od
+
 
 def init_thematic_annotation_od(storythemeobj, templated_themes_list):
     """
@@ -315,6 +317,7 @@ def init_themes_list(themeobjs_list, basepath):
 
     return themes_list, templated_themes_list
 
+
 def init_stories_list(storyobjs_list, basepath):
     """
     Create a list of stories, where each story is represented by an ordered dictionary, for a given
@@ -337,6 +340,7 @@ def init_stories_list(storyobjs_list, basepath):
 
     return stories_list
 
+
 def init_collections_list(storyobjs_list, basepath):
     """
     Create a list of collections, where each collection is represented by an ordered dictionary.
@@ -350,7 +354,7 @@ def init_collections_list(storyobjs_list, basepath):
     collections_list = list()
     for storyobj in storyobjs_list:
         story_id = storyobj.name
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         if story_id.startswith('Collection: ') or (not story_id.startswith('Collection: ') and (storyobj.name == storyobj.collections or len(component_story_ids) > 0)):
             collection_od = init_collection_od(storyobj, basepath)
             collections_list.append(collection_od)
@@ -359,6 +363,7 @@ def init_collections_list(storyobjs_list, basepath):
     collections_list = sorted(collections_list, key=lambda i: i['title'])
 
     return collections_list
+
 
 def add_root_theme(themes_list):
     """
@@ -384,6 +389,7 @@ def add_root_theme(themes_list):
     #' return updated theme list
     return themes_list
 
+
 def populate_stories_with_themes(stories_list, storythemeobjs_list, templated_themes_list):
     """
     Initialize an ordered dictionary and populate its entries with the preprocessed fields of a
@@ -403,6 +409,7 @@ def populate_stories_with_themes(stories_list, storythemeobjs_list, templated_th
 
     return stories_list
 
+
 def populate_stories_with_collections_1(storyobjs_list, stories_list):
     """
     Add collection IDs to the individual stories.
@@ -415,12 +422,13 @@ def populate_stories_with_collections_1(storyobjs_list, stories_list):
 
     for storyobj in storyobjs_list:
         if storyobj.name.startswith('Collection: '):
-            component_story_ids = filter(None, storyobj.components.split('\n'))
+            component_story_ids = list(filter(None, storyobj.components.split('\n')))
             for component_story_id in component_story_ids:
                 if component_story_id in story_ids:
                     stories_list[story_ids.index(component_story_id)]['collections'].append(storyobj.name)
 
     return stories_list
+
 
 def populate_stories_with_collections_2(storyobjs_list, stories_list):
     """
@@ -434,13 +442,14 @@ def populate_stories_with_collections_2(storyobjs_list, stories_list):
     story_ids = [story_od['story-id'] for i, story_od in enumerate(stories_list)]
 
     for storyobj in storyobjs_list:
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         if not storyobj.name.startswith('Collection: ') and len(component_story_ids) > 0:
             for component_story_id in component_story_ids:
                 if component_story_id in story_ids:
                     stories_list[story_ids.index(component_story_id)]['collections'].append('Collection: ' + storyobj.name)
 
     return stories_list
+
 
 def populate_collections_with_component_stories(collections_list, storyobjs_list):
     """
@@ -456,7 +465,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #' Make list of frame story component story IDs
     all_frame_story_component_story_ids = []
     for storyobj in storyobjs_list:
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         candidate_story_collection_id = 'Collection: ' + storyobj.name
         if not storyobj.name.startswith('Collection: ') and len(component_story_ids) > 0 and candidate_story_collection_id in collection_ids:
             all_frame_story_component_story_ids.extend(component_story_ids)
@@ -509,7 +518,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #'
     #' These are the non-frame stories in the ./notes/stories/* subfolders.
     for storyobj in storyobjs_list:
-        story_collection_ids = filter(None, storyobj.collections.split('\n'))
+        story_collection_ids = list(filter(None, storyobj.collections.split('\n')))
         for story_collection_id in story_collection_ids:
             if story_collection_id in collection_ids and story_collection_id != storyobj.name and not storyobj.name in all_frame_story_component_story_ids:
                 collections_list[collection_ids.index(story_collection_id)]['component-story-ids'].append(storyobj.name)
@@ -532,7 +541,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #'
     #' These are found in the ./notes/collections folder.
     for storyobj in storyobjs_list:
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         if storyobj.name.startswith('Collection: ') and len(component_story_ids) > 0:
             story_collection_id = storyobj.name
             for component_story_id in component_story_ids:
@@ -573,7 +582,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #' occur in other folders.
     for storyobj in storyobjs_list:
         if not storyobj.name.startswith('Collection: ') and len(storyobj.collections) > 0:
-            story_collection_ids = filter(None, storyobj.collections.split('\n'))
+            story_collection_ids = list(filter(None, storyobj.collections.split('\n')))
             for story_collection_id in story_collection_ids:
                 if 'Collection: ' + story_collection_id in collection_ids and story_collection_id != storyobj.name:
                     collections_list[collection_ids.index('Collection: ' + story_collection_id)]['component-story-ids'].append(storyobj.name)
@@ -593,7 +602,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
     #'
     #' See ./notes/stories/literature/novel-apuleius.st.txt for a concrete example.
     for storyobj in storyobjs_list:
-        component_story_ids = filter(None, storyobj.components.split('\n'))
+        component_story_ids = list(filter(None, storyobj.components.split('\n')))
         candidate_story_collection_id = 'Collection: ' + storyobj.name
         if not storyobj.name.startswith('Collection: ') and len(component_story_ids) > 0:
             if candidate_story_collection_id in collection_ids:
@@ -601,6 +610,7 @@ def populate_collections_with_component_stories(collections_list, storyobjs_list
                     collections_list[collection_ids.index(candidate_story_collection_id)]['component-story-ids'].append(component_story_id)
 
     return collections_list
+
 
 def populate_collections_with_themes(collections_list, storythemeobjs_list, templated_themes_list):
     """
@@ -621,6 +631,7 @@ def populate_collections_with_themes(collections_list, storythemeobjs_list, temp
 
     return collections_list
 
+
 def write_lto_data_to_json_file(lto_json, version, output_dir, category, overwrite=False):
     """
     Write LTO information to JSON file. Set 'overwrite' to 'True' to regenerate a non-developmental
@@ -630,11 +641,12 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, category, overwri
         version: string
         overwrite: boolean
     """
+    import sys
 
     #' ensure JSOn object is encoded as UTF-8
     #' failing to do so may result in an error in the case when an Ordered Dictionary of themes,
     #' stories, or collections is empty
-    if isinstance(lto_json, str):
+    if isinstance(lto_json, str) and sys.version_info[0] < 3:
         lto_json = str(lto_json, 'UTF-8')
 
     #' write JSON object to file
@@ -642,6 +654,7 @@ def write_lto_data_to_json_file(lto_json, version, output_dir, category, overwri
     if not os.path.exists(path) or overwrite:
         with io.open(path, 'w', encoding='utf-8') as f:
             f.write(lto_json)
+
 
 def generate_lto_file_path(output_dir, version, category):
     """
@@ -662,27 +675,31 @@ def generate_lto_file_path(output_dir, version, category):
 
     return file_path
 
-def main(test_run=False):
-    #' preliminaries
-    basepath = GIT_THEMING_PATH_HIST
-    output_dir = os.path.join(PUBLIC_DIR, 'data')
+
+
+def main(
+    test_run=False,
+    basepath=GIT_THEMING_PATH_HIST,
+    output_dir=os.path.join(PUBLIC_DIR, 'data'),
+    versions=None,
+):
     lib.files.mkdirs(output_dir)
     os.chdir(basepath)
-
-    #' setup git repository
     subprocess.check_output('git reset --hard origin/master'.split(), stderr=subprocess.STDOUT)
-    #' The first two versions (i.e. v0.1.0 and v0.1.1) are skipped on account that neither contains
-    #' any themes. The tags exist for historical reasons that are unimportant here.
-    versions = subprocess.check_output('git tag'.split()).decode("utf-8").rstrip().split('\n')[2:]
-    versions.append('dev')
 
-    #' use version v0.3.2 for testing purposes
-    if test_run:
+    # The first two versions (i.e. v0.1.0 and v0.1.1) are skipped on account that neither contains
+    # any themes. The tags exist for historical reasons that are unimportant here.
+    if versions:
+        versions = versions.split(",") if isinstance(versions, str) else versions
+    elif test_run:
         versions = ['v0.3.2']
+    else:
+        versions = subprocess.check_output('git tag'.split()).decode("utf-8").rstrip().split('\n')[2:]
+        versions.append('dev')
 
-    #' create a JSON file for each named version of LTO catalogued in the repository
+    # create a JSON file for each named version of LTO catalogued in the repository
     for version in versions:
-        #' check if cached files already exist for non "dev" versions
+        # check if cached files already exist for non "dev" versions
         cached_files_exist = False
         if version != 'dev':
             themes_file_path = generate_lto_file_path(output_dir, version, category='theme')
@@ -690,26 +707,26 @@ def main(test_run=False):
             collections_file_path = generate_lto_file_path(output_dir, version, category='collection')
             cached_files_exist = os.path.isfile(themes_file_path) and os.path.isfile(stories_file_path) and os.path.isfile(collections_file_path)
 
-        #' cache LTO data
-        #' if test_run is true, then only LTO v0.3.2 is cached
-        #' if test_run is false, then
-        #' 1) the "dev" version of LTO is always cached, and
-        #' 2) tagged LTO version data is cached if and only if the corresponding JSON files do not
-        #' already exist
+        # cache LTO data
+        # if test_run is true, then only LTO v0.3.2 is cached
+        # if test_run is false, then
+        # 1) the "dev" version of LTO is always cached, and
+        # 2) tagged LTO version data is cached if and only if the corresponding JSON files do not
+        # already exist
         if not test_run and not cached_files_exist:
             lib.log.info('Caching LTO %s data...', version)
 
-            #' retrieve theme, story, collection, and metadata for a given LTO version
+            # retrieve theme, story, collection, and metadata for a given LTO version
             themeobjs_list, storyobjs_list, storythemeobjs_list, timestamp, commit_id = get_lto_data(version, basepath)
 
-            #' prepare theme data and write to JSON file
+            # prepare theme data and write to JSON file
             themes_list, templated_themes_list = init_themes_list(themeobjs_list, basepath)
             themes_od = OrderedDict()
             themes_od['lto'] = init_metadata_od(version, timestamp, commit_id, category='theme', count=len(themes_list))
             themes_od['themes'] = themes_list
             themes_json = json.dumps(themes_od, ensure_ascii=False, indent=4)
 
-            #' prepare story data and write to JSON file
+            # prepare story data and write to JSON file
             stories_list = init_stories_list(storyobjs_list, basepath)
             stories_list = populate_stories_with_collections_1(storyobjs_list, stories_list)
             stories_list = populate_stories_with_collections_2(storyobjs_list, stories_list)
@@ -719,7 +736,7 @@ def main(test_run=False):
             stories_od['stories'] = stories_list
             stories_json = json.dumps(stories_od, ensure_ascii=False, indent=4)
 
-            #' prepare collection data and write to JSON file
+            # prepare collection data and write to JSON file
             collections_list = init_collections_list(storyobjs_list, basepath)
             collections_list = populate_collections_with_component_stories(collections_list, storyobjs_list)
             collections_list = populate_collections_with_themes(collections_list, storythemeobjs_list, templated_themes_list)
@@ -728,9 +745,9 @@ def main(test_run=False):
             collection_od['collections'] = collections_list
             collections_json = json.dumps(collection_od, ensure_ascii=False, indent=4)
 
-            #' write theme, story, and collection JSON objects to file
-            #' set overwrite to True to force existing files to be overwritten
-            #' only the developmental version should be written to file by default
+            # write theme, story, and collection JSON objects to file
+            # set overwrite to True to force existing files to be overwritten
+            # only the developmental version should be written to file by default
             if not test_run:
                 if version == 'dev':
                     write_lto_data_to_json_file(themes_json, version, output_dir, category='theme', overwrite=True)

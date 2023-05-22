@@ -5,8 +5,6 @@ Created on Jul 29, 2012
 '''
 from collections import defaultdict
 import os
-import shutil
-import log
 
 
 class KWGraph(object):
@@ -48,7 +46,6 @@ class KWGraph(object):
         Delete edge specified by either kw tuple or by KWEdge instance.
         '''
         if not isinstance(edge, self.KWEdge):
-            log.debug('Dropping edge by name %s' % str(edge))
             edge = self.edges.get(edge)
         if edge:
             edge.n1.edgeout.discard(edge)
@@ -138,6 +135,13 @@ class KWGraph(object):
         nn = self.getNode(kw)
         return [e.n1.kw for e in nn.edgein]
 
+    def children_of(self, kw):
+        """
+        Find all parents for a node.
+        """
+        nn = self.getNode(kw)
+        return [e.n2.kw for e in nn.edgeout]
+
     def ancestry_of(self, kw):
         """
         Find all roots for a node.
@@ -207,7 +211,6 @@ class KWGraph(object):
         ## write all edges going to clusters
         for (kwid1, clusterid), count in clusteredgecount.items():
             weight = max(2, min(8, count))
-            #log.debug(u'%s -> %s [weight=%s]' % (kwid1, clusterid, weight))
             edgelines.append(u'''\t%s -> %s [weight=%d];''' % (kwid1, clusterid, weight))
             clusterused.add(clusterid)
 
@@ -306,7 +309,7 @@ class KWGraph(object):
                 yield (ee.n1.kw, ee.n2.kw, ee.weight)
 
         for rkwmiss in [rkw for rkw in roots if rkw not in self.nodes]:
-            log.error('Root %s not found in graph nodes' % rkwmiss)
+            raise ValueError('Root {} not found in graph nodes'.format(rkwmiss))
 
     def walkNodesDF(self, roots):
         '''

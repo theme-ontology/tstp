@@ -1,0 +1,47 @@
+services:
+  m4:
+    image: ${DOCKER_REGISTRY}/totolo-m4
+    build:
+      context: .
+      dockerfile: ./m4/Dockerfile
+    env_file:
+      - ./.env.dev
+    networks:
+      - backend
+    volumes:
+      - code_data:/code
+      - www_data:/www/pub
+
+
+  sphinx:
+    image: ${DOCKER_REGISTRY}/totolo-sphinx
+    build:
+      context: .
+      dockerfile: ./sphinx/Dockerfile
+    networks:
+      - backend
+    expose:
+    - "9306:9306"
+
+  sqldb:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=totolo
+      - POSTGRES_PASSWORD=totolo
+      - POSTGRES_DB=totolo_db
+    networks:
+      - backend
+    expose:
+      - '5432:5432'
+    volumes: 
+      - sqldb_data:/var/lib/postgresql/data
+
+volumes:
+  sqldb_data:
+  code_data:
+  www_data:
+
+networks:
+  frontend:
+  backend:

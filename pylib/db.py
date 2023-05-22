@@ -1,4 +1,3 @@
-from credentials import DBS
 import log
 
 try:
@@ -9,6 +8,10 @@ except ImportError:
     except ImportError:
         log.warn("ERROR: Unable to import MySQLdb bindings - database access will not work")
 
+try:
+    from credentials import DBS
+except Exception:
+    DBS = {}
 
 DB_HANDLE = None
 DB_HANDLES = {}

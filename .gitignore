@@ -4,3 +4,6 @@
 /docker/credentials.py
 /docker/test/credentials.py
 *.sqlite3
+*.py
+/totolo/docker/.env.private
+/totolo/docker/.env.tr.private.dev

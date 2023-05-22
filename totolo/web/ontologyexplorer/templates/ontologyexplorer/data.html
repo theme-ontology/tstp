@@ -1,0 +1,27 @@
+{% extends "ontologyexplorer/totolo_base.html" %}
+
+{% block page_subtitle %}data{% endblock %}
+
+{% load static %}
+{% block page_body %}
+    <H1>View or Download Data</H1>
+
+    {% for bucket, links in links_in_buckets %}
+    <H4>{{bucket}}</H4>
+    <UL>
+        {% for link in links %}
+        <LI>
+            <A href="{{link.url}}">{{link.name}}</A>
+        </LI>
+        {% endfor %}
+    </UL>
+    {% endfor %}
+
+    <H1>Other Resources</H1>
+    <UL>
+        <LI>
+            <A href="/logs/all">View M-4 logs</A>
+        </LI>
+    </UL>
+
+{% endblock %}

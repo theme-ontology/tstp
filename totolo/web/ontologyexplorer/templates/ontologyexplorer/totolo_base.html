@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Theme Ontology {% block page_subtitle %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static '/ontologyexplorer/img/favicon.ico' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/DataTables/datatables.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/css/bootstrap.min.css' %}">
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/jquery-3.6.3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/DataTables/datatables.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/typeahead.bundle.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/jquery.form.js' %}"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{% static '/ontologyexplorer/css/totolo.css' %}">
+    <script type="text/javascript" src="{% static '/ontologyexplorer/js/totolo.js' %}"></script>
+
+    {% block page_scripts %}{% endblock %}
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131790483-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-131790483-1');
+    </script>
+
+</head>
+
+<body id="totolo-body" style="overflow-y: scroll;">
+    <nav class="navbar navbar-light navbar-expand-lg fixed-top">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/"><IMG src="{% static '/ontologyexplorer/img/logo2021.svg' %}" style="height: calc(1.5em + 0.00025vw);"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="/stories">stories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/themes">themes</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/data">data</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" href="https://github.com/theme-ontology/theming">github&raquo;</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+    <div class="container main-body">
+        <div class="row">
+            {% block page_body %}{% endblock %}
+        </div>
+    </div>
+
+</body>
+</html>
