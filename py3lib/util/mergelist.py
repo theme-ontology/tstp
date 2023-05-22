@@ -99,14 +99,16 @@ def report_changes(newentries, replacements, deletions, new_themes):
     """
     Just print a summary of changes for debugging.
     """
-    print("NEW")
+    replacements = dict(replacements)
+    actual_deletes = {key: value for key, value in deletions.items() if key not in replacements}
+    print("\nNEW")
     for sid in newentries:
         print(sid)
-        pprint(dict(newentries[sid]))
-    print("REPLACEMENT")
-    pprint(dict(replacements))
-    print("DELETION")
-    pprint(dict(deletions))
+        pprint(dict(newentries[sid]), width=500)
+    print("\nREPLACEMENT")
+    pprint(replacements, width=500)
+    print("\nDELETION")
+    pprint(actual_deletes, width=500)
 
     for newtheme, previous in new_themes.items():
         lib.log.warn("Undefined New Theme: %s CHANGED FROM %s", newtheme, sorted(set(previous)))
