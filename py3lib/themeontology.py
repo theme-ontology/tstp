@@ -9,7 +9,7 @@ required for that purpose.
 import codecs
 import os.path
 import re
-from collections import defaultdict
+from collections import defaultdict, deque
 
 import lib.files
 import lib.textformat
@@ -647,35 +647,52 @@ class ThemeOntology(object):
             for filepath in lib.files.walk(path, r".*\.(st|th)\.txt$"):
                 self.read(filepath)
         else:
-            entrytype = TOEntry
-            if path.endswith(".th.txt"):
-                entrytype = TOTheme
-            elif path.endswith(".st.txt"):
-                entrytype = TOStory
             with codecs.open(path, "r", encoding='utf-8') as fh:
-                collection_entry = None
-                for idx, entrylines in enumerate(TOParser.iter_entries(fh)):
-                    entry = entrytype(entrylines)
-                    entry.ontology = self
-                    self.entries[path].append(entry)
-                    if isinstance(entry, TOTheme):
-                        self.theme[entry.name] = entry
-                    elif isinstance(entry, TOStory):
-                        self.story[entry.name] = entry
-                        if idx == 0:
-                            mycols = entry.get("Collections").parts
-                            if mycols and mycols[0] == entry.sid:
-                                collection_entry = entry
-                        if idx > 0 and self._imply_collection and collection_entry:
-                            field = collection_entry.get("Component Stories")
-                            field.parts.append(entry.sid)
-                    else:
-                        raise
+                if path.endswith(".th.txt"):
+                    self.read_themes(fh, path)
+                elif path.endswith(".st.txt"):
+                    self.read_stories(fh, path)
+                else:
+                    raise ValueError("Path must end with .th.txt ot .st.txt to indicate whether it contains themes"
+                                     " or stories.")
+
+    def read_stories(self, lines, path="<api>"):
+        """
+        Read story entries from text or iterable of lines of text.
+        """
+        collection_entry = None
+        if isinstance(lines, str):
+            lines = lines.splitlines()
+        for idx, entrylines in enumerate(TOParser.iter_entries(lines)):
+            entry = TOStory(entrylines)
+            entry.ontology = self
+            self.entries[path].append(entry)
+            self.story[entry.name] = entry
+            if idx == 0:
+                mycols = entry.get("Collections").parts
+                if mycols and mycols[0] == entry.sid:
+                    collection_entry = entry
+            if idx > 0 and self._imply_collection and collection_entry:
+                field = collection_entry.get("Component Stories")
+                field.parts.append(entry.sid)
+
+    def read_themes(self, lines, path="<api>"):
+        """
+        Read theme entries from text or iterable of lines of text.
+        """
+        if isinstance(lines, str):
+            lines = lines.splitlines()
+        for idx, entrylines in enumerate(TOParser.iter_entries(lines)):
+            entry = TOTheme(entrylines)
+            entry.ontology = self
+            self.entries[path].append(entry)
+            self.theme[entry.name] = entry
 
     def validate(self):
         """
         Yields warnings about recognized problems with the data.
         """
+        # validate format of theme and story entries
         lookup = defaultdict(dict)
         for path, entries in self.entries.items():
             for entry in entries:
@@ -684,6 +701,7 @@ class ThemeOntology(object):
                 if entry.name in lookup[type(entry)]:
                     yield u"{}: Multiple {} with name '{}'".format(path, type(entry), entry.name)
 
+        # detect undefined themes used in stories
         for story in self.stories():
             for weight in ["choice", "major", "minor", "not"]:
                 field = "{} Themes".format(weight.capitalize())
@@ -691,6 +709,30 @@ class ThemeOntology(object):
                     if kw.keyword not in self.theme:
                         yield u"{}: Undefined '{} theme' with name '{}'".format(
                             story.name, weight, kw.keyword)
+
+        # detect cycle (stops after first cycle encountered)
+        parents = {}
+        for theme in self.themes():
+            parents[theme.name] = [parent for parent in theme.get("Parents")]
+
+        def dfs(current, tpath=None):
+            tpath = tpath or []
+            if current in tpath:
+                return u"Cycle: {}".format(tpath[tpath.index(current):])
+            else:
+                tpath.append(current)
+                for parent in parents[current]:
+                    msg = dfs(parent, tpath)
+                    if msg:
+                        return msg
+                tpath.pop()
+            return None
+
+        for theme in self.themes():
+            msg = dfs(theme.name)
+            if msg:
+                yield msg
+                break
 
     def write_clean(self, verbose=False):
         """
@@ -721,3 +763,6 @@ def read(paths=None, imply_collection=False):
         paths = os.path.join(credentials.GIT_THEMING_PATH, "notes")
     return ThemeOntology(paths, imply_collection=imply_collection)
 
+
+def empty():
+    return ThemeOntology()
