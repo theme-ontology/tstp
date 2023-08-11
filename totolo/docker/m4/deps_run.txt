@@ -6,3 +6,8 @@ graphviz
 tree
 gpg
 shadow
+certbot
+gcc
+python3-dev
+libc-dev
+libffi-dev

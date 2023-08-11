@@ -125,14 +125,20 @@ def data(request):
 
 
 def story(request, sid):
-    storyobj = Story.objects.get(sid=sid)
+    try:
+        storyobj = Story.objects.get(sid=sid)
+    except Story.DoesNotExist:
+        return HttpResponseBadRequest('No such story in database: {}.'.format(sid))
     template = loader.get_template("ontologyexplorer/story.html")
     context = {'storyobj': storyobj}
     return HttpResponse(template.render(context, request))
 
 
 def theme(request, name):
-    themeobj = Theme.objects.get(name=name)
+    try:
+        themeobj = Theme.objects.get(name=name)
+    except Theme.DoesNotExist:
+        return HttpResponseBadRequest('No such theme in database: {}.'.format(name))
     template = loader.get_template("ontologyexplorer/theme.html")
     context = {'themeobj': themeobj}
     return HttpResponse(template.render(context, request))
