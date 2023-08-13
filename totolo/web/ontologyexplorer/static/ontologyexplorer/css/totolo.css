@@ -14,18 +14,19 @@ body {
 
 #totolo-body .navbar {
   background-color: rgba(255, 255, 255, 0.75);
-  border-bottom: 1px solid #ffffff;
+  border-bottom: 1px solid #f0f0f0;
   padding: 1px;
 }
 #totolo-body .navbar-brand {
-  font-size: calc(1em + 0.5vw);
+  font-size: calc(1.1em + 0.2vw);
   font-variant: small-caps;
 }
 #totolo-body .nav-link
 {
   color: black;
   background-color: rgba(255, 255, 255, 0.85);
-  font-size: calc(1em + 0.5vw);
+  font-size: calc(1.1em + 0.2vw);
+  font-weight: 600;
 }
 #totolo-body .navbar-toggler,
 #totolo-body .navbar-toggler:focus,

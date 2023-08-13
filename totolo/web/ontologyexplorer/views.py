@@ -15,6 +15,13 @@ import os.path
 import time
 
 
+def scount(x, singular, plural):
+    count = sum(1 for y in x.split(",") if y.strip())
+    if count == 1:
+        return f"one {singular}"
+    return f"{count or 'no'} {plural}"
+
+
 def index(request):
     ERR = "&lt;calculating...&gt;"
     try:
@@ -130,7 +137,13 @@ def story(request, sid):
     except Story.DoesNotExist:
         return HttpResponseBadRequest('No such story in database: {}.'.format(sid))
     template = loader.get_template("ontologyexplorer/story.html")
-    context = {'storyobj': storyobj}
+    context = {
+        'storyobj': storyobj,
+        "ncounts": "{}, {}".format(
+            scount(storyobj.parents, "collection", "collections"),
+            scount(storyobj.children, "component", "components"),
+        )
+    }
     return HttpResponse(template.render(context, request))
 
 
@@ -140,7 +153,13 @@ def theme(request, name):
     except Theme.DoesNotExist:
         return HttpResponseBadRequest('No such theme in database: {}.'.format(name))
     template = loader.get_template("ontologyexplorer/theme.html")
-    context = {'themeobj': themeobj}
+    context = {
+        'themeobj': themeobj,
+        "ncounts": "{}, {}".format(
+            scount(themeobj.parents, "parent", "parents"),
+            scount(themeobj.children, "child", "children"),
+        )
+    }
     return HttpResponse(template.render(context, request))
 
 

@@ -77,6 +77,12 @@
                             "targets": 2,
                         },
                     ],
+                    "drawCallback": function( settings ) {
+                        var api = this.api();
+                        var data = api.rows().data();
+                        var stats = summarizeThemes(data);
+                        $('#storythemes_count').html(stats);
+                    },
                 } );
             } );
         }
@@ -92,7 +98,10 @@
             {{storyobj.description|safe}}
         </div>
 
-        <H4 class="mt-4">Collections and Components</H4>
+        <DIV class="clearfix mt-4">
+            <H4 class="float-start">Collections and Components of the Story</H4>
+            <div class="float-end text-muted">{{ncounts}}</div>
+        </DIV>
 
         <table id="stories_datatable" class="display table cell-border hpad0" cellspacing="0" width="100%">
             <thead>
@@ -106,7 +115,10 @@
             </thead>
         </table>
 
-        <H4 class="mt-5">Themes of the Story</H4>
+        <DIV class="clearfix mt-5">
+            <H4 class="float-start">Themes of the Story</H4>
+            <div id="storythemes_count" class="float-end text-muted"></div>
+        </DIV>
 
         <table id="storythemes_datatable" class="display table cell-border" cellspacing="0" width="100%">
             <thead>

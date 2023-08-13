@@ -1,9 +1,11 @@
 #!/bin/bash
 
-url="themeontology.org"
-email="mikael@odinlake.net"
-mkdir -p /opt/letsencrypt
-certbot certonly -d $url -d "*.$url" --dns-route53 --logs-dir /opt/letsencrypt/logs/ --config-dir /opt/letsencrypt/config/ --work-dir /home/mo/letsencrypt/work/ -m $email --agree-tos --non-interactive
+if [[ "$DEBUG" -ne 1 ]]; then
+    url="themeontology.org"
+    email="mikael@odinlake.net"
+    mkdir -p /opt/letsencrypt
+    certbot certonly -d $url -d "*.$url" --dns-route53 --logs-dir /opt/letsencrypt/logs/ --config-dir /opt/letsencrypt/config/ --work-dir /home/mo/letsencrypt/work/ -m $email --agree-tos --non-interactive
+fi
 
 echo ":: STARTING UP AT PATH ::::::::::::::::::::::::::::::::::"
 pwd
