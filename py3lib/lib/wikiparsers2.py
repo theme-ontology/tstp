@@ -65,7 +65,11 @@ def get_descriptions(descfield):
     acc = u""
     descs = []
     for el in descfield:
-        if "<hr" in str(el).lower():
+        if el.name == "div":
+            descs.append(acc)
+            acc = u""
+            descs.extend(get_descriptions(el))
+        elif "<hr" in str(el).lower():
             descs.append(acc)
             acc = u""
         elif hasattr(el, "get_text"):
@@ -285,7 +289,7 @@ def find_episodes_st1(url, season_offsset, prefix, tableclass="wikitable", cols=
                     description = descriptionfield.get_text().strip()
 
             if description and sids:
-                if descriptionfield:
+                if descriptionfield and len(sids) > 1:
                     desclist = get_descriptions(descriptionfield)
                 else:
                     desclist = [description]
