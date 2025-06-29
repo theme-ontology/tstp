@@ -8,7 +8,7 @@ def main():
     fn = sys.argv[-1]
     to.entries[fn] = []
 
-    url = "https://en.wikipedia.org/wiki/Love,_Death_%26_Robots"
+    url = "https://en.wikipedia.org/wiki/List_of_Love,_Death_%26_Robots_episodes"
     for story in find_episodes_st1(
             url, 1, "ldr2019e", cols=(1, 2, 4, 6), isterse=False, tableclass="wikiepisodetable",
             singleseason=False
